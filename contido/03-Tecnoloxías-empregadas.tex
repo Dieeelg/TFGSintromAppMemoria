@@ -1,0 +1,193 @@
+\chapter{Tecnoloxías empregadas}
+\label{chap:tecnoloxias}
+
+Neste capítulo preséntanse as tecnoloxías empregadas tanto no desenvolvemento da solución como nas probas realizadas durante o estudo da extracción automática das follas de tratamento. A solución está formada por un cliente móbil e por unha API que centraliza o procesamento das follas de tratamento e a comunicación cos servizos externos.
+
+%No relativo á extracción automática de información, neste capítulo descríbese unicamente a tecnoloxía finalmente integrada na solución, Azure AI Document Intelligence. As alternativas avaliadas durante o proxecto e os seus resultados experimentais forman parte do Capítulo~\ref{chap:procesamento-follas}.
+
+%A selección realizouse atendendo a cinco criterios sinxelos: adecuación ás necesidades do proxecto, facilidade de integración, dispoñibilidade de documentación, posibilidade de reutilizar código e reproducibilidade do contorno. Tamén se valorou que as ferramentas tivesen unha comunidade activa e que puidesen empregarse cun custo asumible nun traballo académico.
+
+\section{Linguaxes de programación}
+
+\subsection{Dart}
+O cliente móbil para Android desenvolveuse empregando Dart~\cite{DartDocs} (\textit{versión 3.9.2}). Trátase dunha linguaxe orientada a obxectos e deseñada especificamente para o desenvolvemento de aplicacións con interfaces de usuario rápidas e multiplataforma.
+
+A súa elección para este proxecto vén motivada pola súa estreita integración co framework de Flutter. Esta combinación permite empregar unha mesma linguaxe para definir tanto o deseño visual das pantallas como a lóxica interna da aplicación. Deste xeito, simplifícase a estrutura do cliente e evítase cambiar de linguaxe entre a parte visual e o seu comportamento, o que axiliza notablemente o proceso de desenvolvemento.
+
+Outro aspecto que facilitou a súa elección foi a familiaridade da súa sintaxe. Dart comparte conceptos con outras linguaxes orientadas a obxectos, como Java, polo que os coñecementos previos nesta tecnoloxía facilitaron a adaptación ao novo contorno de desenvolvemento.
+
+No contexto do proxecto, Dart empregouse para construír as pantallas, representar os modelos de datos, xestionar o estado da sesión e as preferencias do usuario, e realizar as comunicacións asíncronas coa API.
+
+
+\subsection{Python}
+A API foi implementada con Python ~\cite{PythonDocs} (\textit{versión 3.11.3}). Python é unha linguaxe de programación de alto nivel e propósito xeral, caracterizada por ofrecer unha sintaxe sinxela e lexible. Estas características permiten expresar a lóxica da aplicación de forma clara e favorecen a organización e o mantemento do código.
+
+A súa elección para este proxecto debeuse principalmente á variedade de bibliotecas dispoñibles para o desenvolvemento de servizos web, o procesamento de imaxes e a integración con plataformas externas. Isto permitiu implementar nun mesmo contorno as diferentes tarefas realizadas pola parte servidora, evitando incorporar tecnoloxías adicionais e reducindo a complexidade da solución.
+
+No contexto do proxecto, Python empregouse para implementar a lóxica da API, recibir e validar os datos enviados pola aplicación móbil, coordinar as operacións necesarias na parte servidora e devolver os resultados nun formato que puidese ser consumido polo cliente.
+
+\section{Marcos de desenvolvemento }
+
+\subsection{Flutter}
+Flutter~\cite{FlutterArchitecture} (\textit{versión 3.35.5}) é o marco de traballo empregado para construír a aplicación móbil.  A súa forma de traballar baséase no uso de \textit{widgets}, pezas visuais reutilizables que permiten construír as pantallas da interface de forma sinxela e estruturada. Este marco incorpora o seu propio motor de renderizado, os compoñentes de interface e as ferramentas necesarias para a construción da aplicación.  Aínda que Flutter é unha tecnoloxía deseñada para crear aplicacións en varios sistemas simultaneamente, o alcance deste proxecto limítase a Android, polo que a solución foi desenvolvida e probada exclusivamente para esta plataforma.
+
+No relativo ao deseño, a aplicación emprega as directrices de Material 3 ~\cite{MaterialDesign3} como sistema visual principal. Isto permite manter unha aparencia coherente e moderna en toda a aplicación usando compoñentes xa estandarizados. Ademais, durante o desenvolvemento, a característica de recarga en quente (\textit{hot reload}) resultou de gran axuda, xa que permitiu visualizar os cambios na interface de maneira case instantánea, axilizando moito o traballo.
+
+Por último, a elección de Flutter tamén se xustifica pola súa facilidade para acceder ás funcións nativas do teléfono mediante complementos \textit{plugins})~\cite{FlutterPlugins}. No caso desta aplicación, foron imprescindibles para acceder ao almacenamento seguro do dispositivo, xestionar a cámara para a lectura de códigos QR e recibir notificacións. En resumo, a súa perfecta integración con Dart, a comodidade para crear interfaces e a dispoñibilidade de paquetes listos para usar convertérono na opción ideal para o proxecto.
+
+\subsection{FastAPI}
+
+FastAPI~\cite{FastAPIFeatures} (\textit{versión 0.119.1}) é o marco de traballo web sobre o que se construíu a API do proxecto. Esta ferramenta permite declarar as operacións HTTP empregando directamente funcións e anotacións de tipo (\textit{type annotations}) de Python. A partir destas declaracións, o marco encárgase de validar os datos automaticamente e de xerar unha especificación OpenAPI con interfaces de documentación interactivas.
+
+No contexto do proxecto, FastAPI utilízase como a ponte de comunicación entre a aplicación móbil e os distintos servizos externos. A API permite recibir as follas de tratamento, coordinar o seu procesamento e devolver os resultados estruturados en formato JSON. Ademais, proporciona un punto de acceso para comprobar o estado do servizo e enviar as actualizacións e avisos entre os dispositivos vinculados.
+
+A escolla de FastAPI fronte a outros marcos populares de Python, como Django ou Flask, xustifícase polo seu enfoque moderno e orientado á creación de APIs. Para as necesidades deste proxecto, Django considerouse unha alternativa máis ampla do necesario, ao incorporar de serie funcionalidades como un ORM e outros compoñentes orientados ao desenvolvemento de aplicacións web completas~\cite{DjangoOverview}. Pola súa parte, Flask ofrece un núcleo máis reducido, pero determinadas funcionalidades adicionais deben incorporarse mediante extensións~\cite{FlaskExtensions}. FastAPI ofrece soporte asíncrono e integración directa con Pydantic, permitindo dispoñer de validación de datos e documentación automática da API~\cite{FastAPIFeatures}.
+
+\section{Tecnoloxías para o procesamento automático de documentos}
+\label{sec:tecnoloxias-procesamento}
+
+Durante o estudo da extracción automática das follas de tratamento empregáronse diferentes tecnoloxías de recoñecemento de texto, detección de obxectos, anotación de imaxes e procesamento documental. O procedemento seguido nas probas con cada unha delas descríbese no Capítulo~\ref{chap:procesamento-follas}.
+
+\subsection{Google ML Kit}
+\label{sec:tec-mlkit}
+
+Google ML Kit é un conxunto de ferramentas de aprendizaxe automática orientado á incorporación de funcionalidades de visión artificial en aplicacións móbiles. Entre os seus módulos inclúese o recoñecemento de texto en imaxes, que permite identificar texto e obter información sobre a súa distribución na imaxe~\cite{GoogleMLKitTextRecognition}.
+
+\subsection{Tesseract}
+\label{sec:tec-tesseract}
+
+Tesseract é un motor de recoñecemento óptico de caracteres de código aberto orientado á extracción de texto a partir de imaxes e documentos dixitalizados. Dispón de modelos para diferentes idiomas e permite tamén crear modelos adaptados a documentos concretos~\cite{TesseractOCR}.
+
+\subsection{YOLO}
+\label{sec:tec-yolo}
+
+YOLO é unha familia de modelos de detección de obxectos baseada en redes neuronais. Permite localizar e clasificar elementos presentes nunha imaxe mediante caixas delimitadoras, polo que, a diferenza dun sistema OCR, está orientado á identificación de obxectos e non á extracción directa de texto~\cite{UltralyticsYOLO}.
+
+\subsection{CVAT}
+\label{sec:tec-cvat}
+
+CVAT é unha ferramenta de anotación de imaxes orientada á preparación de conxuntos de datos para tarefas de visión artificial. Permite marcar manualmente rexións dunha imaxe e asignarlles as clases que posteriormente poden utilizarse para adestrar modelos de detección~\cite{CVATDocumentation}.
+
+\subsection{Azure AI Document Intelligence}
+\label{sec:tec-azure-di}
+\label{sec:azure-document-intelligence}
+
+Azure AI Document Intelligence é un servizo na nube de Microsoft orientado á extracción de información estruturada a partir de documentos. Permite identificar campos, táboas e outros elementos e ofrece tanto modelos preadestrados como modelos personalizados para documentos cunha estrutura específica~\cite{AzureDocumentIntelligence}.
+
+Para a creación e xestión destes modelos empregouse Azure AI Document Intelligence Studio~\cite{AzureDocumentIntelligenceStudio}, a interface web proporcionada por Microsoft para traballar co servizo.
+
+\section{Bibliotecas}
+
+\subsection{Bibliotecas do cliente móbil}
+
+As bibliotecas do cliente seleccionáronse para resolver necesidades concretas e evitar programar desde cero funcións que xa están consolidadas na comunidade:
+
+\begin{description}
+  \item[Provider 6.1.5+1] Emprégase para xestionar a información que se comparte entre as diferentes pantallas da aplicación. Deste xeito, calquera cambio nos datos actualiza a interface automaticamente~\cite{ProviderPackage}. A súa elección débese a que permite separar claramente o deseño visual da lóxica da aplicación, mantendo o código organizado e doado de manter.
+
+  \item[HTTP 1.6.0] Utilízase para realizar as comunicacións coa API, como o envío dos documentos escaneados e a recepción dos resultados~\cite{DartHttpPackage}. Escolleuse por ser unha solución robusta e un estándar dentro da comunidade para xestionar peticións asíncronas e comunicarse con servizos web.
+
+  \item[Flutter Secure Storage 9.2.4] Permite gardar información sensible aproveitando os mecanismos de almacenamento protexido proporcionados por Android~\cite{FlutterSecureStorage}. No proxecto utilízase para conservar os identificadores da instalación, os datos das vinculacións e as claves criptográficas compartidas entre os dispositivos. Seleccionouse porque esta información non debe gardarse como texto simple na base de datos SQLite do dispositivo mobil nin nos ficheiros ordinarios da aplicación.
+  
+  \item[Cryptography 2.9.0] Proporciona os algoritmos necesarios para cifrar as mensaxes intercambiadas entre pacientes e supervisores~\cite{CryptographyPackage}. Seleccionouse para empregar unha solución segura, probada e integrada co ecosistema Dart, evitando así ter que implementar manualmente operacións criptográficas sensibles.
+  
+  \item[sqflite 2.4.2 e path 1.9.1] Proporcionan a ponte de comunicación entre o código de Flutter e o motor de base de datos SQLite do dispositivo~\cite{SqflitePackage}. Seleccionáronse por ofrecer unha integración oficial e estable que permite realizar operacións de lectura e escritura de maneira asíncrona.
+
+  \item[QR Flutter 4.1.0 e Mobile Scanner 5.2.3] A primeira biblioteca xera os códigos QR e a segunda emprega a cámara do teléfono para lelos~\cite{QrFlutterPackage,MobileScannerPackage}. Escolléronse por ser compoñentes estables, amplamente probados e que permiten resolver a vinculación dos perfís de usuario de forma eficiente.
+
+  \item[Complementos de Firebase] Os paquetes \textit{firebase\_core}, \textit{firebase\_auth} e \textit{firebase\_messaging} conectan a aplicación cos servizos de identificación e notificacións (descritos na Sección~\ref{sec:firebase}). Optouse polas dependencias oficiais para garantir unha integración segura e estable cos servizos na nube.
+\end{description}
+
+\subsection{Bibliotecas da API web}
+
+As dependencias da parte servidora seleccionáronse para xestionar a validación de datos, o procesamento de imaxes e a comunicación externa de forma robusta e estandarizada:
+
+\begin{description}
+  \item[Pydantic 2.12.3] Define os esquemas de entrada e saída, converte os tipos recibidos e comproba que os datos cumpran as restricións establecidas antes de seren tratados pola lóxica da aplicación~\cite{PydanticDocumentation}. Seleccionouse pola súa integración nativa con FastAPI e por aproveitar as anotacións de tipo de Python para realizar estas validacións.
+
+  \item[Uvicorn 0.38.0 e python-multipart 0.0.20]
+    Para a súa execución, FastAPI apóiase en Uvicorn, un servidor ASGI\footnote{ASGI (\textit{Asynchronous Server Gateway Interface}) é un estándar que permite a comunicación entre servidores web e aplicacións Python asíncronas.} encargado de recibir e xestionar as peticións dirixidas á aplicación~\cite{UvicornDocumentation}. Pola súa parte, \textit{python-multipart} permite a FastAPI interpretar os formularios empregados para subir os documentos escaneados~\cite{PythonMultipartPackage}. Escolléronse por seren compatibles directamente co marco de traballo e resolver as necesidades básicas de execución e carga de ficheiros.
+
+  \item[SDK de Azure] Os paquetes \textit{azure-ai-documentintelligence}, \textit{azure-core}, \textit{azure-identity} e \textit{azure-keyvault-secrets} proporcionan un acceso tipado a Document Intelligence e a recuperación segura das credenciais~\cite{AzureDocumentIntelligence,AzureKeyVault}. Optouse polo SDK oficial para garantir unha comunicación estable coa plataforma e delegar o mantemento subxacente das peticións en rede.
+
+  \item[OpenCV 4.13 e NumPy 2.4] Utilízanse no preprocesamento xeométrico das imaxes antes de envialas ao servizo de extracción. OpenCV proporciona operacións fundamentais de visión artificial, como as transformacións de perspectiva~\cite{OpenCVTransformations}, mentres que NumPy permite representar e manipular os píxeles como matrices numéricas~\cite{NumPyDocumentation}. Seleccionáronse por ser o estándar da industria en Python, o que permite realizar estas operacións con alto rendemento e sen necesidade de implementar os algoritmos básicos desde cero. 
+
+  \item[Firebase Admin 6.6] Permite á API enviar mensaxes a Firebase Cloud Messaging empregando as credenciais do servidor~\cite{FirebaseAdminSDK}. Seleccionouse por ser o paquete oficial para realizar envíos seguros e autenticados desde un contorno de confianza.
+\end{description}
+
+\section{Persistencia e bases de datos}
+
+O cliente móbil utiliza unha base de datos relacional SQLite ~\cite{SQLiteOfficial} para conservar localmente a información necesaria para o seu funcionamento. SQLite é un motor integrado que almacena os datos nun ficheiro local sen necesidade dun servidor independente. Esta característica resulta ideal para a nosa aplicación móbil, xa que garante que o usuario poida consultar o seu tratamento independentemente de se ten conexión a internet ou non.
+
+A elección de SQLite xustifícase pola súa capacidade para manter datos estruturados no propio dispositivo de forma eficiente e sen depender de infraestruturas externas. Como complemento a esta base de datos, emprégase Flutter Secure Storage. Esta ferramenta resérvase unicamente para datos sensibles (como os identificadores de sesión e de vinculación), que, por motivos de seguridade, deben gardarse no almacén protexido do sistema operativo en formato clave-valor~\cite{FlutterSecureStorage}.
+
+Por outra banda, no que respecta á parte servidora, a API foi deseñada baixo unha arquitectura sen estado (\textit{stateless}). Isto significa que non implementa ningún tipo de persistencia propia: recibe a petición, procesa a folla de tratamento, devolve o resultado ao cliente e descarta a información sen conservar copias dos documentos enviados. En liña con esta decisión, os servizos externos de Firebase empréganse exclusivamente para a autenticación e a mensaxería, sen facer uso das súas solucións de base de datos ou almacenamento na nube.
+
+\section{Servizos na nube}
+\subsection{Azure Key Vault}
+
+Para garantir a seguridade da aplicación, as claves de acceso a Document Intelligence nunca se incorporan no código fonte. Para a xestión destes segredos faise uso de Azure Key Vault, un servizo deseñado especificamente para centralizar credenciais e controlar o acceso a elas~\cite{AzureKeyVault}.
+
+Key Vault seleccionouse porque se integra de forma natural co resto dos servizos de Azure e permite que a API recupere as claves de forma dinámica. Isto supón unha vantaxe arquitectónica importante, xa que permite cambiar ou rotar os segredos sen necesidade de modificar nin volver despregar o código da aplicación.
+
+\subsection{Firebase}
+\label{sec:firebase}
+
+Firebase é a plataforma empregada para resolver dúas necesidades transversais da aplicación sen ter que construír unha infraestrutura propia:
+
+\begin{description}
+  \item[Firebase Authentication] Proporciona un identificador de usuario mediante autenticación anónima. Firebase mantén a sesión no dispositivo e permite substituír máis adiante este mecanismo por outro provedor sen que o cliente teña que implementar o sistema completo de autenticación ~\cite{FirebaseAuthentication}. Isto axústase á perfección ao prototipo, xa que permite identificar a instalación sen obrigar ao usuario a crear unha conta con correo e contrasinal.
+
+  \item[Firebase Cloud Messaging] Facilita o envío de notificacións e mensaxes de datos desde a API aos dispositivos Android rexistrados. No contexto da aplicación, esta característica resulta fundamental para a comunicación entre pacientes e supervisores, xa que permite tanto mostrar avisos convencionais como intercambiar información interna de forma transparente para o usuario. O cliente obtén e comunica o seu identificador de conexión (\textit{token}), mentres que Firebase encárgase do transporte e a entrega fiable destas mensaxes~\cite{FirebaseCloudMessaging}.
+
+
+\end{description}
+
+A decisión de integrar Firebase vén xustificada porque dispón de complementos oficiais moi estables para Flutter, resolvendo o rexistro de usuarios e o envío de notificacións \textit{push} de maneira sinxela e estandarizada.
+
+\section{Contornas de desenvolvemento e despregamento}
+
+\subsection{Contornas de desenvolvemento}
+
+O cliente móbil desenvolveuse principalmente con Android Studio, a contorna oficial para o ecosistema Android~\cite{AndroidStudio}. Esta ferramenta integra a edición de código Dart, as ferramentas de Flutter, os emuladores de dispositivos e as opcións de depuración. Seleccionouse por reunir nunha mesma aplicación todo o necesario para o ciclo de desenvolvemento e as probas do cliente móbil. 
+
+Para a construción da API empregouse PyCharm ~\cite{PyCharm}, a contorna desenvolvida por JetBrains. A súa escolla xustifícase pola súa integración nativa co ecosistema Python, o que facilita a xestión da contorna virtual, o control do intérprete e a depuración do servidor en tempo real.
+
+\subsection{Deseño de interfaces}
+
+Os primeiros deseños das pantallas e os prototipos (\textit{mockups}) da aplicación realizáronse coa versión web de Figma ~\cite{FigmaDesign}. Esta ferramenta permite crear, compartir e revisar deseños de interfaces directamente desde o navegador. 
+
+Utilizouse nas fases previas á programación para idear a interface e organizar a estrutura da aplicación antes de escribir código. Contar cun deseño previo resulta fundamental, xa que é practicamente inviable iniciar a programación desde cero sen ter unha referencia visual clara do que se quere construír. Ademais, a ferramenta permitiu comprobar rapidamente se o fluxo de navegación entre as distintas pantallas era o adecuado. A escolla de Figma baseouse na súa lixeireza (non require instalación) e na comodidade que ofrece para crear e modificar os deseños. Estes prototipos actuaron como guía principal durante a posterior implementación con Flutter.
+
+\subsection{Contedores e orquestración}
+
+Para garantir que a API funcione de maneira idéntica independentemente do equipo onde se execute, utilizouse Docker. Esta tecnoloxía empaqueta o código da aplicación e todas as súas dependencias dentro dun contedor illado, separándoo da configuración do sistema anfitrión~\cite{DockerOverview}. Seleccionouse para asegurar a reproducibilidade do contorno, garantindo que a mesma versión de Python e das bibliotecas estea presente en calquera máquina.
+
+Como complemento, empregouse Docker Compose ~\cite{DockerCompose}, unha ferramenta que permite definir e arrincar aplicacións multicontedor mediante un ficheiro descritivo YAML. No proxecto utilízase para iniciar localmente a API e montar o código durante o desenvolvemento. Escolleuse porque simplifica a posta en marcha do contorno local, reducindo todo o proceso a un único comando.
+
+\section{Control de versións}
+
+Para o control de versións do código fonte seleccionouse Git, o cal permite rexistrar a evolución do proxecto, consultar o historial de cambios e traballar de forma segura mediante o uso de ramas independentes~\cite{GitDocumentation}. 
+
+Como plataforma de aloxamento remoto e xestión do traballo empregouse GitHub~\cite{GitHubPullRequests}. A escolla desta plataforma fundaméntase en que centraliza nun único lugar tanto o repositorio de código como as ferramentas de planificación e seguimento. En concreto, no marco deste proxecto, GitHub utilizouse para:
+
+\begin{itemize}
+    \item \textbf{GitHub Projects}: para representar o taboleiro Kanban e xestionar visualmente o fluxo de traballo.
+    \item \textbf{GitHub Issues}: para describir e facer un seguimento pormenorizado das tarefas.
+    \item \textbf{Etiquetas (\textit{labels})}: para clasificar e priorizar o traballo pendente.
+    \item \textbf{Fitos (\textit{milestones})}: para agrupar as tarefas segundo os obxectivos temporais ou entregas do proxecto.
+    \item \textbf{Ramas (\textit{branches})}: para desenvolver novas funcionalidades illando os cambios do código principal.
+    \item \textbf{Solicitudes de integración (\textit{pull requests})}: para revisar os cambios antes de fusionalos coa rama principal.
+\end{itemize}
+
+Esta metodoloxía de traballo garante que cada tarefa estea directamente relacionada coas modificacións correspondentes no código. Ademais, seguindo as boas prácticas de seguridade, os ficheiros que conteñen credenciais ou configuracións locais exclúense estritamente do control de versións.
+
+\section{Documentación}
+
+A memoria redáctase integramente en \LaTeX{}, un sistema de composición orientado á produción de documentos técnicos e científicos~\cite{LaTeXDocumentation}. O seu uso vén determinado pola adopción do modelo oficial de Traballo de Fin de Grao proporcionado pola Facultade de Informática. 
+
+%Ademais de cumprir con este requisito institucional, \LaTeX{} resulta a ferramenta tecnolóxica ideal para este propósito, xa que automatiza e facilita enormemente a xestión de referencias cruzadas, a numeración de figuras e táboas, e a xeración de índices. O proxecto compílase con XeLaTeX e emprega BibTeX para xestionar as citas bibliográficas segundo o estándar IEEE.
+
+Como editor de \LaTeX{} utilizouse Overleaf, unha plataforma web que permite editar o código fonte e compilar o documento desde o navegador~\cite{OverleafDocumentation}. Seleccionouse porque non require configurar localmente o contorno de compilación e porque mostra nun mesmo espazo o código, os ficheiros do proxecto, os avisos de compilación e o PDF resultante.
+
+Finalmente, para a elaboración dos diagramas e esquemas incluídos na memoria empregáronse Mermaid~\cite{Mermaid} e Draw.io~\cite{Drawio}. O uso combinado de ambas ferramentas permitiu adaptar a elaboración dos diagramas ás características de cada representación.

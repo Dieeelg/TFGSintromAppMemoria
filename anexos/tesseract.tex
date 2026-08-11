@@ -1,0 +1,244 @@
+\chapter{Resultados complementarios da avaliación de Tesseract}
+\label{chapapd:resultados-tesseract}
+
+Neste apéndice recóllense exemplos adicionais dos resultados obtidos durante
+a avaliación do modelo estándar de Tesseract. O obxectivo é complementar os
+casos mostrados no corpo principal mediante fragmentos máis amplos das saídas
+xeradas e a súa comparación directa coas follas de tratamento orixinais.
+
+A avaliación realizouse sobre as \textbf{11 follas escaneadas}, empregadas como
+escenario de referencia ao representar as condicións de entrada máis
+favorables. Dado que xa neste conxunto se observaron erros importantes no
+recoñecemento e na conservación da estrutura da táboa de doses, non se
+considerou necesario ampliar a proba do modelo estándar a fotografías tomadas
+co dispositivo móbil.
+
+Os exemplos seguintes non pretenden recoller todos os erros observados, senón
+mostrar distintos comportamentos representativos: a degradación dunha pauta
+extensa, a omisión da táboa de doses, os erros en valores numéricos e,
+finalmente, un caso no que o recoñecemento da pauta foi considerablemente
+mellor.
+
+
+\section{Degradación da táboa de doses}
+\label{secapd:tesseract-f01}
+
+A folla F01 contén unha pauta extensa distribuída ao longo de varias semanas.
+Neste caso, Tesseract recupera correctamente unha parte das primeiras entradas,
+pero a saída vaise degradando e aparecen modificacións nas datas e nas
+fraccións, ademais de caracteres que non forman parte da información da
+táboa.
+
+A Figura~\ref{fig:apendice-tesseract-f01} mostra o fragmento correspondente da
+folla orixinal, mentres que o
+Listing~\ref{lst:apendice-tesseract-f01} recolle a saída xerada por Tesseract.
+
+\begin{figure}[htbp]
+    \centering
+    % Recortar a táboa da folla F01.
+    % Interesa que se vexan especialmente as últimas filas,
+    % nas que a saída de Tesseract presenta máis ruído.
+    \includegraphics[width=0.93\textwidth]
+    {imaxes/apendices/tesseract-f01-orixinal.jpg}
+    \caption{Fragmento da táboa de doses da folla F01 empregada na
+    avaliación do modelo estándar de Tesseract.}
+    \label{fig:apendice-tesseract-f01}
+\end{figure}
+
+\begin{lstlisting}[
+    frame=single,
+    rulecolor=\color{gray!60},
+    backgroundcolor=\color{gray!5},
+    basicstyle=\ttfamily\scriptsize,
+    caption={Fragmento da saída de Tesseract correspondente á
+    Figura~\ref{fig:apendice-tesseract-f01}},
+    label={lst:apendice-tesseract-f01},
+    captionpos=t,
+    columns=fullflexible,
+    keepspaces=true
+]
+LUNES MARTES MIERCOLES JUEVES VIERNES SABADO DOMINGO
+08 SEP. 1/2 09 SEP 1/4 |l0SEP 1/2 |11 SEP 1/2 |12SEP 1/2 13SEP 1/4 |14SEP 1/2
+15 SEP. 1/2 lI6SEP 1/4 I17SEP 1/2 |I8 SEP 1/2 |19SEP 1/2 20SEP 1/4 121 SEP 172
+22 SEP 1/2 (23 SEP 114 |2SEP 12 |125SEP 1/2 26SEP 1/2 |27 SEP 1/4 28 SEP 1/2
+29 SEP" 1/2 |30 SEP 1/4 |01 12 [02 12 10 12 04 1/4 [05 1/2
+al O a a d a d
+06 12 [07 1/14 08 12 [09 1/2 |10 12 | 1 14 |2 1/2
+OCT OCT OCT OCT OCT OCT OCT
+\end{lstlisting}
+
+A comparación permite observar que unha parte do contido segue sendo
+recoñecible, pero aparecen modificacións como a perda dos separadores das
+fraccións, caracteres adicionais e alteracións nos días. Tamén se introduce
+unha liña de ruído sen correspondencia coa información da pauta. Como
+resultado, a secuencia completa deixa de poder interpretarse de maneira
+fiable mediante un procesamento textual directo.
+
+
+\section{Omisión da pauta diaria}
+\label{secapd:tesseract-f02}
+
+Un comportamento diferente apareceu na folla F02. Neste caso, Tesseract
+consegue recoñecer diferentes elementos do documento, incluído o encabezado
+da sección de doses, pero non recupera o contido da táboa situada baixo el.
+
+A Figura~\ref{fig:apendice-tesseract-f02} mostra a zona correspondente da
+folla orixinal. O Listing~\ref{lst:apendice-tesseract-f02} permite comprobar
+que, tras recoñecer o título da táboa, a saída pasa directamente á información
+da próxima visita.
+
+\begin{figure}[htbp]
+    \centering
+    % Recortar desde "DOSIS DIARIA DE ANTICOAGULANTE"
+    % ata xusto antes de "Próxima visita".
+    % Debe verse claramente a pauta presente no documento orixinal.
+    \includegraphics[width=0.93\textwidth]
+    {imaxes/apendices/tesseract-f02-orixinal.jpg}
+    \caption{Táboa de doses da folla F02 que non foi recuperada na saída
+    textual de Tesseract.}
+    \label{fig:apendice-tesseract-f02}
+\end{figure}
+
+\begin{lstlisting}[
+    frame=single,
+    rulecolor=\color{gray!60},
+    backgroundcolor=\color{gray!5},
+    basicstyle=\ttfamily\scriptsize,
+    caption={Fragmento da saída de Tesseract correspondente á
+    Figura~\ref{fig:apendice-tesseract-f02}},
+    label={lst:apendice-tesseract-f02},
+    captionpos=t,
+    columns=fullflexible,
+    keepspaces=true
+]
+Fármaco oral.:Sintrom 1 mg
+Dosis semanal: 4 mg (1,0,1,0,1,0,1) Dosis inyecta:
+
+DOSIS DIARIA DE ANTICOAGULANTE
+
+Próxima visita: martes, 29/04/2025 Turno: Mañanas - Num: 5
+Centro visita:
+Comentarios.
+C.S. TABOADA
+\end{lstlisting}
+
+Neste caso, o problema non se limita á reorganización ou á modificación dos
+caracteres: a información correspondente ás datas e doses non aparece na
+saída. Polo tanto, non sería posible recuperar a pauta unicamente mediante a
+aplicación posterior de regras de reorganización ou expresións regulares.
+
+
+\section{Modificación de valores numéricos}
+\label{secapd:tesseract-f03}
+
+Os erros non se limitaron á táboa de doses. Na folla F03 tamén se observaron
+modificacións en campos numéricos do resumo das últimas visitas. A
+Figura~\ref{fig:apendice-tesseract-f03} mostra o fragmento orixinal empregado
+para a comparación e o Listing~\ref{lst:apendice-tesseract-f03} presenta a
+saída obtida.
+
+\begin{figure}[htbp]
+    \centering
+    % Recortar "RESUMEN DE LAS ULTIMAS VISITAS"
+    % incluíndo as filas que aparecen no listing.
+    \includegraphics[width=0.93\textwidth]
+    {imaxes/apendices/tesseract-f03-orixinal.jpg}
+    \caption{Fragmento do resumo das últimas visitas da folla F03.}
+    \label{fig:apendice-tesseract-f03}
+\end{figure}
+
+\begin{lstlisting}[
+    frame=single,
+    rulecolor=\color{gray!60},
+    backgroundcolor=\color{gray!5},
+    basicstyle=\ttfamily\scriptsize,
+    caption={Fragmento da saída de Tesseract correspondente á
+    Figura~\ref{fig:apendice-tesseract-f03}},
+    label={lst:apendice-tesseract-f03},
+    captionpos=t,
+    columns=fullflexible,
+    keepspaces=true
+]
+15/01/2025 8  Sintrom4mg 35 me 16/01/2025
+07/01/2025 29 Sintrom4mg 4 mg 16/01/2025
+30/12/2024 54 Sintrom4mg 4 mg 07/01/2025
+23/12/2024 44 Sintrom4mg 53 mg 30/12/2024
+16/12/2024 3,1 Sintrom4mg 5,6 mg 24/12/2024
+\end{lstlisting}
+
+A comparación coa imaxe orixinal permite comprobar que varios valores
+numéricos son modificados durante o recoñecemento. Este tipo de erro resulta
+especialmente relevante porque a saída pode continuar tendo a aparencia dun
+valor numérico válido, aínda que xa non coincida co presente no documento.
+Por tanto, a detección posterior do erro non pode basearse unicamente en
+comprobar que o resultado teña un formato numérico.
+
+
+\section{Caso cun mellor recoñecemento da pauta}
+\label{secapd:tesseract-f05}
+
+Os resultados non presentaron o mesmo nivel de degradación en todas as
+follas. Na F05, que contén unha pauta máis curta, Tesseract conseguiu conservar
+con bastante fidelidade a secuencia principal de datas e doses.
+
+Inclúese este exemplo para mostrar a variabilidade observada entre os
+documentos e evitar limitar a análise unicamente aos casos nos que se
+produciron os erros máis evidentes. A
+Figura~\ref{fig:apendice-tesseract-f05} mostra a pauta orixinal e o
+Listing~\ref{lst:apendice-tesseract-f05} a saída correspondente.
+
+\begin{figure}[htbp]
+    \centering
+    % Recortar a fila completa de LUNES a DOMINGO,
+    % do 16 DIC ao 22 DIC, incluíndo as doses e "NO TOMAR".
+    \includegraphics[width=0.93\textwidth]
+    {imaxes/apendices/tesseract-f05-orixinal.jpg}
+    \caption{Táboa de doses da folla F05, correspondente a un dos casos
+    cun mellor recoñecemento por parte do modelo estándar de Tesseract.}
+    \label{fig:apendice-tesseract-f05}
+\end{figure}
+
+\begin{lstlisting}[
+    frame=single,
+    rulecolor=\color{gray!60},
+    backgroundcolor=\color{gray!5},
+    basicstyle=\ttfamily\scriptsize,
+    caption={Saída de Tesseract correspondente á
+    Figura~\ref{fig:apendice-tesseract-f05}},
+    label={lst:apendice-tesseract-f05},
+    captionpos=t,
+    columns=fullflexible,
+    keepspaces=true
+]
+| LUNES MARTES MIERCOLES JUEVES VIERNES SABADO DOMINGO
+16 DIC 0 17 DIC 1/4 18 DIC 1/4 19 DIC 1/4 20 DIC 1/4 21 DIC 0 22 DIC 1/4
+No Tomar 8 a a a No Tomar [(
+\end{lstlisting}
+
+Neste caso, a asociación principal entre os días e as doses mantense de forma
+moito máis clara ca nos exemplos anteriores. A saída segue introducindo
+caracteres adicionais na liña inferior, pero a pauta principal resulta
+recoñecible.
+
+Este resultado mostra que a limitación do modelo estándar non consiste en que
+sexa incapaz de recuperar calquera táboa deste tipo, senón na falta de
+consistencia entre documentos. Unha solución destinada a reconstruír
+automaticamente a pauta de tratamento non pode asumir que unha estrutura que
+se conserva nunha folla vaia manterse nas restantes.
+
+
+\section{Síntese dos exemplos}
+\label{secapd:tesseract-sintese}
+
+Os exemplos anteriores mostran que o comportamento do modelo estándar varía
+considerablemente entre as distintas follas escaneadas. Nalgúns documentos
+consérvase unha parte importante da pauta, mentres que noutros aparecen
+modificacións nas fraccións e nas datas, ruído adicional ou mesmo a omisión
+completa do contido da táboa.
+
+Esta variabilidade é especialmente problemática neste proxecto, xa que a
+extracción require manter de maneira fiable a relación entre cada data e a súa
+dose. A presenza destas limitacións nas propias follas escaneadas foi
+suficiente para non continuar a avaliación do modelo estándar en condicións de
+captura menos favorables e motivou a experimentación posterior cun modelo de
+Tesseract adestrado especificamente para este tipo de documentos.

@@ -1,0 +1,247 @@
+\chapter{Planificación e seguimento}
+\label{chap:planificacion}
+
+Neste capítulo preséntase a organización temporal e económica do proxecto. En primeiro lugar descríbense os incrementos nos que se dividiu o traballo. A continuación recóllese a planificación inicial, elaborada ao comezo do proxecto, e compárase coa planificación revisada a partir da evolución real do desenvolvemento. Finalmente explícanse as principais desviacións e compáranse os custos inicialmente estimados coa previsión de peche.
+
+
+\section{Incrementos do proxecto e asignación de horas}
+\label{subsec:incrementos-proxecto}
+De acordo co enfoque incremental descrito no Capítulo \ref{chap:metodoloxia}, o proxecto organizouse en sete incrementos. Cada un deles produciu un resultado concreto sobre o que se puido continuar traballando:
+
+\begin{enumerate}
+    \item \textbf{Estudo da viabilidade e investigación de tecnoloxías de extracción automática:} Analizáronse as características das follas de tratamento, identificáronse os campos que debían ser extraídos e estudáronse  diferentes técnicas de visión artificial, recoñecemento óptico de caracteres e procesamento documental.
+    Este incremento permitiu comprender o problema, identificar as principais dificultades e determinar os requisitos básicos da solución.
+
+    \item \textbf{Experimentación e selección da tecnoloxía de extracción :}  Recompiláronse follas de tratamento que se empregaron para probar as distintas tecnoloxías. As probas permitiron comparar a calidade da extracción, o esforzo necesario para preparar os datos, a facilidade de integración e as limitacións de cada alternativa. A partir destes resultados seleccionouse a tecnoloxía máis adecuada para continuar o proxecto.
+
+    \item \textbf{Primeira versión da API :} Desenvolveuse unha API sinxela capaz de recibir informes, invocar ao servizo de extracción, procesar o resultado e devolver os datos estruturados en formato JSON.
+
+    O obxectivo deste incremento foi obter unha proba de concepto funcional que permitise comprobar a comunicación co servizo de extracción e a transformación dos datos devoltos.
+
+    \item \textbf{Reorganización da API por capas :} Unha vez comprobado o funcionamento da primeira versión, a API reorganizouse para separar os puntos de entrada, a lóxica de negocio, os modelos de datos e as dependencias externas. 
+
+    %TODO: permitiu comprobar os seus compoñentes por separado
+    Esta reorganización facilitou o mantemento, a realización de probas e a posible substitución dalgún dos servizos externos no futuro. Neste incremento incorporáronse tamén probas unitarias e probas de integración dos \textit{endpoints}.
+
+    \item \textbf{Primeira versión da aplicación Flutter :} Creouse a estrutura do proxecto Flutter e implementáronse progresivamente a configuración inicial, as modalidades de paciente e supervisor, a persistencia local, a captura de informes, a visualización da pauta, o calendario e a confirmación das tomas.
+
+    As funcionalidades da aplicación dividíronse en tarefas independentes para facilitar a súa implementación e revisión.
+
+    \item \textbf{Integración e estabilización :} Levouse a cabo a conexión completa da aplicación coa API e cos servizos de Firebase, unificando os distintos fluxos de navegación. Durante esta fase completouse a vinculación entre paciente e supervisor, a sincronización da información e o sistema de recordatorios. Unha vez conectados os compoñentes de forma progresiva, o sistema estabilizouse mediante a análise estática do código e a execución de probas unitarias, de \textit{widgets} e de uso en dispositivos reais. Por último, corrixíronse os erros detectados nos casos de uso principais e realizáronse os axustes necesarios para garantir un funcionamento robusto de extremo a extremo.
+
+    \item  \textbf{Documentación e entrega:} O último incremento abrangueu a revisión final da memoria, a elaboración dos diagramas definitivos e a preparación da presentación e dos materiais necesarios para a entrega.
+
+\end{enumerate}
+
+Na práctica, a execución destes incrementos non foi estritamente secuencial, senón que algunhas tarefas se solaparon de forma intencionada para facilitar o traballo. A redacción da memoria, por exemplo, foise facendo en paralelo á programación para ter frescos os detalles e as decisións tomadas. Do mesmo xeito, a integración e as probas fóronse realizando a medida que se ían rematando as distintas funcionalidades, co obxectivo de detectar os erros de forma progresiva e non acumular problemas para os últimos días do proxecto. Esta organización temporal reflíctese de xeito visual nos diagramas de Gantt.
+
+\section{Planificación inicial}
+\label{sec:planificacion-inicial}
+
+\subsection{Estimación da dedicación}
+\label{subsec:estimacion-inicial-horas}
+
+O Traballo de Fin de Grao ten unha carga de 12 créditos ECTS. Segundo a normativa da Universidade da Coruña, cada crédito equivale a 25 horas de traballo do estudante~\cite{UDCNormativaECTS}. Por este motivo, ao comezo do proxecto tomouse como referencia unha dedicación total de 300 horas:
+
+\[
+    12\ \mathrm{ECTS} \times 25\ \mathrm{h/ECTS} = 300\ \mathrm{h}
+\]
+
+Esta cifra empregouse como referencia para dimensionar o traballo, non como un límite estrito. Dado que as fases de investigación e experimentación conlevaron unha incerteza considerable, as horas distribuíronse en bloques amplos para manter a flexibilidade necesaria na planificación inicial.
+
+\begin{table}[htbp]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Distribución inicial da dedicación estimada por incremento.}
+    \label{tab:horas-planificacion-inicial}
+    \begin{tabular}{lr}
+        \toprule
+        \textbf{Incremento} & \textbf{Horas previstas} \\
+        \midrule
+        Viabilidade e investigación & 15 \\
+        Experimentación e selección & 45 \\
+        API inicial & 35 \\
+        API por capas & 20 \\
+        Aplicación Flutter & 100 \\
+        Integración e estabilización & 35 \\
+        Documentación e entrega & 50 \\
+        \midrule
+        \textbf{Total} & \textbf{300} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+
+
+\subsection{Calendario previsto inicialmente}
+\label{subsec:calendario-inicial}
+
+A planificación inicial tomou como punto de partida o 15 de outubro de 2025. A idea era rematar o desenvolvemento principal antes do verán: chegar a finais de maio cunha primeira versión funcional da aplicación e dedicar xuño á integración e ás probas. Así, xullo quedaba reservado para redactar e revisar a memoria, marcando o 31 de xullo de 2026 como data límite interna. Esta marxe pensouse para facilitarlles o traballo de revisión ás directoras, asegurando que houbese tempo para incorporar os seus cambios antes das vacacións de agosto. Por iso, o cronograma inicial deixou ese mes libre de tarefas, deixando todo preparado para o 11 de setembro de 2026, data da entrega oficial.
+ 
+A asignación inicial concentraba unha maior dedicación na experimentación práctica, na API e, especialmente, no desenvolvemento da aplicación. Para o estudo de viabilidade reservouse unha cantidade menor de horas, pois inicialmente esperábase realizar unha análise breve e pasar rapidamente ás probas coas diferentes tecnoloxías. Esta previsión resultou optimista, xa que a investigación e a experimentación precisaron finalmente máis traballo do esperado.
+
+\begin{table}[htbp]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Calendario establecido na planificación inicial.}
+    \label{tab:datas-planificacion-inicial}
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Incremento} & \textbf{Inicio previsto} & \textbf{Fin previsto} \\
+        \midrule
+        Viabilidade e investigación & 15/10/2025 & 30/11/2025 \\
+        Experimentación e selección & 01/12/2025 & 15/01/2026 \\
+        API inicial & 16/01/2026 & 31/01/2026 \\
+        API por capas & 01/02/2026 & 20/02/2026 \\
+        Aplicación Flutter & 21/02/2026 & 31/05/2026 \\
+        Integración e estabilización & 15/05/2026 & 30/06/2026 \\
+        Elaboración e revisión da memoria & 15/01/2026 & 31/07/2026 \\
+        Entrega final (fito) & 11/09/2026 & 11/09/2026 \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+O resultado desta planificación pódese observar na Figura~\ref{fig:gantt-planificacion-inicial}. Ademais de amosar a evolución paralela das tarefas (como a documentación ou a integración temperá), o diagrama ilustra a distribución temporal de todos os fitos do traballo ata chegar á entrega en setembro.
+
+%ooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooo
+% HASTA AQUI REVISADO E GUAY
+\todo[inline, color=yellow]{ACORDARSE DE REVISAR SE A PLANIFICACIÓN FINAL É ESTA}
+\section{Seguimento e evolución do proxecto}
+\label{sec:seguimento-evolucion}
+
+Tal e como se indicou no capítulo de metodoloxía, o control do avance diario levouse a cabo mediante un taboleiro Kanban. Esta xestión visual facilitou o seguimento continuo das tarefas e permitiu adaptar o calendario e a carga de traballo á realidade do desenvolvemento.
+
+O resultado deste axuste temporal recóllese na Táboa~\ref{tab:datas-planificacion-revisada}. Nela, as datas reflicten o tempo que realmente requiriu a execución de todas as tarefas.
+
+\begin{table}[htbp]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Calendario final de execución do proxecto.}
+    \label{tab:datas-planificacion-revisada}
+    \resizebox{\columnwidth}{!}{
+    \begin{tabular}{lcc}
+        \toprule
+        \textbf{Incremento} & \textbf{Inicio} & \textbf{Fin} \\
+        \midrule
+        Viabilidade e investigación & 15/10/2025 & 15/01/2026 \\
+        Experimentación e selección & 08/01/2026 & 07/02/2026 \\
+        API inicial & 08/02/2026 & 15/02/2026 \\
+        API por capas & 16/02/2026 & 08/03/2026 \\
+        Aplicación Flutter & 10/03/2026 & 31/07/2026 \\
+        Integración e estabilización & 16/07/2026 & 15/08/2026 \\
+        Documentación e entrega & 06/03/2026 & 11/09/2026 \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+Á par desta actualización do calendario, tamén se reavaliou o esforzo necesario. A medida que se avanzaba nas tarefas e se resolvían os primeiros imprevistos, fíxose evidente que a estimación inicial de 300 horas non sería suficiente. Tras revisar a carga de traballo realizada, o historial de confirmacións (\textit{commits}) no repositorio e as métricas do taboleiro Kanban, a dedicación final fixouse nun total de 390 horas (Táboa~\ref{tab:comparacion-horas}). 
+
+\begin{table}[htbp]
+    \centering
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Comparación entre a dedicación inicial e a dedicación final por incremento.}
+    \label{tab:comparacion-horas}
+    \resizebox{\columnwidth}{!}{
+    \begin{tabular}{lrrr}
+        \toprule
+        \textbf{Incremento} &
+        \textbf{Inicial (h)} &
+        \textbf{Final (h)} &
+        \textbf{Diferenza (h)} \\
+        \midrule
+        Viabilidade e investigación & 15 & 25 & +10 \\
+        Experimentación e selección & 45 & 70 & +25 \\
+        API inicial & 35 & 45 & +10 \\
+        API por capas & 20 & 25 & +5 \\
+        Aplicación Flutter & 100 & 125 & +25 \\
+        Integración e estabilización & 35 & 50 & +15 \\
+        Documentación e entrega & 50 & 50 & 0 \\
+        \midrule
+        \textbf{Total} & \textbf{300} & \textbf{390} & \textbf{+90} \\
+        \bottomrule
+    \end{tabular}
+    }
+\end{table}
+
+Esta cifra supón un incremento de 90 horas, equivalente ao 30\,\% sobre a liña base, e constitúe unha avaliación fundamentada da dedicación real requirida polo proxecto. As causas desta desviación analízanse a continuación.
+
+\subsection{Análise das desviacións}
+\label{subsec:analise-desviacions}
+
+A primeira desviación produciuse na investigación e na experimentación coas tecnoloxías de procesamento automático das follas. A planificación inicial supoñía que sería posible atopar unha alternativa axeitada nun prazo relativamente curto. Porén, a obtención dunha solución fiable requiriu recompilar un conxunto suficiente de follas de tratamento, tarefa que resultou máis custosa do previsto, e probar varias alternativas. Para cada unha delas foi necesario preparar os exemplos e analizar os erros obtidos. Este proceso de proba, análise e descarte prolongouse ata seleccionar unha tecnoloxía que ofrecese unha calidade suficiente.
+
+No desenvolvemento da API, a desviación debeuse principalmente ao esforzo necesario para garantir a calidade e a coherencia dos datos devoltos. Ao tratarse de información relacionada coa medicación, non era suficiente con implementar os puntos de acceso e estruturar a resposta. Foi preciso analizar os posibles datos incorrectos ou incompletos, definir as regras para detectalos e decidir como debía responder o sistema en cada caso.
+
+No caso da aplicación Android non se identificou unha única funcionalidade como responsable principal da desviación. Durante o desenvolvemento foron xurdindo novas funcionalidades e melloras que non estaban completamente concretadas na planificación inicial, pero que se consideraron útiles para completar a aplicación. Tamén se modificaron algunhas pantallas e fluxos de navegación a medida que se comprobaba o seu funcionamento, co obxectivo de facer o uso da aplicación máis claro e sinxelo.
+
+A incorporación destes cambios, xunto coa comprobación do funcionamento conxunto dos distintos compoñentes e a corrección dos problemas detectados durante as probas, obrigou a revisar e modificar varias veces partes da aplicación que xa foran implementadas, aumentando así o tempo de desenvolvemento respecto do previsto inicialmente.
+
+Outro factor determinante foi o cambio na dispoñibilidade horaria. O 17 de marzo de 2026 iniciei un período de prácticas en empresa, limitando a dedicación ao proxecto ás tardes e ás fins de semana, tempo que houbo que compaxinar co resto das materias do curso. Aínda que esta situación non afectou aos obxectivos nin ao alcance do traballo, si provocou que o desenvolvemento se estendese no tempo, desprazando a finalización da aplicación e da memoria respecto da previsión inicial.
+
+Por estes motivos non se puido cumprir o obxectivo interno de ter o proxecto practicamente rematado antes do verán nin a memoria completa o 31 de xullo. O calendario real trasladou a estabilización ata o 15 de agosto e a finalización da memoria ata o 31 de agosto. Con todo, logrouse manter a marxe respecto da data oficial de entrega do 11 de setembro de 2026.
+
+O diagrama de Gantt da Figura~\ref{fig:gantt-comparacion} representa de forma conxunta a planificación inicial e o calendario final de execución. A extensión das barras reais permite identificar visualmente os incrementos nos que se produciu o atraso.
+
+\section{Custos}
+\label{sec:custos-iniciais-revisados}
+
+Para valorar o esforzo económico do proxecto, tomouse como base o salario dun perfil técnico con pouca experiencia segundo o vixente convenio do sector TIC~\cite{BOEConvenioTIC2025}. Partindo dun salario bruto anual de 24.105,37~€~\cite{BOETablasTIC2026} e dunha xornada laboral estándar de 1.800 horas para o ano 2026, calcúlase o seguinte custo por hora:
+
+\[
+    C_{\mathrm{hora}} =
+    \frac{24.105{,}37\ \text{€}}{1.800\ \mathrm{h}}
+    \approx 13{,}39\ \text{€/h}
+\]
+
+A Táboa~\ref{tab:custos-perfis} distribúe o custo entre os perfís funcionais asumidos, todos eles desempeñados pola mesma persoa.
+
+\begin{table}[htbp]
+    \centering
+    \small
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Valoración do traballo segundo os perfís asumidos no proxecto.}
+    \label{tab:custos-perfis}
+    
+    % Envolvemos o tabular co resizebox
+    \resizebox{\columnwidth}{!}{%
+        \begin{tabular}{lrrrr}
+            \toprule
+            \textbf{Perfil funcional} &
+            \textbf{Inicial (h)} &
+            \textbf{Final (h)} &
+            \textbf{Inicial (€)} &
+            \textbf{Final (€)} \\
+            \midrule
+            Análise e experimentación & 60 & 95 & 803,40 & 1.272,05 \\
+            Desenvolvemento da API & 55 & 70 & 736,45 & 937,30 \\
+            Desenvolvemento móbil & 100 & 125 & 1.339,00 & 1.673,75 \\
+            Integración e probas & 35 & 50 & 468,65 & 669,50 \\
+            Documentación técnica & 50 & 50 & 669,50 & 669,50 \\
+            \midrule
+            \textbf{Total} & \textbf{300} & \textbf{390} & \textbf{4.017,00} & \textbf{5.222,10} \\
+            \bottomrule
+        \end{tabular}
+    } % Peche do comando resizebox
+    
+\end{table}
+
+O custo do traballo pasa así de 4.017,00~€ na planificación inicial a 5.222,10~€ na execución final, cunha diferenza de 1.205,10~€. O hardware xa estaba dispoñible e os servizos e ferramentas empregáronse mediante créditos de estudante ou modalidades gratuítas. En consecuencia, o desembolso directo foi de 0~€ e a desviación económica procede unicamente da valoración das 90 horas adicionais.
+
+\begin{landscape}
+    \begin{figure}[p]
+        \centering
+        \includegraphics[width=1\linewidth]{imaxes/05-Planificacion/gantt-planificacion-inicial.pdf}
+        \caption{Diagrama de Gantt correspondente á planificación inicial.}
+        \label{fig:gantt-planificacion-inicial}
+    \end{figure}
+\end{landscape}
+
+\begin{landscape}
+    \begin{figure}[p]
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/05-Planificacion/gantt_comparacion_seguimento.pdf}
+        \caption{Comparación entre a planificación inicial e o calendario real do proxecto.}
+        \label{fig:gantt-comparacion}
+    \end{figure}
+\end{landscape}

@@ -1,0 +1,141 @@
+% !TEX program = xelatex % (can also use "lualatex") %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Preámbulo                                                                    %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\documentclass[11pt,a4paper,titlepage,oneside]{report}
+
+%%% RELACIÓN DE VARIABLES A PERSONALIZAR %%%
+\def\lingua{gal}
+%\def\lingua{esp} % descomenta esta liña se redactarás a memoria en español
+%\def\lingua{eng} % descomenta esta liña se redactarás a memoria en inglés
+\def\nome{Diego Losada Gómez}                             % substitúe aquí o teu nome
+\def\nomedirectorA{María Noelia Barreira Rodríguez
+}              % substitúe aquí o nome de quen dirixe
+\def\nomedirectorB{Lucía Ramos García}             % duplica esta liña máis veces se o precisas, cambiando
+                                                     % a letra final (A, B, C, D...): úsanse na portada.tex
+\def\titulo{Aplicación mobil para a xestión e monitorización do tratamento anticoagulante oral (Sintrom)} % substitúe aquí o título do teu TFG
+%\def\titulacion{gced}                               % descomenta esta liña e comenta a seguinte se es estudante do GCED
+\def\titulacion{gei}
+%\def\mencion{COMPUTACIÓN}                           % descomenta a mención que che corresponda se es estudante do GEI
+%\def\mencion{ENXEÑARÍA DO SOFTWARE}
+%\def\mencion{ENXEÑARÍA DE COMPUTADORES}
+%\def\mencion{SISTEMAS DE INFORMACIÓN}
+\def\mencion{TECNOLOXÍAS DA INFORMACIÓN}
+
+%\def\renomearcadros{si} % descomenta esta liña se redactas a memoria en español e prefires que
+                         % os "cuadros" e o "índice de cuadros" se renomeen
+                         % a "tablas" e "índice de tablas" respectivamente
+
+\usepackage{placeins} % ensure \FloatBarrier is defined even if style load changes
+\usepackage{estilo_tfg}
+\usepackage{graphicx}
+\usepackage{wrapfig}
+
+% Lista de paquetes potencialmente interesantes (uso baixo demanda)
+\usepackage{xurl}
+% \usepackage{alltt}       % proporciona o entorno alltt, semellante a verbatim pero que respecta comandos
+% \usepackage{enumitem}    % permite personalizar os entornos de lista
+% \usepackage{eurofont}    % proporciona o comando \euro
+ \usepackage{float}       % permite máis opcións para controlar obxectos flotantes (táboas, figuras)
+% \usepackage{hhline}      % permite personalizar as liñas horizontais en arrays e táboas
+  \usepackage{longtable}   % permite construir táboas que ocupan máis dunha páxina
+ \usepackage{lscape}      % permite colocar partes do documento en orientación apaisada
+% \usepackage{moreverb}    % permite personalizar o entorno verbatim
+% \usepackage{multirow}    % permite crear celdas que ocupan varias filas da mesma táboa
+ \usepackage{pdfpages}    % permite insertar ficheiros en PDF no documento
+ \usepackage{rotating}    % permite diferentes tipos de rotacións para figuras e táboas
+% \usepackage{subcaption}  % permite a inclusión de varias subfiguras nunha figura
+ \usepackage{tabu}        % permite táboas flexibles
+ \usepackage{tabularx}    % permite táboas con columnas de anchura determinada
+ \usepackage{xltabular}
+ \usepackage{booktabs}
+ \usepackage{pdflscape}
+ \usepackage{todonotes}
+ \usepackage{geometry}
+\usepackage{xcolor}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Corpo                                                                        %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\begin{document}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ % Preliminares do documento            %
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ \include{portada/portada}
+ \dedicatoria{Á miña familia e, especialmente, aos que xa non poden estar aquí para verme rematar esta etapa.} % escribe neste comando o teu texto de dedicatoria
+ \paxinaenbranco
+
+\begin{agradecementos}
+
+Este traballo marca o final dunha etapa moi importante da miña vida, e non sería posible chegar ata aquí sen todas as persoas que me acompañaron e apoiaron durante estes anos.
+
+En primeiro lugar, quero agradecerlle á miña familia por estar sempre ao meu lado. Aos meus pais, por todo o cariño, apoio e confianza que me deron desde sempre, especialmente nos momentos máis difíciles. Grazas por axudarme a seguir adiante e por facer posible que chegase ata aquí.
+
+Aos meus tíos Mary e Luis, por estar sempre presentes, por apoiarme e preocuparvos por min durante todos estes anos.
+
+Quero lembrar tamén dun xeito moi especial ao meu avó, que faleceu en 2024 e que sempre me preguntaba como ían os estudos e se alegraba de verme continuar coa carreira. Gustaríame que puidese estar aquí para ver rematada esta etapa. Tamén quero dedicar unhas palabras á irmá da miña avoa, que nos deixou en 2026 e que para min foi sempre como unha avoa máis. O cariño de ambos e todos os momentos compartidos con eles seguirán formando parte deste logro.
+
+A Mireia, por facilitarme moitas das follas de tratamento empregadas durante o desenvolvemento deste traballo, que foron de gran utilidade para realizar as probas do proxecto.
+
+Aos meus amigos, grazas por acompañarme ao longo destes anos, polos bos momentos, polo apoio cando foi necesario e por facer que o camiño ata aquí tamén estea cheo de recordos que levarei comigo.
+
+Por último, ás miñas titoras, Lucía e Noelia, polo seu acompañamento durante a realización deste traballo, pola súa dispoñibilidade e orientación, e por todas as indicacións que me axudaron a desenvolvelo e melloralo ao longo destes meses.
+
+Finalmente, quero dedicar este traballo a todas as persoas que, dunha maneira ou doutra, me apoiaron durante a carreira, confiaron en min e contribuíron a que hoxe poida pechar esta etapa.
+
+A todos vós, grazas por formar parte deste camiño.
+
+
+\end{agradecementos}
+
+\include{portada/resumo}
+
+
+ \pagenumbering{roman}
+ \setcounter{page}{1}
+ \bstctlcite{IEEEexample:BSTcontrol}
+
+ \tableofcontents
+ \listoffigures
+ \listoftables
+ \clearpage
+ 
+ \pagenumbering{arabic}
+ \setcounter{page}{1}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ % Capítulos                            %
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ \include{contido/01-Introducion}
+ \include{contido/02-Metodoloxia-de-desenvolvemento}
+\include{contido/03-Tecnoloxías-empregadas}
+\include{contido/04-Analise}
+ \include{contido/05-Planificación-e-seguimento}
+ \include{contido/06-Procesamento-automático-das-follas-de-tratamento}
+ \include{contido/demo}
+%\include{contido/...}
+ \include{contido/conclusions}
+
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+ % Apéndices, glosarios e bibliografía  %
+ %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+ \appendix
+ \appendixpage
+ \include{anexos/adicional}
+%\include{anexos/...}
+
+ \printglossary[type=\acronymtype,title=\nomeglosarioacronimos]
+ \printglossary[title=\nomeglosariotermos]
+
+ \bibliographystyle{IEEEtranN}
+ \bibliography{\bibconfig,bibliografia/bibliografia}
+ \clearpage
+ 
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%

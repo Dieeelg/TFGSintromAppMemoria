@@ -1,0 +1,69 @@
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Obxectivo: Lista de termos empregados no documento,                          %
+%            xunto cos seus respectivos significados.                          %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\newglossaryentry{lstm}{
+  name=LSTM,
+  description={Siglas de \textit{Long Short-Term Memory}. É un tipo de rede neuronal que aprende a recoñecer secuencias, como os caracteres que forman unha palabra ou unha liña de texto}
+}
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% ATIGOS E DE MOMENTO SEN USAR                         %
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\newglossaryentry{bytecode}{
+  name=bytecode,
+  description={Código independente da máquina que xeran compiladores de determinadas linguaxes (Java, Erlang,\dots) e que é executado polo correspondente intérprete.}
+}
+
+
+
+\newglossaryentry{cer}{
+  name=CER,
+  description={(\textit{Character Error Rate}) Taxa de erro a nivel de carácter. Mide a diferenza entre a predición do modelo e o texto de referencia carácter a carácter.}
+}
+
+\newglossaryentry{wer}{
+  name=WER,
+  description={(\textit{Word Error Rate}) Taxa de erro a nivel de palabra. Mide a diferenza entre a saída xerada e o texto de referencia considerando palabras completas.}
+}
+
+\newglossaryentry{bcer}{
+  name=BCER,
+  description={(\textit{Best Character Error Rate}) Mellor valor de CER acadado durante o adestramento.}
+}
+
+\newglossaryentry{bwer}{
+  name=BWER,
+  description={(\textit{Best Word Error Rate}) Mellor valor de WER acadado durante o adestramento.}
+}
+
+\newglossaryentry{map05}{
+  name={mAP@0.5},
+  description={(\textit{mean Average Precision at IoU 0.5}) Métrica empregada en detección de obxectos que mide a precisión media do modelo considerando correcta unha detección cando a caixa predita acada un valor de IoU igual ou superior a 0,5 respecto á caixa real etiquetada.}
+}
+
+\newglossaryentry{iou}{
+  name=IoU,
+  description={(\textit{Intersection over Union}) Métrica que mide o grao de solapamento entre a caixa delimitadora predita polo modelo e a caixa real etiquetada. Calcúlase dividindo a área de intersección entre ambas caixas pola área da súa unión.}
+}
+
+\newglossaryentry{map}{
+  name=mAP,
+  description={(\textit{mean Average Precision}) Métrica global empregada en detección de obxectos que resume a precisión media do modelo para unha ou varias clases.}
+}
+
+\newglossaryentry{precision}{
+  name=Precision,
+  description={Métrica que indica a proporción de deteccións realizadas polo modelo que son correctas. Un valor alto implica que o modelo xera poucos falsos positivos.}
+}
+
+\newglossaryentry{recall}{
+  name=Recall,
+  description={Métrica que indica a proporción de obxectos reais que foron detectados correctamente polo modelo. Un valor alto implica que o modelo deixa poucos obxectos sen detectar.}
+}

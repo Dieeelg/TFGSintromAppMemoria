@@ -558,8 +558,7 @@ fraccións corrixidas polo modelo \textit{sintromv2}.}
 \label{fig:tesseract-comparacion-f11}
 \end{figure}
 
-A mellora non eliminou, con todo, os problemas de recoñecemento. Nas follas F09 e F10 continuaron aparecendo modificacións nas datas e perda da estrutura da táboa. Por exemplo, en F10 obtivéronse valores como \textit{068/09/2025} en lugar de \textit{08/09/2025} ou
-\textit{13/10/2023} en lugar de \textit{13/10/2025}, ao mesmo tempo que os elementos da pauta aparecían parcialmente desordenados.
+A mellora non eliminou, con todo, os problemas de recoñecemento. Nas follas F09 e F10 continuaron aparecendo modificacións nas datas e perda da estrutura da táboa. Por exemplo, en F10 obtivéronse valores como \textit{068/09/2025} en lugar de \textit{08/09/2025} ou \textit{13/10/2023} en lugar de \textit{13/10/2025}, ao mesmo tempo que os elementos da pauta aparecían parcialmente desordenados.
 
 Ao empregar fotografías, o comportamento empeorou. Mesmo con iluminación normal producíronse perdas importantes na táboa de doses; por exemplo, nunha das capturas de F10 recoñeceuse correctamente boa parte do texto xeral e a dose semanal, pero da pauta diaria practicamente só se conservaron os encabezados \textit{VIERNES} e \textit{DOMINGO}. Nas fotografías con menor iluminación e nas tomadas desde unha maior distancia a degradación foi aínda maior, chegando a obterse saídas nas que gran parte do texto e da estrutura do documento resultaban inintelixibles.
 
@@ -567,12 +566,12 @@ En conxunto, o adestramento específico permitiu mellorar o recoñecemento de de
 
 \subsection{Resultados de Azure AI Document Intelligence}
 
-A avaliación de Azure AI Document Intelligence realizouse comparando os dous modelos personalizados adestrados, \textit{Template} e \textit{Neural}. Primeiro analizáronse as métricas proporcionadas por Azure Document Intelligence Studio ao finalizar o adestramento e, posteriormente, avaliáronse ambos modelos sobre as follas reservadas para as probas.
+A avaliación de Azure AI Document Intelligence realizouse comparando os dous modelos personalizados adestrados, \textit{Template} e \textit{Neural}. Primeiro analizáronse as métricas proporcionadas ao finalizar o adestramento e, posteriormente, avaliáronse ambos modelos sobre as follas reservadas para as probas.
 
-No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template}, obtéñense valores elevados na maior parte dos campos: 99,50\,\% para \textit{fecha visita}, \textit{inr}, \textit{farmaco oral} e
-\textit{prox visit}, 98,80\,\% para \textit{DOSE} e 94,70\,\% para \textit{RUV}. Os valores máis baixos corresponden a \textit{dosis semanal} e \textit{centro visita}, cun 87,50\,\%, e a \textit{turno}, cun 62,50\,\%. . Non obstante, estes campos teñen unha relevancia secundaria dentro da aplicación, xa que non afectan ao procesamento principal. En consecuencia, aínda que estes resultados son inferiores aos do resto dos campos, non representan un impacto significativo sobre o rendemento global do sistema.
+No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template}, Azure proporciona unha estimación da precisión para cada un dos campos definidos.Os valores foron elevados na maior parte dos campos: 99,50\,\% para \textit{fecha visita}, \textit{inr}, \textit{farmaco oral} e \textit{prox visit}, 98,80\,\% para \textit{DOSE} e 94,70\,\% para \textit{RUV}. Os valores máis baixos corresponden a \textit{dosis semanal} e \textit{centro visita}, cun 87,50\,\%, e a \textit{turno}, cun 62,50\,\%. . Non obstante, estes campos teñen unha relevancia secundaria dentro da aplicación, xa que non afectan ao procesamento principal. En consecuencia, aínda que estes resultados son inferiores aos do resto dos campos, non representan un impacto significativo sobre o rendemento global do sistema.
 
-No modelo \textit{Neural}, Azure Document Intelligence non mostra valores de precisión por campo durante o adestramento. A diferenza do modelo \textit{Template}, no que estas métricas se calculan a partir da comparación entre os campos etiquetados e os valores extraídos, o modelo \textit{Neural} non proporciona esta estimación na fase de adestramento. Por este motivo, os campos aparecen sen valor na columna de precisión do Studio, sen que isto implique un erro no modelo.
+%Bibliografía de azure  e poñer unha nota ou algo
+No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuacións de precisión por campo durante o adestramento, polo que estes valores aparecen sen informar no Studio. Isto responde ao propio funcionamento deste tipo de modelo e non indica un erro no proceso de adestramento.
 
 \begin{figure}[htbp]
     \centering
@@ -586,7 +585,9 @@ No modelo \textit{Neural}, Azure Document Intelligence non mostra valores de pre
 
 Nas probas sobre documentos non vistos, ambos modelos conseguiron recuperar correctamente numerosos campos individuais, como o INR, fármaco oral ou a data da visita. A principal diferenza apareceu na extracción da pauta diaria. O modelo \textit{Template} conservou de forma moito máis estable a agrupación dos días e das doses dentro das filas da táboa, mentres que o modelo \textit{Neural} fragmentou con frecuencia estes elementos en rexistros separados.
 
-Un exemplo desta ...... pode observarse na folla F10 con iluminación normal. Como se mostra na Figura~\ref{fig:azure-comparacion-f10n}, o modelo \textit{Template} mantén nun mesmo rexistro os valores correspondentes aos sete días da semana. No modelo \textit{Neural}, pola contra, parte das datas e das doses son separadas en rexistros diferentes. Por exemplo, \textit{14 OCT} aparece separado da súa dose \textit{1/4}, dificultando a reconstrución directa da relación entre ambos elementos.
+A plataforma de Azure devolve a información extraída nun documento con formato JSON para que poida ser consumido. O problema subxacente desta mala lectura visual é que o JSON resultante herda todo este caos. Ao non seguir un patrón predicible na súa resposta (nalgúns casos o JSON devolve a data e a dose xuntas, noutros devólveas separadas en distintas filas do obxecto …), resulta practicamente imposible deseñar unha lóxica de extracción que sexa capaz de recoller a información correcta para o día adecuado de forma robusta e automática
+
+Un exemplo representativo desta diferenza pode observarse na folla F10 con iluminación normal. Como se mostra na Figura~\ref{fig:azure-comparacion-f10n}, o modelo \textit{Template} mantén nun mesmo rexistro os valores correspondentes aos sete días da semana. No modelo \textit{Neural}, pola contra, parte das datas e das doses son separadas en rexistros diferentes. Por exemplo, \textit{14 OCT} aparece separado da súa dose \textit{1/4}, dificultando a reconstrución directa da relación entre ambos elementos.
 
 % Primeiro bloque (Páxina 1)
 \begin{figure}[htbp]
@@ -637,10 +638,13 @@ Un exemplo desta ...... pode observarse na folla F10 con iluminación normal. Co
     \label{fig:azure-comparacion-f10n} % Esta é a etiqueta xeral que debes usar para referenciala no texto
 \end{figure}
 
-O modelo \textit{Template} non estivo exento de erros. Por exemplo, na folla F09 o campo \textit{turno} foi asociado incorrectamente co valor \textit{C.S. MONDOÑEDO}, mentres que o modelo \textit{Neural} recuperou correctamente \textit{Mañanas}. Isto tamén concorda co 62,50\,\% mostrado polo Studio para "turno" pero como comentábamos antes estes campos non supoñen un 
+O modelo \textit{Template} non estivo exento de erros. Por exemplo, na folla F09 o campo \textit{turno} foi asociado incorrectamente co valor \textit{C.S. MONDOÑEDO}, mentres que o modelo \textit{Neural} recuperou correctamente \textit{Mañanas}.  Este resultado é coherente coa menor precisión obtida por este campo durante o adestramento do modelo \textit{Template}.
 
 
-Podemos observar que nas condicións con menos luz a casilla de contro resultalle algo complicada de extraer correctamente,a lgunhas veces non extrae a data por exemplo, a entrada \textit{CONTROL 05 ABR} quedou reducida a \textit{CONTROL}. Isto non resulta un problema para a aplicaciópn xa que xustoi debaixo da táboa temos un campo coa data da próxima visita que conta cun \,\% polo que a data se pode obter a aprtir del.
+Nas condicións con menor iluminación, a cela de control resultou máis difícil de extraer correctamente debido ao sombreado escuro da propia cela, sobre o que se representan caracteres tamén escuros. Por exemplo, a entrada \textit{CONTROL 05 ABR} foi devolta unicamente como \textit{CONTROL}, perdéndose a data asociada.Esta perda non supón unha limitación práctica para
+a aplicación, xa que a data do seguinte control pode obterse tamén a partir do campo \textit{prox visit}. Este campo presentou unha precisión do 99,50\,\% no modelo \textit{Template} e foi extraído correctamente en todas as probas realizadas.
 
-% Unha conslusión breve sen adiantar moito antes da táboa de resultados 
+En conxunto, ambos modelos permitiron recuperar unha parte importante da información das follas e mostraron un bo comportamento nos campos individuais. As principais diferenzas apareceron na estrutura da pauta diaria, onde o modelo \textit{Template} conservou de maneira máis consistente a asociación entre cada data e a súa dose. Aínda que se detectaron erros puntuais,
+especialmente nas condicións de captura menos favorables, os resultados obtidos favoreceron este modelo para o procesamento estruturado das follas.
+
 

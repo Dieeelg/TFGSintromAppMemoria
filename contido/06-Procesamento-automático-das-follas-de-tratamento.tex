@@ -111,6 +111,14 @@ As fotografías inclinadas adicionais empregáronse especificamente para avaliar
 
 Nesta sección descríbense as diferentes aproximacións exploradas. O obxectivo é explicar o procedemento seguido con cada unha delas e a preparación dos datos necesaria.
 
+\subsection{Preprocesamento das imaxes}
+
+Debido a que as imaxes empregadas pola aplicación son fotografías realizadas co móbil, estas poden presentar certa inclinación ou deformación pola perspectiva. Para reducir este problema incorporouse unha etapa previa de preprocesamento mediante OpenCV, aplicada antes de enviar a imaxe ao servizo de extracción.
+
+O procedemento intenta localizar os límites da folla e, cando é posible identificar de maneira fiable a súa xeometría, aplica unha transformación de perspectiva para obter unha vista máis próxima a unha captura frontal. Nos casos nos que non se pode determinar o contorno completo, emprégase como alternativa a orientación das liñas da imaxe para estimar e corrixir a súa
+inclinación.
+
+A corrección deseñouse de maneira conservadora, só se modifica a imaxe cando a detección presenta unha confianza suficiente. Se a fotografía xa está correctamente aliñada ou non é posible determinar unha transformación fiable, mantense a imaxe orixinal sen cambios.
 
 % ------------------------------------------------------------
 % ML KIT
@@ -647,4 +655,42 @@ a aplicación, xa que a data do seguinte control pode obterse tamén a partir do
 En conxunto, ambos modelos permitiron recuperar unha parte importante da información das follas e mostraron un bo comportamento nos campos individuais. As principais diferenzas apareceron na estrutura da pauta diaria, onde o modelo \textit{Template} conservou de maneira máis consistente a asociación entre cada data e a súa dose. Aínda que se detectaron erros puntuais,
 especialmente nas condicións de captura menos favorables, os resultados obtidos favoreceron este modelo para o procesamento estruturado das follas.
 
+\subsection{Resultados do preprocesamento}
 
+Para comprobar o funcionamento desta etapa realizáronse varias probas con fotografías das follas tomadas con diferentes graos de inclinación, perspectiva e contraste co fondo. Tamén se comprobou o comportamento ante imaxes xa aliñadas, co obxectivo de evitar aplicar transformacións innecesarias.
+
+Nas fotografías nas que foi posible identificar de maneira fiable a xeometría da folla, o preprocesamento permitiu corrixir a súa orientación e obter unha representación máis próxima a unha captura frontal. A Figura~\ref{fig:opencv-preprocesamento} mostra un exemplo deste proceso.
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/T1.jpg}
+        \caption{Fotografía orixinal.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/RESULTADO-T1.jpg}
+        \caption{Resultado do preprocesamento.}
+    \end{subfigure}
+
+    \caption{Exemplo da corrección da orientación e perspectiva dunha folla
+    mediante OpenCV.}
+    \label{fig:opencv-preprocesamento}
+\end{figure}
+
+\section{Conclusións}
+
+As probas realizadas permitiron comprobar que o principal reto non consiste unicamente en recoñecer o texto presente nas follas, senón en conservar de forma fiable a relación entre os diferentes elementos da pauta de tratamento, especialmente entre cada data e a dose correspondente.
+
+Google ML Kit conseguiu recuperar unha parte importante do texto, pero a variabilidade da súa saída e os erros observados impediron establecer unha estrutura suficientemente estable para reconstruír a pauta. Tesseract presentou limitacións similares, o adestramento dun modelo específico mellorou o recoñecemento de determinados elementos, pero continuaron aparecendo erros
+nas datas, nas doses e na organización da táboa, que aumentaron nas fotografías realizadas en condicións menos favorables.
+
+O enfoque baseado en YOLO mostrou que a detección das representacións gráficas das pastillas pode realizarse con bos resultados, polo que resulta interesante como ferramenta auxiliar. Porén, esta información por si soa non permite reconstruír a pauta completa, xa que existen tamén entradas textuais, como \textit{NO TOMAR} ou \textit{CONTROL}, e continúa sendo necesario
+determinar a data e a dose asociadas a cada cela.
+
+Finalmente, a comparación dos modelos personalizados de Azure AI Document Intelligence mostrou un comportamento máis estable da arquitectura \textit{Template}, especialmente na extracción da táboa de doses. A súa capacidade para manter agrupadas a data e a dose facilita o posterior procesamento da resposta e permite evitar gran parte da lóxica adicional que sería necesaria co resto das alternativas avaliadas. Por este motivo, seleccionouse este modelo como base da extracción automática empregada na aplicación.
+
+Como complemento, incorporouse un preprocesamento mediante OpenCV para corrixir determinadas desviacións de perspectiva e rotación nas fotografías antes da súa análise. Deste modo, a solución final combina a preparación da imaxe coa extracción estruturada mediante o modelo \textit{Template} de Azure AI Document Intelligence.

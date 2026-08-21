@@ -1,0 +1,153 @@
+\chapter{Deseño}
+\label{chap:deseño}
+
+Neste capítulo descríbese o deseño da solución desenvolvida, presentando a arquitectura do sistema, o modelo de datos e a persistencia, así como o deseño da navegación e da interface da aplicación. Os detalles adicionais necesarios para complementar este capítulo recóllense no Apéndice~\ref{app:deseno-detallado} 
+
+\section{Arquitectura da solución}
+
+\subsection{Visión xeral do sistema}
+
+A solución segue unha \textbf{arquitectura cliente-servidor} formada por unha aplicación móbil e unha API REST. O cliente encárgase da interacción coa persoa usuaria, da persistencia local, do seguimento das tomas e das notificacións. A API centraliza o procesamento das follas de tratamento, a consulta de información dos centros sanitarios e o reenvío das mensaxes empregadas na sincronización entre dispositivos.
+
+A información clínica necesaria para o funcionamento da aplicación almacénase nos dispositivos, polo que a API non mantén unha base de datos central coa pauta ou o historial das persoas usuarias.
+
+\subsection{Arquitectura do cliente móbil}
+
+O cliente organízase seguindo o patrón \textit{Model-View-ViewModel} (MVVM), dividindo a súa estrutura nos seguintes compoñentes:
+
+\begin{itemize}
+    \item As \textbf{vistas}: conteñen as pantallas, os compoñentes visuais e a navegación.
+    \item Os \textbf{modelos de vista}: manteñen o estado e coordinan as operacións.
+    \item Os \textbf{modelos}: representan a información do dominio.
+\end{itemize}
+
+A comunicación entre as vistas e os modelos de vista realízase mediante \textit{Provider} e \textit{ChangeNotifier}. O acceso á API, á base de datos local, ao almacenamento seguro, ás notificacións e á sincronización encapsúlase mediante servizos. Desta forma, a interface non necesita coñecer os detalles da persistencia ou da comunicación externa.
+
+\subsection{Arquitectura da API}
+
+A API presenta unha arquitectura sen estado (\textit{stateless}) e organízase en varios módulos:
+\begin{itemize}
+\item Os \textbf{\textit{routers}}: encárganse de recibir as peticións HTTP.
+\item A \textbf{lóxica interna}: realiza o preprocesamento, o procesamento, as transformacións e as validacións.
+\item Os \textbf{esquemas de datos}: definen os contratos de entrada e saída.
+\item As \textbf{dependencias}: centralizan o acceso aos servizos externos.
+\end{itemize}
+
+A Figura~\ref{fig:arquitectura-mvvm-api} mostra conxuntamente a organización
+do cliente e da API, así como a comunicación entre ambos.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.92\textwidth]{imaxes/07-Deseño/02_cliente_mvvm_api.drawio(1).png}
+    \caption{Arquitectura do cliente móbil e da API.}
+    \label{fig:arquitectura-mvvm-api}
+\end{figure}
+
+\subsection{Comunicación e sincronización entre dispositivos}
+
+A vinculación entre paciente e supervisor realízase mediante un código QR xerado no dispositivo do paciente. Este código contén a información necesaria para identificar o dispositivo, establecer a vinculación e iniciar o intercambio seguro de mensaxes.
+
+Unha vez completada a vinculación, ambos dispositivos conservan a información necesaria para comunicarse entre si. Os datos intercambiados cífranse no dispositivo de orixe mediante AES-GCM e envíanse a través da API e Firebase Cloud Messaging. A API actúa unicamente como intermediaria no transporte das mensaxes, polo que non necesita acceder ao contido clínico enviado. O dispositivo destinatario recibe a mensaxe, descífraa e actualiza a información local correspondente.
+
+As claves e os datos necesarios para manter a vinculación gárdanse no almacenamento seguro do dispositivo. O proceso completo de vinculación, cifrado e sincronización descríbese no Apéndice~\ref{app:comunicacion}.
+
+\section{Modelo de datos e persistencia}
+
+\subsection{Modelo de dominio}
+
+A información obtida dunha folla represéntase mediante
+\textit{AnaliseModel}, que agrupa unha cabeceira, a pauta diaria e o
+histórico de visitas. A cabeceira contén os datos xerais do informe; cada
+\textit{DoseDiaModel} representa un día da pauta; e
+\textit{ItemHistoricoModel} representa unha visita anterior.
+
+Para o seguimento posterior emprégase \textit{PautaToma}, que incorpora á
+dose o seu estado e permite distinguir entre unha toma pendente, realizada,
+realizada fóra de hora ou non realizada.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.72\textwidth]{imaxes/07-Deseño/05_modelo_dominio.png}
+    \caption{Modelo de dominio principal da aplicación.}
+    \label{fig:modelo-dominio}
+\end{figure}
+
+\subsection{Persistencia local}
+
+A persistencia principal da aplicación realízase mediante SQLite. A táboa
+\textit{analise\_actual} conserva a información xeral correspondente á última
+folla de tratamento gardada, como os datos da visita e do tratamento actual.
+A táboa \textit{pautas} almacena as doses asociadas a cada día e incorpora
+tamén a información necesaria para realizar o seguimento das tomas, como o seu
+estado. Pola súa parte, \textit{historico\_visitas} mantén os datos das visitas
+anteriores incluídas nas follas procesadas.
+
+No dispositivo do supervisor emprégase ademais a táboa
+\textit{pacientes\_coidador}, destinada a conservar localmente a información
+das persoas vinculadas e os últimos datos recibidos de cada unha delas.
+
+Os datos de configuración da aplicación, a información asociada ás
+vinculacións e as claves empregadas no cifrado entre dispositivos
+almacénanse separadamente mediante almacenamento seguro do sistema operativo.
+O esquema completo da persistencia, xunto cos campos empregados en cada táboa,
+recóllese no Apéndice~\ref{app:persistencia}.
+
+\section{Deseño da navegación e da interface}
+
+\subsection{Navegación entre pantallas}
+
+A navegación da aplicación defínese a partir do tipo de usuario seleccionado
+na configuración inicial. Se se escolle o rol de paciente, móstrase primeiro
+a pantalla de vinculación cun supervisor, que pode completarse mediante un
+código QR ou omitirse. A continuación accédese á configuración adicional e,
+unha vez rematada, á pantalla principal do paciente.
+
+Desde esta pantalla principal pódese acceder ás distintas funcionalidades da
+aplicación mediante a navegación inferior: consulta do progreso, incorporación
+dunha nova folla de tratamento e calendario. Ademais, desde a propia pantalla
+de inicio pódese consultar a pauta actual, confirmar a toma correspondente e
+acceder aos axustes.
+
+No caso do supervisor, a configuración inicial continúa coa pantalla de
+vinculación, desde a que se escanea o código QR xerado polo paciente. Tras
+completar este proceso accédese á pantalla principal do supervisor, onde se
+mostra a lista de pacientes vinculados. Ao seleccionar un deles ábrese a súa
+vista de detalle, desde a que se pode consultar o estado do tratamento, revisar
+a información recibida, modificar a configuración asociada ou incorporar unha
+nova folla de tratamento para ese paciente.
+
+A Figura~\ref{fig:navegacion-pantallas} representa as principais pantallas e
+as transicións existentes entre elas.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]{imaxes/07-Deseño/diagrama fluxo.drawio.png}
+    \caption{Fluxo de navegación das pantallas segundo o tipo de usuario.}
+    \label{fig:navegacion-pantallas}
+\end{figure}
+
+\subsection{Wireframes da interface}
+
+Antes da implementación elaboráronse en Figma distintos wireframes co
+obxectivo de definir a distribución da información e comprobar os principais
+percorridos da aplicación. Estes deseños serviron como referencia inicial para
+a construción das pantallas, aínda que algúns elementos foron modificados
+durante o desenvolvemento.
+
+Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes máis
+representativos, correspondentes á selección do tipo de usuario, á pantalla
+principal do paciente, á incorporación dunha nova folla e á pantalla principal
+do supervisor.
+
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.90\textwidth]{imaxes/07-Deseño/wireframes_principais.png}
+    \caption{Wireframes representativos da interface da aplicación.}
+    \label{fig:wireframes-principais}
+\end{figure}
+
+O conxunto completo de wireframes, incluíndo as pantallas de vinculación,
+revisión da pauta, confirmación das tomas, progreso, calendario e
+configuración, recóllese noApéndice~\ref{app:wireframes}.
+

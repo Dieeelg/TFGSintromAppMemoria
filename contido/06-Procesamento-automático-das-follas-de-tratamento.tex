@@ -111,15 +111,6 @@ As fotografías inclinadas adicionais empregáronse especificamente para avaliar
 
 Nesta sección descríbense as diferentes aproximacións exploradas. O obxectivo é explicar o procedemento seguido con cada unha delas e a preparación dos datos necesaria.
 
-\subsection{Preprocesamento das imaxes}
-
-Debido a que as imaxes empregadas pola aplicación son fotografías realizadas co móbil, estas poden presentar certa inclinación ou deformación pola perspectiva. Para reducir este problema incorporouse unha etapa previa de preprocesamento mediante OpenCV, aplicada antes de enviar a imaxe ao servizo de extracción.
-
-O procedemento intenta localizar os límites da folla e, cando é posible identificar de maneira fiable a súa xeometría, aplica unha transformación de perspectiva para obter unha vista máis próxima a unha captura frontal. Nos casos nos que non se pode determinar o contorno completo, emprégase como alternativa a orientación das liñas da imaxe para estimar e corrixir a súa
-inclinación.
-
-A corrección deseñouse de maneira conservadora, só se modifica a imaxe cando a detección presenta unha confianza suficiente. Se a fotografía xa está correctamente aliñada ou non é posible determinar unha transformación fiable, mantense a imaxe orixinal sen cambios.
-
 % ------------------------------------------------------------
 % ML KIT
 % ------------------------------------------------------------
@@ -451,7 +442,7 @@ Tesseract conseguiu recuperar correctamente unha parte do texto xeral dos docume
 
 A maior dificultade apareceu novamente na táboa de doses diarias. Aínda que nalgúns documentos se recoñeceron correctamente varias entradas, o comportamento foi moi irregular entre as distintas follas. Observáronse perdas ou modificacións dos separadores das fraccións, días incorrectos, caracteres sen relación co contido da táboa e agrupacións que dificultan establecer a correspondencia entre cada data e a súa dose.
 
-Un dos exemplos máis representativos obsérvase na folla F04. Como mostra o Listing~\ref{lst:tesseract-estandar-f04}, a saída conserva algúns elementos recoñecibles, pero introduce numerosos caracteres incorrectos e perde a estrutura necesaria para asociar de forma fiable cada data coa súa dose.
+Un dos exemplos máis representativos obsérvase na folla F01. Como mostra o Listing~\ref{lst:tesseract-estandar-f01}, a saída conserva algúns elementos recoñecibles, pero introduce numerosos caracteres incorrectos e perde a estrutura necesaria para asociar de forma fiable cada data coa súa dose.
 
 \begin{figure}[h!]
     \centering
@@ -468,7 +459,7 @@ Un dos exemplos máis representativos obsérvase na folla F04. Como mostra o Lis
     backgroundcolor=\color{gray!5},
     basicstyle=\ttfamily\scriptsize,
     caption={Fragmento da saída do modelo estándar de Tesseract para unha das follas escaneadas},
-    label={lst:tesseract-estandar-f04},
+    label={lst:tesseract-estandar-f01},
     captionpos=t,
     columns=fullflexible,
     keepspaces=true
@@ -572,6 +563,94 @@ Ao empregar fotografías, o comportamento empeorou. Mesmo con iluminación norma
 
 En conxunto, o adestramento específico permitiu mellorar o recoñecemento de determinados elementos, especialmente das fraccións. Porén, seguiron producíndose erros nas datas, nas doses e na organización da táboa, que se fixeron máis acusados ao empeorar as condicións de captura. Estes resultados impedían garantir unha reconstrución suficientemente fiable da pauta, polo que Tesseract foi descartado como solución principal para a extracción automática.
 
+\subsection{Resultados da aproximación baseada en YOLO}
+
+O detector mostrou un rendemento elevado no conxunto de validación. A curva Precision-Recall alcanzou un \textit{mAP@0.5} de \textbf{0,989} e a curva F1 acadou un valor máximo de \textbf{0,98} cun limiar de confianza de \textbf{0,603}. Na matriz de confusión rexistráronse \textbf{130 deteccións correctas} da clase \textit{pastilla} e \textbf{5 falsos positivos}.
+
+\begin{figure}[htbp]
+    \centering
+    \begin{subfigure}[t]{0.4\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/BoxPR_curve.png}
+        \caption{Curva Precision-Recall.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.5\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/confusion_matrix.png}
+        \caption{Matriz de confusión.}
+    \end{subfigure}
+
+    \caption{Resultados obtidos durante a validación do detector YOLO.}
+    \label{fig:yolo-resultados}
+\end{figure}
+
+
+Para comprobar a capacidade de xeneralización do detector, o modelo final aplicouse sobre as follas F09--F11, que non foran empregadas durante o adestramento nin durante a validación. Para estas probas utilizouse o limiar de confianza de \textbf{0,603} obtido a partir da curva F1.
+
+Nas fotografías tomadas con iluminación normal detectáronse correctamente as \textbf{74 representacións gráficas} presentes nas tres follas. O comportamento mantívose tamén ante cambios nas condicións de captura: con menor iluminación localizáronse \textbf{73 das 74 representacións}, mentres que nas fotografías tomadas a maior distancia se detectaron \textbf{66 das 74}.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.65\textwidth]{imaxes/06-Procesamento automático das follas de tratamento/F10-N.jpg}
+    \caption{Exemplo de detección das representacións gráficas das pastillas
+    nunha fotografía non empregada durante o adestramento.}
+    \label{fig:yolo-f10n}
+\end{figure}
+
+Estes resultados mostran que YOLO permite localizar con elevada fiabilidade as representacións gráficas das pastillas, mesmo ante determinadas variacións de iluminación e distancia.
+
+\subsubsection{Combinación de YOLO e Tesseract}
+
+Unha vez comprobada a capacidade de YOLO para localizar as representacións gráficas das pastillas, realizouse unha proba adicional co obxectivo de determinar se estas deteccións podían empregarse como referencia para recuperar tamén a data e a dose correspondentes.
+
+Para cada detección ampliouse a caixa delimitadora xerada por YOLO e aplicouse sobre o recorte resultante o modelo personalizado de Tesseract \textit{sintromv2}. Probáronse tres tamaños de ampliación, co obxectivo de comprobar se era posible atopar unha rexión que incluíse a información necesaria da cela sen incorporar elementos pertencentes ás celas veciñas.
+
+Os resultados mostraron que o tamaño da rexión condiciona directamente a saída do OCR. Nas ampliacións máis pequenas, o recorte conserva principalmente a representación da pastilla e parte da data, pero pode deixar fóra a dose ou outros elementos necesarios para interpretar a cela. Ao incrementar a rexión é posible incluír unha maior parte da data e da dose, pero comezan a aparecer tamén cabeceiras, valores e información procedente das celas adxacentes.
+
+% EXEMPLOS DOS RESULTADOS:
+% Nos recortes pequenos pode quedar representada a data pero perderse a dose.
+% Nos recortes medios aparecen saídas nas que se mesturan elementos próximos,
+% por exemplo referencias ao día da semana xunto con varias fraccións.
+% Nas ampliacións grandes Tesseract chega a incorporar tamén o título da táboa
+% e información doutras celas.
+% Fonte: resultados.csv da proba YOLO + sintromv2.
+
+Esta situación pode observarse nos recortes da Figura~\ref{fig:yolo-tesseract-recortes}. A caixa proporcionada por YOLO delimita correctamente a representación gráfica, pero esta non coincide cos límites da cela completa. Como consecuencia, non existe unha ampliación fixa que permita garantir que o OCR reciba exclusivamente a data e a dose
+correspondentes á detección.
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/01_pequena.jpg}
+        \caption{Ampliación pequena.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/01_media.jpg}
+        \caption{Ampliación media.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.31\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/01_grande.jpg}
+        \caption{Ampliación grande.}
+    \end{subfigure}
+
+    \caption{Exemplo dos diferentes tamaños de rexión empregados para aplicar
+    Tesseract a partir dunha detección realizada por YOLO.}
+    \label{fig:yolo-tesseract-recortes}
+\end{figure}
+
+A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0},  textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
+
+Por estes motivos, aínda que YOLO mostrou un bo comportamento na localización das representacións das pastillas, a combinación con Tesseract non se considerou suficientemente robusta para reconstruír automaticamente a pauta completa e descartouse como solución principal.
+
+% AZURE DOCUMENT INTELLIGENCE
+
 \subsection{Resultados de Azure AI Document Intelligence}
 
 A avaliación de Azure AI Document Intelligence realizouse comparando os dous modelos personalizados adestrados, \textit{Template} e \textit{Neural}. Primeiro analizáronse as métricas proporcionadas ao finalizar o adestramento e, posteriormente, avaliáronse ambos modelos sobre as follas reservadas para as probas.
@@ -579,7 +658,7 @@ A avaliación de Azure AI Document Intelligence realizouse comparando os dous mo
 No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template}, Azure proporciona unha estimación da precisión para cada un dos campos definidos.Os valores foron elevados na maior parte dos campos: 99,50\,\% para \textit{fecha visita}, \textit{inr}, \textit{farmaco oral} e \textit{prox visit}, 98,80\,\% para \textit{DOSE} e 94,70\,\% para \textit{RUV}. Os valores máis baixos corresponden a \textit{dosis semanal} e \textit{centro visita}, cun 87,50\,\%, e a \textit{turno}, cun 62,50\,\%. . Non obstante, estes campos teñen unha relevancia secundaria dentro da aplicación, xa que non afectan ao procesamento principal. En consecuencia, aínda que estes resultados son inferiores aos do resto dos campos, non representan un impacto significativo sobre o rendemento global do sistema.
 
 %Bibliografía de azure  e poñer unha nota ou algo
-No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuacións de precisión por campo durante o adestramento, polo que estes valores aparecen sen informar no Studio. Isto responde ao propio funcionamento deste tipo de modelo e non indica un erro no proceso de adestramento.
+No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuacións de precisión por campo durante o adestramento \cite{microsoft-document-intelligence-accuracy} , polo que estes valores aparecen sen informar no Studio. Isto responde ao propio funcionamento deste tipo de modelo e non indica un erro no proceso de adestramento.
 
 \begin{figure}[htbp]
     \centering
@@ -657,22 +736,22 @@ especialmente nas condicións de captura menos favorables, os resultados obtidos
 
 \subsection{Resultados do preprocesamento}
 
-Para comprobar o funcionamento desta etapa realizáronse varias probas con fotografías das follas tomadas con diferentes graos de inclinación, perspectiva e contraste co fondo. Tamén se comprobou o comportamento ante imaxes xa aliñadas, co obxectivo de evitar aplicar transformacións innecesarias.
-
-Nas fotografías nas que foi posible identificar de maneira fiable a xeometría da folla, o preprocesamento permitiu corrixir a súa orientación e obter unha representación máis próxima a unha captura frontal. A Figura~\ref{fig:opencv-preprocesamento} mostra un exemplo deste proceso.
+Para avaliar esta etapa empregáronse as \textbf{7 fotografías inclinadas} descritas anteriormente, con diferentes graos de inclinación, perspectiva e contraste co fondo. O preprocesamento mediante OpenCV permitiu corrixir correctamente as sete imaxes, mellorando a orientación do documento e, cando foi posible delimitar a folla, reducindo tamén a presenza do fondo exterior. A Figura~\ref{fig:opencv-preprocesamento} mostra un exemplo do resultado obtido.
 
 \begin{figure}[htbp]
     \centering
 
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/T1.jpg}
+        \includegraphics[width=\linewidth]
+        {imaxes/06-Procesamento automático das follas de tratamento/T1.jpg}
         \caption{Fotografía orixinal.}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.48\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/RESULTADO-T1.jpg}
+        \includegraphics[width=\linewidth]
+        {imaxes/06-Procesamento automático das follas de tratamento/RESULTADO-T1.jpg}
         \caption{Resultado do preprocesamento.}
     \end{subfigure}
 
@@ -688,8 +767,10 @@ As probas realizadas permitiron comprobar que o principal reto non consiste unic
 Google ML Kit conseguiu recuperar unha parte importante do texto, pero a variabilidade da súa saída e os erros observados impediron establecer unha estrutura suficientemente estable para reconstruír a pauta. Tesseract presentou limitacións similares, o adestramento dun modelo específico mellorou o recoñecemento de determinados elementos, pero continuaron aparecendo erros
 nas datas, nas doses e na organización da táboa, que aumentaron nas fotografías realizadas en condicións menos favorables.
 
-O enfoque baseado en YOLO mostrou que a detección das representacións gráficas das pastillas pode realizarse con bos resultados, polo que resulta interesante como ferramenta auxiliar. Porén, esta información por si soa non permite reconstruír a pauta completa, xa que existen tamén entradas textuais, como \textit{NO TOMAR} ou \textit{CONTROL}, e continúa sendo necesario
-determinar a data e a dose asociadas a cada cela.
+Pola súa parte, YOLO mostrou unha capacidade elevada para localizar as representacións gráficas das pastillas, incluídas fotografías tomadas baixo diferentes condicións de iluminación e distancia. Non obstante, a detección destes elementos constitúe só unha parte do problema, xa que é necesario recuperar tamén a data e a dose correspondente e interpretar as celas nas que
+non existe unha representación gráfica.
+
+A combinación de YOLO co modelo personalizado de Tesseract tampouco resolveu esta limitación. A posición das representacións gráficas permitiu aproximar a rexión da cela, pero os diferentes tamaños e disposicións das entradas impediron definir un recorte fixo que recuperase de maneira estable e exclusiva a data e a dose correspondentes. Por este motivo, esta aproximación foi igualmente descartada como solución principal.
 
 Finalmente, a comparación dos modelos personalizados de Azure AI Document Intelligence mostrou un comportamento máis estable da arquitectura \textit{Template}, especialmente na extracción da táboa de doses. A súa capacidade para manter agrupadas a data e a dose facilita o posterior procesamento da resposta e permite evitar gran parte da lóxica adicional que sería necesaria co resto das alternativas avaliadas. Por este motivo, seleccionouse este modelo como base da extracción automática empregada na aplicación.
 

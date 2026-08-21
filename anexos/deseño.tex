@@ -1,0 +1,215 @@
+\chapter{Deseño técnico detallado da aplicación}
+\label{app:deseno-detallado}
+
+Este apéndice complementa o Capítulo~\ref{chap:deseño} coa información
+técnica necesaria para reproducir a estrutura da aplicación. Inclúense a
+organización interna do código, o mecanismo de comunicación entre
+dispositivos, o esquema completo de persistencia e os wireframes elaborados
+durante o deseño.
+
+\section{Estrutura interna da solución}
+\label{app:estrutura-interna}
+
+O código do cliente móbil distribúese en directorios segundo a
+responsabilidade de cada elemento:
+
+\begin{verbatim}
+client/lib/
+|-- componentes/
+|-- modelos/
+|-- modelos_vista/
+|   `-- autenticacion/
+|-- nucleo/
+|-- recursos/
+|-- servizos/
+|-- views/
+|   `-- camara/
+`-- main.dart
+\end{verbatim}
+
+Os directorios \textit{views}, \textit{modelos\_vista} e \textit{modelos}
+correspóndense respectivamente coas capas View, ViewModel e Model do patrón
+MVVM. O directorio \textit{servizos} contén as operacións de acceso á API,
+persistencia, notificacións, cifrado e sincronización, mentres que
+\textit{componentes} agrupa elementos visuais reutilizables.
+
+A API presenta a seguinte organización:
+
+\begin{verbatim}
+server/app/
+|-- data/
+|-- internal/
+|-- routers/
+|-- schemas/
+|-- dependencies.py
+`-- main.py
+\end{verbatim}
+
+\textit{main.py} crea a aplicación FastAPI e rexistra os routers.
+\textit{routers} define os endpoints, \textit{internal} contén a lóxica de
+procesamento, \textit{schemas} define os modelos de intercambio e
+\textit{dependencies.py} inicializa o acceso aos servizos externos.
+
+\section{Comunicación entre dispositivos}
+\label{app:comunicacion}
+
+A vinculación inicial permite establecer unha relación entre un paciente e
+un supervisor. O dispositivo do paciente xera un código QR que contén un
+identificador da vinculación, o identificador do paciente, o token de Firebase
+Cloud Messaging e unha clave temporal.
+
+O supervisor le este código e completa o proceso de vinculación. A partir
+dese momento mantense unha clave asociada á relación entre ambos dispositivos.
+As claves gárdanse mediante \textit{Secure Storage}.
+
+Para as comunicacións posteriores emprégase AES-GCM con claves de 256 bits.
+Cada mensaxe cifrada contén, como mínimo, a versión do protocolo, o
+identificador da vinculación, o \textit{nonce}, os datos cifrados e o código
+de autenticación da mensaxe. A API recibe este sobre cifrado e envíao ao
+dispositivo destinatario mediante Firebase Cloud Messaging.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]
+    {imaxes/07-Deseño/04_comunicacion_sincronizacion.png}
+    \caption{Detalle da vinculación e sincronización entre dispositivos.}
+    \label{fig:app-comunicacion}
+\end{figure}
+
+Os datos dunha vinculación poden representarse mediante os seguintes
+elementos:
+
+\begin{center}
+\begin{tabular}{|p{0.27\textwidth}|p{0.60\textwidth}|}
+\hline
+\textbf{Campo} & \textbf{Descrición} \\ \hline
+\textit{id} & Identificador único da vinculación. \\ \hline
+\textit{uidRemoto} & Identificador Firebase do outro dispositivo. \\ \hline
+\textit{tokenRemoto} & Token empregado para o envío mediante FCM. \\ \hline
+\textit{claveBase64} & Clave AES-GCM compartida codificada en Base64. \\ \hline
+\textit{rolRemoto} & Tipo de usuario situado no outro extremo da vinculación. \\ \hline
+\end{tabular}
+\end{center}
+
+
+\section{Persistencia local detallada}
+\label{app:persistencia}
+
+A base de datos SQLite emprega catro táboas principais. A
+Figura~\ref{fig:app-persistencia} mostra a súa organización.
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\textwidth]
+    {imaxes/07-Deseño/06_persistencia_local.png}
+    \caption{Esquema completo da persistencia local.}
+    \label{fig:app-persistencia}
+\end{figure}
+
+\begin{longtable}{|p{0.23\textwidth}|p{0.67\textwidth}|}
+\hline
+\textbf{Táboa} & \textbf{Campos} \\ \hline
+\endfirsthead
+
+\hline
+\textbf{Táboa} & \textbf{Campos} \\ \hline
+\endhead
+
+\textit{analise\_actual} &
+\textit{id}, \textit{dataInforme}, \textit{proximaVisita},
+\textit{centro}, \textit{farmaco}, \textit{doseSemanal},
+\textit{documentoId}, \textit{inr}. \\ \hline
+
+\textit{pautas} &
+\textit{id}, \textit{data}, \textit{dia}, \textit{dose},
+\textit{accion}, \textit{eControl}, \textit{diaSemanaTexto},
+\textit{estado}, \textit{horaConfirmacion},
+\textit{desviacionMinutos}. \\ \hline
+
+\textit{historico\_visitas} &
+\textit{id}, \textit{data}, \textit{inr}, \textit{farmaco},
+\textit{dose}, \textit{apttInyectable},
+\textit{doseInyectable}, \textit{proximaVisita},
+\textit{comentarios}. \\ \hline
+
+\textit{pacientes\_coidador} &
+\textit{uid}, \textit{token}, \textit{nome}, \textit{payload},
+\textit{actualizadoEn}. \\ \hline
+
+\end{longtable}
+
+As táboas \textit{analise\_actual}, \textit{pautas} e
+\textit{historico\_visitas} representan partes dunha mesma análise, pero a
+relación entre elas mantense na lóxica da aplicación e non mediante claves
+foráneas.
+
+Determinados datos almacénanse fóra de SQLite mediante
+\textit{Flutter Secure Storage}. Entre os principais valores gárdanse:
+
+\begin{center}
+\begin{tabular}{|p{0.39\textwidth}|p{0.51\textwidth}|}
+\hline
+\textbf{Clave} & \textbf{Finalidade} \\ \hline
+\textit{configuracion\_finalizada} &
+Indica que se completou a configuración inicial. \\ \hline
+
+\textit{rol\_usuario} &
+Identifica se a instalación corresponde a un paciente ou supervisor. \\ \hline
+
+\textit{nome\_usuario} &
+Nome opcional empregado na interface e nas notificacións. \\ \hline
+
+\textit{hora\_toma} &
+Hora habitual configurada para a toma. \\ \hline
+
+\textit{modo\_sinxelo} &
+Configuración do modo simplificado da interface. \\ \hline
+
+\textit{p2p\_vinculacions\_seguras} &
+Información das vinculacións activas. \\ \hline
+
+\textit{p2p\_vinculacion\_pendente\_actual} &
+Identificador dunha vinculación que aínda non foi completada. \\ \hline
+
+\textit{p2p\_clave\_pendente\_<id>} &
+Clave temporal asociada ao proceso de vinculación indicado. \\ \hline
+\end{tabular}
+\end{center}
+
+
+\section{Diagramas adicionais}
+\label{app:diagramas-adicionais}
+
+Nesta sección poden incluírse os diagramas empregados para representar con
+maior detalle os fluxos secundarios da aplicación. En particular, resulta
+útil conservar:
+
+\begin{itemize}
+    \item a secuencia de vinculación entre paciente e supervisor;
+    \item a secuencia de sincronización segura;
+    \item o diagrama de estados dunha toma diaria;
+    \item os fluxos de desvinculación e actualización da información;
+    \item outros diagramas de secuencia empregados durante o deseño.
+\end{itemize}
+
+Estes diagramas complementan os fluxos principais presentados no
+Capítulo~\ref{chap:deseño}, pero non son necesarios para comprender a
+arquitectura xeral da solución.
+
+
+\section{Wireframes completos}
+\label{app:wireframes}
+
+Nesta sección recóllese o conxunto completo de wireframes realizados en Figma.
+Estes deseños mostran as distintas propostas de interface empregadas como
+referencia antes e durante a implementación.
+
+% Require \usepackage{pdfpages}
+% Coloca Pantallas_mock_figma.pdf nunha ruta accesible desde o proxecto.
+\includepdf[
+    pages=-,
+    nup=2x2,
+    delta=4mm 4mm,
+    frame=false,
+    pagecommand={}
+]{imaxes/07-Deseño/Pantallas_mock_figma.pdf}

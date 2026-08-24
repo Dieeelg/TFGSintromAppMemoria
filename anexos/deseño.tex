@@ -3,7 +3,7 @@
 
 \section{Organización interna dos compoñentes}
 
-Como complemento á arquitectura xeral, a Figura~\ref{fig:anexo-componentes} recolle a organización interna da aplicación, detallando a distribución dos paquetes do cliente móbil e dos módulos da API.
+Como complemento á arquitectura xeral, a Figura~\ref{fig:anexo-componentes} recolle a organización interna da aplicación, detallando a distribución dos paquetes do cliente móbil e dos módulos da \gls{api}.
 
 \begin{figure}[htbp]
     \centering
@@ -34,7 +34,7 @@ No capítulo principal represéntanse os fluxos de vinculación entre dispositiv
 
 \subsection{Incorporación dunha nova pauta desde o supervisor}
 
-A aplicación permite que a persoa supervisora dixitalice unha nova folla de tratamento en nome dun paciente vinculado. O proceso iníciase coa selección da persoa supervisada na pantalla principal, seguida da captura do documento e do seu envío á API para realizar a extracción dos datos.
+A aplicación permite que a persoa supervisora dixitalice unha nova folla de tratamento en nome dun paciente vinculado. O proceso iníciase coa selección da persoa supervisada na pantalla principal, seguida da captura do documento e do seu envío á \gls{api} para realizar a extracción dos datos.
 
 Tras recibir a resposta do servidor, preséntase a interface de revisión para que o supervisor poida comprobar e corrixir a información obtida antes de confirmar a nova pauta. A principal diferenza respecto ao fluxo realizado directamente polo paciente prodúcese nesta confirmación final: a pauta resultante non se garda como tratamento activo no dispositivo do supervisor. No seu lugar, a actualización transmítese ao dispositivo do paciente a través da canle cifrada establecida durante a vinculación.
 
@@ -53,7 +53,7 @@ A Figura~\ref{fig:anexo-pauta-supervisor} mostra as interaccións principais des
 
 O procesamento dunha folla de tratamento non conduce necesariamente á obtención dunha pauta válida. Se durante a análise non é posible recuperar a información necesaria, o resultado presenta unha fiabilidade insuficiente, ou se detectan datos incompletos e incoherentes, o proceso interrómpese e non se avanza cara á fase de revisión.
 
-Nestes casos, a aplicación informa á persoa usuaria de que o documento non puido procesarse de maneira satisfactoria e ofrécelle a posibilidade de realizar unha nova captura ou seleccionar un ficheiro distinto. Só cando a extracción supera as comprobacións internas da API se presentan os datos na interface para a súa revisión manual.
+Nestes casos, a aplicación informa á persoa usuaria de que o documento non puido procesarse de maneira satisfactoria e ofrécelle a posibilidade de realizar unha nova captura ou seleccionar un ficheiro distinto. Só cando a extracción supera as comprobacións internas da \gls{api} se presentan os datos na interface para a súa revisión manual.
 
 Este deseño preventivo evita que un resultado considerado insuficiente ou dubidoso poida chegar a confirmarse e empregarse no seguimento diario do tratamento. A Figura~\ref{fig:anexo-extraccion-non-valida} representa este fluxo alternativo.
 

@@ -15,7 +15,7 @@ Unha das principais complexidades deste tratamento é que a dose non é fixa. Co
 
 Un fallo na dosificación pode ter consecuencias moi negativas na saúde do paciente. O Sintrom é un fármaco cunha marxe terapéutica moi estreita, o que implica que un pequeno cambio na dose pode provocar hemorraxias graves ou trombos. Un erro de interpretación da táboa de doses (como por exemplo tomar a dose doutro día en lugar da do día que toca), ou o esquecemento da toma, poden poñer en risco a saúde do paciente. 
 
-Outro inconveniente do formato físico é a dificultade para consultar a evolución do tratamento ao longo do tempo. O paciente adoita tirar os informes vellos, perdendo a información de como evoluciona o INR ou as súas doses nos últimos meses. A dixitalización permite manter un histórico que facilita ao paciente unha perspectiva para ver os seus avances.
+Outro inconveniente do formato físico é a dificultade para consultar a evolución do tratamento ao longo do tempo. O paciente adoita tirar os informes vellos, perdendo a información de como evoluciona o \gls{inr} ou as súas doses nos últimos meses. A dixitalización permite manter un histórico que facilita ao paciente unha perspectiva para ver os seus avances.
 
 Ademais, o seguimento manual carece de mecanismos de notificación ou confirmación das tomas, o que limita a capacidade de supervisión por parte dos coidadores. Isto xera incerteza e preocupación, xa que non poden saber se o paciente tomou a dose sen falar directamente con el, quen á súa vez pode non lebrar se a tomou ou non. Como consecuencia, aumenta o risco de non actuar a tempo ante un esquecemento.
 
@@ -45,7 +45,7 @@ O obxectivo principal deste proxecto é desenvolver unha aplicación móbil mult
     \item\textbf{ Eliminar a dependencia do papel:} Ao dixitalizar o informe, a información estará sempre dispoñible no móbil, evitando desprazamentos ao centro médico no caso de perda ou estragamento do documento orixinal.
     \item \textbf{Automatizar a entrada de datos mediante técnicas de procesado de imaxe:} Substituír a carga manual de información por un sistema que lea a imaxe da folla médica, reducindo os posibles erros ao copiar as doses.
     \item \textbf{Mellorar a seguridade nas tomas:} Reducir o risco de esquecementos mediante recordatorios programados e un sistema de avisos automáticos aos coidadores.
-    \item \textbf{Facilitar o control a pacientes e coidadores: } Proporcionando un seguimento detallado das tomas e ofrecendo un rexistro visual e sinxelo sobre a evolución histórica dos valores de INR e da dose.
+    \item \textbf{Facilitar o control a pacientes e coidadores: } Proporcionando un seguimento detallado das tomas e ofrecendo un rexistro visual e sinxelo sobre a evolución histórica dos valores de \gls{inr} e da dose.
     \item \textbf{Garantir a privacidade dos datos:} Protexer a información médica evitando a súa persistencia nos servidores da aplicación, almacenando de forma segura os datos sensibles no dispositivo e cifrando a nivel de aplicación as mensaxes intercambiadas entre os dispositivos vinculados.
 \end{itemize}
 
@@ -81,7 +81,7 @@ Algunhas das app máis populares desta categoría son, por exemplo, \textit{Medi
 \subsection{Aplicacións especializadas}
 Existen algunhas solucións deseñadas especificamente para este tratamento como por exemplo:
 \begin{itemize}
-    \item \textbf{AnticoagulApp} \cite{AppAnticoagulApp} (Figura \ref{fig:AnticoagulApp}): Esta é unha aplicación lanzada pola \textit{Sociedade Española de Cardioloxía} que permite rexistrar o INR, as doses e ofrece consellos de saúde. Pero seguimos coa mesma barreira mencionada na sección anterior, o rexistro das doses é manual, aínda que moito máis sinxelo que nas apps xenéricas, xa que si permite a correcta xestión das pautas variables. Non ten capacidade de interpretar documentos físicos, obrigando ao paciente a ler e transcribir a folla do médico. \footnote{Durante o período de redacción da memoria deste traballo esta aplicación non está dispoñible xa que se atopa en proceso de actualizacións.}
+    \item \textbf{AnticoagulApp} \cite{AppAnticoagulApp} (Figura \ref{fig:AnticoagulApp}): Esta é unha aplicación lanzada pola \textit{Sociedade Española de Cardioloxía} que permite rexistrar o \gls{inr}, as doses e ofrece consellos de saúde. Pero seguimos coa mesma barreira mencionada na sección anterior, o rexistro das doses é manual, aínda que moito máis sinxelo que nas apps xenéricas, xa que si permite a correcta xestión das pautas variables. Non ten capacidade de interpretar documentos físicos, obrigando ao paciente a ler e transcribir a folla do médico. \footnote{Durante o período de redacción da memoria deste traballo esta aplicación non está dispoñible xa que se atopa en proceso de actualizacións.}
 
         \begin{figure}[h!]
             \centering
@@ -90,7 +90,7 @@ Existen algunhas solucións deseñadas especificamente para este tratamento como
             \label{fig:AnticoagulApp}
             
         \end{figure}
-    \item \textbf{INR Diary} \cite{AppINRDiary} (Figura \ref{fig:AppINRDiary}):  Aínda que permite un rexistro detallado do INR e das doses tomadas, a entrada de datos segue a ser completamente manual. Ademais esta aplicación é de pago, o que supón unha barreira económica engadida que limita a súa accesibilidade para gran parte dos pacientes.
+    \item \textbf{INR Diary} \cite{AppINRDiary} (Figura \ref{fig:AppINRDiary}):  Aínda que permite un rexistro detallado do \gls{inr} e das doses tomadas, a entrada de datos segue a ser completamente manual. Ademais esta aplicación é de pago, o que supón unha barreira económica engadida que limita a súa accesibilidade para gran parte dos pacientes.
     \begin{figure}[h]
         \centering
         \includegraphics[width=0.8\textwidth]{imaxes/Introducion/DiarioINR.png}

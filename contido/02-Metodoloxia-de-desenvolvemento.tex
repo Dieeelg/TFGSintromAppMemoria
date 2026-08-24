@@ -11,7 +11,7 @@ O desenvolvemento incremental consiste en construír o sistema mediante etapas s
 
 O carácter iterativo permite revisar e modificar solucións xa desenvolvidas cando aparecen novos datos ou necesidades. Isto foi especialmente importante neste proxecto, xa que a estrutura das follas de tratamento, os resultados das técnicas de extracción e os requisitos da aplicación móbil fóronse coñecendo con maior precisión durante o desenvolvemento.
 
-En lugar de desenvolver a aplicación completa desde o principio, o traballo dividiuse en varios pasos. Primeiro estudouse se era posible extraer os datos automaticamente dos documentos, despois desenvolveuse unha API capaz de procesar as follas de tratamento e, finalmente, creouse a aplicación móbil que consume esa API e permite utilizar os resultados.
+En lugar de desenvolver a aplicación completa desde o principio, o traballo dividiuse en varios pasos. Primeiro estudouse se era posible extraer os datos automaticamente dos documentos, despois desenvolveuse unha \gls{api} capaz de procesar as follas de tratamento e, finalmente, creouse a aplicación móbil que consume esa \gls{api} e permite utilizar os resultados.
 
 Esta forma de traballo evitou desenvolver a aplicación móbil arredor dunha tecnoloxía de extracción que podía non ofrecer resultados suficientemente fiables. Ademais, permitiu comprobar o funcionamento de cada compoñente antes de realizar a integración completa do sistema.
 
@@ -58,7 +58,7 @@ O movemento seguido polas tarefas entre as distintas columnas represéntase na F
 
 \subsection{Límite de traballo en curso}
 
-Estableceuse un límite de traballo en curso, ou límite WIP (\textit{Work In Progress}), de \textbf{catro tarefas}. O seu obxectivo foi favorecer a finalización das tarefas iniciadas antes de comezar outras novas.
+Estableceuse un límite de \gls{wip} de \textbf{catro tarefas}. O seu obxectivo foi favorecer a finalización das tarefas iniciadas antes de comezar outras novas.
 
 Escolleuse este valor porque permitía manter activas tarefas de distintas áreas do proxecto sen acumular un número excesivo de actividades abertas. No cómputo do límite incluíanse tamén as tarefas pendentes de revisión, validación ou
 desbloqueo, polo que non implicaba que se desenvolvesen catro tarefas simultaneamente.
@@ -140,9 +140,9 @@ A principal diferenza desta adaptación con respecto ao modelo orixinal foi a om
 
 A combinación dun desenvolvemento incremental e iterativo cun taboleiro Kanban resultou axeitada para as características e necesidades do proxecto. Durante as primeiras etapas existía unha elevada incerteza sobre a viabilidade da extracción automática dos datos e sobre a tecnoloxía máis axeitada para realizala. Por este motivo, resultaba difícil establecer desde o inicio unha planificación pechada ou estimar con precisión a duración das tarefas de investigación e experimentación.
 
-O enfoque incremental permitiu avanzar por etapas e reducir progresivamente esta incerteza. Primeiro estudouse a viabilidade da extracción automática, despois seleccionouse unha tecnoloxía e desenvolveuse unha primeira versión funcional da API e, finalmente, construíuse a aplicación móbil. Cada incremento proporcionou un resultado comprobable que serviu como base para continuar co desenvolvemento.
+O enfoque incremental permitiu avanzar por etapas e reducir progresivamente esta incerteza. Primeiro estudouse a viabilidade da extracción automática, despois seleccionouse unha tecnoloxía e desenvolveuse unha primeira versión funcional da \gls{api} e, finalmente, construíuse a aplicación móbil. Cada incremento proporcionou un resultado comprobable que serviu como base para continuar co desenvolvemento.
 
-O carácter iterativo permitiu revisar solucións xa desenvolvidas cando se obtiveron novos resultados. As decisións relacionadas coa extracción dos datos, a organización da API e o funcionamento da aplicación fóronse modificando e refinando a medida que se coñecían mellor a estrutura das follas de tratamento e as necesidades do sistema.
+O carácter iterativo permitiu revisar solucións xa desenvolvidas cando se obtiveron novos resultados. As decisións relacionadas coa extracción dos datos, a organización da \gls{api} e o funcionamento da aplicación fóronse modificando e refinando a medida que se coñecían mellor a estrutura das follas de tratamento e as necesidades do sistema.
 
 Non se aplicou Scrum de maneira estrita porque a organización do traballo en sprints de duración fixa non se considerou a opción máis axeitada para unhas tarefas cunha duración e uns resultados difíciles de prever. En cambio, Kanban permitiu manter un fluxo continuo, modificar as prioridades segundo os avances realizados e incorporar novas tarefas cando se detectaban necesidades ou problemas.
 

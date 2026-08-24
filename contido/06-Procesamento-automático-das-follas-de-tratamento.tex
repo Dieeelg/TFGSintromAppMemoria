@@ -9,7 +9,7 @@ En segundo lugar, existe unha variabilidade importante nas imaxes de entrada. O 
 
 Finalmente, a información procesada é especialmente sensible. Un erro na identificación dunha data ou dunha dose podería provocar que a aplicación mostrase unha pauta incorrecta. Por este motivo, a capacidade de conservar correctamente a relación entre ambos elementos constitúe un dos principais criterios empregados durante a avaliación.
 
-Co obxectivo de determinar unha aproximación adecuada para este problema, estudáronse diferentes técnicas de recoñecemento óptico de caracteres, detección de obxectos e procesamento documental. En concreto, avaliáronse Google ML Kit, Tesseract, unha aproximación baseada na combinación de YOLO cun motor OCR e dous tipos de modelos personalizados de Azure Document Intelligence. Ademais, desenvolveuse unha etapa de preprocesamento mediante OpenCV destinada a corrixir fotografías nas que a folla aparece inclinada ou deformada pola perspectiva.
+Co obxectivo de determinar unha aproximación adecuada para este problema, estudáronse diferentes técnicas de recoñecemento óptico de caracteres, detección de obxectos e procesamento documental. En concreto, avaliáronse Google ML Kit, Tesseract, unha aproximación baseada na combinación de \gls{yolo} cun motor de \gls{ocr} e dous tipos de modelos personalizados de Azure Document Intelligence. Ademais, desenvolveuse unha etapa de preprocesamento mediante OpenCV destinada a corrixir fotografías nas que a folla aparece inclinada ou deformada pola perspectiva.
 
 
 % ============================================================
@@ -78,7 +78,7 @@ A Táboa~\ref{tab:resumo-conxunto-imaxes} resume a composición deste conxunto.
 
 A utilización das imaxes variou segundo as necesidades de cada método. Google ML Kit e o modelo estándar de Tesseract non requiriron ningún proceso de adestramento, polo que se aplicaron directamente sobre os documentos seleccionados para cada proba. O conxunto concreto empregado en cada caso indícase posteriormente xunto cos seus resultados.
 
-Nos métodos que si requiriron adestramento realizouse unha división a nivel de documento. As follas \textbf{F01--F08} destináronse ao adestramento, mentres que as follas \textbf{F09--F11} reserváronse exclusivamente para a avaliación. Esta mesma distribución empregouse no modelo personalizado de Tesseract, no detector baseado en YOLO e nos modelos personalizados de Azure Document Intelligence.
+Nos métodos que si requiriron adestramento realizouse unha división a nivel de documento. As follas \textbf{F01--F08} destináronse ao adestramento, mentres que as follas \textbf{F09--F11} reserváronse exclusivamente para a avaliación. Esta mesma distribución empregouse no modelo personalizado de Tesseract, no detector baseado en \gls{yolo} e nos modelos personalizados de Azure Document Intelligence.
 
 Deste modo, ningún exemplo procedente das follas F09--F11 foi empregado durante o adestramento, permitindo avaliar posteriormente os modelos sobre documentos non vistos previamente.
 
@@ -121,7 +121,7 @@ Para avaliar Google ML Kit, descrito na Sección~\ref{sec:tec-mlkit}, empregouse
 
 Desenvolveuse unha pequena aplicación en Flutter que permitía seleccionar unha imaxe almacenada no dispositivo ou capturar unha fotografía da folla e enviala ao recoñecedor de texto de ML Kit.
 
-Como resultado, a ferramenta devolvía o texto detectado xunto coa súa organización en bloques, liñas e elementos. Esta información gardouse en formato JSON para facilitar a análise posterior da orde na que se devolvían os diferentes elementos do documento.
+Como resultado, a ferramenta devolvía o texto detectado xunto coa súa organización en bloques, liñas e elementos. Esta información gardouse en formato \gls{json} para facilitar a análise posterior da orde na que se devolvían os diferentes elementos do documento.
 
 O proceso seguido pola aplicación represéntase na Figura~\ref{fig:secuencia-mlkit}.
 
@@ -142,7 +142,7 @@ O proceso seguido pola aplicación represéntase na Figura~\ref{fig:secuencia-ml
 
 Para avaliar Tesseract, estudáronse dúas variantes, o modelo estándar para lingua española e un modelo personalizado adaptado ao tipo de documento empregado no proxecto.
 
-A primeira proba realizouse empregando o modelo estándar de Tesseract para lingua española, sen introducir ningún proceso de adestramento adicional. As imaxes procesáronse como documentos completos e analizouse directamente a saída textual xerada polo motor OCR. O obxectivo desta proba foi comprobar se un sistema de recoñecemento de texto convencional era capaz de recuperar suficiente información da folla como para reconstruír posteriormente a súa estrutura.
+A primeira proba realizouse empregando o modelo estándar de Tesseract para lingua española, sen introducir ningún proceso de adestramento adicional. As imaxes procesáronse como documentos completos e analizouse directamente a saída textual xerada polo motor de \gls{ocr}. O obxectivo desta proba foi comprobar se un sistema de recoñecemento de texto convencional era capaz de recuperar suficiente información da folla como para reconstruír posteriormente a súa estrutura.
 
 Co obxectivo de adaptar Tesseract á tipografía, ao vocabulario e ao formato das follas de tratamento, construíuse un conxunto de adestramento específico.
 
@@ -172,13 +172,13 @@ Durante o proceso, \textit{tesstrain} emprega os pares formados pola imaxe e a s
 
 \subsection{Detección de representacións de pastillas mediante YOLO}
 
-A terceira aproximación estudada baseouse no uso de YOLO como detector de obxectos. A diferenza dun sistema OCR, este tipo de modelo non intenta interpretar directamente o texto da imaxe, senón localizar visualmente as rexións correspondentes ás clases que foron definidas durante o adestramento.
+A terceira aproximación estudada baseouse no uso de \gls{yolo} como detector de obxectos. A diferenza dun sistema de \gls{ocr}, este tipo de modelo non intenta interpretar directamente o texto da imaxe, senón localizar visualmente as rexións correspondentes ás clases que foron definidas durante o adestramento.
 
-A aproximación formulouse en dúas fases. Na primeira, YOLO empregouse para localizar automaticamente as representacións gráficas das pastillas presentes na táboa da pauta. Na segunda, a posición obtida mediante o detector utilizouse como referencia para delimitar unha rexión máis ampla da cela e aplicar posteriormente OCR sobre ese recorte.
+A aproximación formulouse en dúas fases. Na primeira, \gls{yolo} empregouse para localizar automaticamente as representacións gráficas das pastillas presentes na táboa da pauta. Na segunda, a posición obtida mediante o detector utilizouse como referencia para delimitar unha rexión máis ampla da cela e aplicar posteriormente un proceso de \gls{ocr} sobre ese recorte.
 
 %A intención desta estratexia era reducir o problema observado nas aproximacións anteriores: en lugar de solicitar ao motor OCR que interpretase a folla completa e reconstruíse posteriormente a estrutura da táboa, intentábase primeiro localizar os elementos visuais máis característicos e limitar o recoñecemento de texto á súa contorna.
 
-Para a preparación do detector empregouse a ferramenta CVAT, mediante a cal se etiquetaron manualmente as representacións gráficas das pastillas. Esta anotación realizouse baixo unha única clase denominada \textit{pastilla}, debuxando unha caixa delimitadora (bounding box) arredor de cada representación visual. Na Figura~\ref{fig:yolo-cvat} móstrase un exemplo deste proceso.
+Para a preparación do detector empregouse a ferramenta \gls{cvat}, mediante a cal se etiquetaron manualmente as representacións gráficas das pastillas. Esta anotación realizouse baixo unha única clase denominada \textit{pastilla}, debuxando unha caixa delimitadora (bounding box) arredor de cada representación visual. Na Figura~\ref{fig:yolo-cvat} móstrase un exemplo deste proceso.
 
 \begin{figure}[h!]
     \centering
@@ -196,9 +196,9 @@ imgsz=1024 epochs=100 batch=4 name=sintrom_pastilla
 
 %Empregouse un tamaño de imaxe de 1024 píxeles debido ao reducido tamaño das representacións das pastillas dentro da folla de tratamento.
 
-Unha vez obtida a detección, ampliouse a rexión delimitada polo modelo para intentar incluír tamén a información asociada á cela e aplicar un OCR sobre o recorte resultante.
+Unha vez obtida a detección, ampliouse a rexión delimitada polo modelo para intentar incluír tamén a información asociada á cela e aplicar un proceso de \gls{ocr} sobre o recorte resultante.
 
-Esta segunda fase presenta unha dificultade adicional, xa que a caixa detectada por YOLO corresponde unicamente á representación da pastilla e non aos límites reais da cela. Polo tanto, é necesario decidir canto debe ampliarse a rexión antes de aplicar OCR.
+Esta segunda fase presenta unha dificultade adicional, xa que a caixa detectada por \gls{yolo} corresponde unicamente á representación da pastilla e non aos límites reais da cela. Polo tanto, é necesario decidir canto debe ampliarse a rexión antes de aplicar o \gls{ocr}.
 
 % TODO IMPORTANTE - YOLO + OCR:
 %
@@ -228,7 +228,7 @@ Esta segunda fase presenta unha dificultade adicional, xa que a caixa detectada 
 
 Para avaliar Azure Document Intelligence optouse por adestrar modelos personalizados capaces de interpretar a estrutura específica das follas de tratamento. 
 
-A partir das necesidades da aplicación definiuse un esquema cos campos que se consideraron relevantes para a extracción, entre eles as datas e doses da pauta diaria, o INR, o fármaco, a seguinte visita e a información correspondente ao histórico de visitas.
+A partir das necesidades da aplicación definiuse un esquema cos campos que se consideraron relevantes para a extracción, entre eles as datas e doses da pauta diaria, o \gls{inr}, o fármaco, a seguinte visita e a información correspondente ao histórico de visitas.
 
 Estes campos etiquetáronse manualmente mediante Azure Document Intelligence Studio, asociando en cada documento as rexións correspondentes coas etiquetas definidas no esquema. Na Figura~\ref{fig:etiquetaxe-azure} móstrase un exemplo deste proceso.
 
@@ -259,7 +259,7 @@ O proceso comeza coa detección dos bordos e dos principais contornos da imaxe, 
 
 Se non é posible delimitar completamente a folla, emprégase unha alternativa baseada na orientación das liñas detectadas no documento. A partir delas estímase o ángulo de inclinación e, cando a desviación é significativa, rótase a fotografía para aliñala. Se non existe suficiente evidencia para aplicar ningunha das dúas correccións, a entrada continúa sen modificacións.
 
-Esta etapa integrouse antes do proceso de extracción da API, de forma que o sistema encargado de interpretar o documento recibe a versión corrixida cando é necesario. Para avaliar especificamente este mecanismo preparouse un subconxunto de \textbf{7 fotografías inclinadas}, correspondentes a sete documentos diferentes. Dúas delas realizáronse sobre fondos claros similares á propia folla co obxectivo de comprobar o comportamento da detección en condicións de menor contraste.
+Esta etapa integrouse antes do proceso de extracción da \gls{api}, de forma que o sistema encargado de interpretar o documento recibe a versión corrixida cando é necesario. Para avaliar especificamente este mecanismo preparouse un subconxunto de \textbf{7 fotografías inclinadas}, correspondentes a sete documentos diferentes. Dúas delas realizáronse sobre fondos claros similares á propia folla co obxectivo de comprobar o comportamento da detección en condicións de menor contraste.
 
 % FIGURA RECOMENDADA:
 % Nos resultados, mostrar:
@@ -291,7 +291,7 @@ A avaliación centrouse principalmente nos seguintes criterios:
 
 A táboa de doses considerouse o elemento máis importante da avaliación, xa que constitúe a base a partir da cal a aplicación representa a pauta diaria e programa os avisos correspondentes. Por este motivo, non se considerou suficiente que unha tecnoloxía recoñecese correctamente palabras ou números de maneira independente. Para resultar adecuada debía ser posible determinar de forma fiable que dose correspondía a cada data.
 
-No caso da aproximación baseada en YOLO, valorouse adicionalmente a capacidade de localizar as representacións gráficas das pastillas e a posibilidade de utilizar esas deteccións como punto de partida para delimitar a información da cela correspondente.
+No caso da aproximación baseada en \gls{yolo}, valorouse adicionalmente a capacidade de localizar as representacións gráficas das pastillas e a posibilidade de utilizar esas deteccións como punto de partida para delimitar a información da cela correspondente.
 
 No caso concreto da etapa de preprocesamento mediante OpenCV, a avaliación centrouse en comprobar se era posible detectar unha inclinación significativa, endereitar correctamente o documento e, cando se identificaban os seus catro bordos, corrixir tamén a deformación de perspectiva e recortar as zonas exteriores innecesarias.
 
@@ -312,7 +312,7 @@ Finalmente, unha vez seleccionada unha aproximación para realizar a extracción
 
 A avaliación de Google ML Kit realizouse inicialmente sobre as \textbf{11 follas de tratamento escaneadas}, consideradas como o escenario de referencia e as condicións máis favorables de entrada. O obxectivo desta primeira proba foi comprobar se a ferramenta permitía recuperar non só o texto presente no documento, senón tamén a información necesaria para reconstruír de maneira fiable a pauta de tratamento.
 
-ML Kit conseguiu recoñecer unha parte importante do contido dos documentos. Non obstante, observáronse erros mesmo nestas condicións favorables. Entre os exemplos atopamos, valores de INR como \textit{1,9} e \textit{2,2} foron devoltos como \textit{19} e \textit{22}, respectivamente, e producíronse tamén modificacións en datas, como \textit{11/12/2024} recoñecido como \textit{1/12/2024} ou \textit{25/05/2018} como \textit{2.5/05/2018}.
+ML Kit conseguiu recoñecer unha parte importante do contido dos documentos. Non obstante, observáronse erros mesmo nestas condicións favorables. Entre os exemplos atopamos, valores de \gls{inr} como \textit{1,9} e \textit{2,2} foron devoltos como \textit{19} e \textit{22}, respectivamente, e producíronse tamén modificacións en datas, como \textit{11/12/2024} recoñecido como \textit{1/12/2024} ou \textit{25/05/2018} como \textit{2.5/05/2018}.
 
 % FONTES:
 % F01.json -> INR 1,9 -> 19
@@ -484,7 +484,7 @@ Dado que estas limitacións apareceron xa nas follas escaneadas, non se consider
 \subsubsection{Modelo personalizado}
 
 O adestramento do modelo \textit{sintromv2} mostrou unha redución progresiva da taxa de erro ao longo do proceso. Como se observa na
-Figura~\ref{fig:tesseract-sintromv2-adestramento}, o BCER pasou de valores próximos ao 39\,\% nas primeiras iteracións ata alcanzar un mínimo do \textbf{10,878\,\%}.
+Figura~\ref{fig:tesseract-sintromv2-adestramento}, o \gls{bcer} pasou de valores próximos ao 39\,\% nas primeiras iteracións ata alcanzar un mínimo do \textbf{10,878\,\%}.
 
 \begin{figure}[htbp]
     \centering
@@ -496,7 +496,7 @@ Figura~\ref{fig:tesseract-sintromv2-adestramento}, o BCER pasou de valores próx
 \end{figure}
 
 O proceso completou as \textbf{10\,000 iteracións} empregadas por defecto por \textit{tesstrain} e obtivo o mellor resultado na
-\textbf{iteración 4\,911}, cun BCER do \textbf{10,878\,\%} e un BWER do \textbf{20,409\,\%}. O punto de control correspondente a este resultado foi empregado para xerar o modelo final \textit{sintromv2}.
+\textbf{iteración 4\,911}, cun \gls{bcer} do \textbf{10,878\,\%} e un \gls{bwer} do \textbf{20,409\,\%}. O punto de control correspondente a este resultado foi empregado para xerar o modelo final \textit{sintromv2}.
 
 Seguindo a distribución indicada anteriormente, a avaliación realizouse sobre as follas \textbf{F09, F10 e F11}, que non foran empregadas durante o adestramento. As tres procesáronse nas catro condicións de captura definidas: imaxe escaneada, iluminación normal, menor iluminación e maior distancia.
 
@@ -565,7 +565,7 @@ En conxunto, o adestramento específico permitiu mellorar o recoñecemento de de
 
 \subsection{Resultados da aproximación baseada en YOLO}
 
-O detector mostrou un rendemento elevado no conxunto de validación. A curva Precision-Recall alcanzou un \textit{mAP@0.5} de \textbf{0,989} e a curva F1 acadou un valor máximo de \textbf{0,98} cun limiar de confianza de \textbf{0,603}. Na matriz de confusión rexistráronse \textbf{130 deteccións correctas} da clase \textit{pastilla} e \textbf{5 falsos positivos}.
+O detector mostrou un rendemento elevado no conxunto de validación. A curva Precision-Recall alcanzou un \gls{map05} de \textbf{0,989} e a curva F1 acadou un valor máximo de \textbf{0,98} cun limiar de confianza de \textbf{0,603}. Na matriz de confusión rexistráronse \textbf{130 deteccións correctas} da clase \textit{pastilla} e \textbf{5 falsos positivos}.
 
 \begin{figure}[htbp]
     \centering
@@ -598,15 +598,15 @@ Nas fotografías tomadas con iluminación normal detectáronse correctamente as 
     \label{fig:yolo-f10n}
 \end{figure}
 
-Estes resultados mostran que YOLO permite localizar con elevada fiabilidade as representacións gráficas das pastillas, mesmo ante determinadas variacións de iluminación e distancia.
+Estes resultados mostran que \gls{yolo} permite localizar con elevada fiabilidade as representacións gráficas das pastillas, mesmo ante determinadas variacións de iluminación e distancia.
 
 \subsubsection{Combinación de YOLO e Tesseract}
 
-Unha vez comprobada a capacidade de YOLO para localizar as representacións gráficas das pastillas, realizouse unha proba adicional co obxectivo de determinar se estas deteccións podían empregarse como referencia para recuperar tamén a data e a dose correspondentes.
+Unha vez comprobada a capacidade de \gls{yolo} para localizar as representacións gráficas das pastillas, realizouse unha proba adicional co obxectivo de determinar se estas deteccións podían empregarse como referencia para recuperar tamén a data e a dose correspondentes.
 
-Para cada detección ampliouse a caixa delimitadora xerada por YOLO e aplicouse sobre o recorte resultante o modelo personalizado de Tesseract \textit{sintromv2}. Probáronse tres tamaños de ampliación, co obxectivo de comprobar se era posible atopar unha rexión que incluíse a información necesaria da cela sen incorporar elementos pertencentes ás celas veciñas.
+Para cada detección ampliouse a caixa delimitadora xerada por \gls{yolo} e aplicouse sobre o recorte resultante o modelo personalizado de Tesseract \textit{sintromv2}. Probáronse tres tamaños de ampliación, co obxectivo de comprobar se era posible atopar unha rexión que incluíse a información necesaria da cela sen incorporar elementos pertencentes ás celas veciñas.
 
-Os resultados mostraron que o tamaño da rexión condiciona directamente a saída do OCR. Nas ampliacións máis pequenas, o recorte conserva principalmente a representación da pastilla e parte da data, pero pode deixar fóra a dose ou outros elementos necesarios para interpretar a cela. Ao incrementar a rexión é posible incluír unha maior parte da data e da dose, pero comezan a aparecer tamén cabeceiras, valores e información procedente das celas adxacentes.
+Os resultados mostraron que o tamaño da rexión condiciona directamente a saída do \gls{ocr}. Nas ampliacións máis pequenas, o recorte conserva principalmente a representación da pastilla e parte da data, pero pode deixar fóra a dose ou outros elementos necesarios para interpretar a cela. Ao incrementar a rexión é posible incluír unha maior parte da data e da dose, pero comezan a aparecer tamén cabeceiras, valores e información procedente das celas adxacentes.
 
 % EXEMPLOS DOS RESULTADOS:
 % Nos recortes pequenos pode quedar representada a data pero perderse a dose.
@@ -616,7 +616,7 @@ Os resultados mostraron que o tamaño da rexión condiciona directamente a saíd
 % e información doutras celas.
 % Fonte: resultados.csv da proba YOLO + sintromv2.
 
-Esta situación pode observarse nos recortes da Figura~\ref{fig:yolo-tesseract-recortes}. A caixa proporcionada por YOLO delimita correctamente a representación gráfica, pero esta non coincide cos límites da cela completa. Como consecuencia, non existe unha ampliación fixa que permita garantir que o OCR reciba exclusivamente a data e a dose
+Esta situación pode observarse nos recortes da Figura~\ref{fig:yolo-tesseract-recortes}. A caixa proporcionada por \gls{yolo} delimita correctamente a representación gráfica, pero esta non coincide cos límites da cela completa. Como consecuencia, non existe unha ampliación fixa que permita garantir que o \gls{ocr} reciba exclusivamente a data e a dose
 correspondentes á detección.
 
 \begin{figure}[htbp]
@@ -647,7 +647,7 @@ correspondentes á detección.
 
 A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0},  textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
 
-Por estes motivos, aínda que YOLO mostrou un bo comportamento na localización das representacións das pastillas, a combinación con Tesseract non se considerou suficientemente robusta para reconstruír automaticamente a pauta completa e descartouse como solución principal.
+Por estes motivos, aínda que \gls{yolo} mostrou un bo comportamento na localización das representacións das pastillas, a combinación con Tesseract non se considerou suficientemente robusta para reconstruír automaticamente a pauta completa e descartouse como solución principal.
 
 % AZURE DOCUMENT INTELLIGENCE
 
@@ -670,9 +670,9 @@ No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuaci�
 \end{figure}
 
 
-Nas probas sobre documentos non vistos, ambos modelos conseguiron recuperar correctamente numerosos campos individuais, como o INR, fármaco oral ou a data da visita. A principal diferenza apareceu na extracción da pauta diaria. O modelo \textit{Template} conservou de forma moito máis estable a agrupación dos días e das doses dentro das filas da táboa, mentres que o modelo \textit{Neural} fragmentou con frecuencia estes elementos en rexistros separados.
+Nas probas sobre documentos non vistos, ambos modelos conseguiron recuperar correctamente numerosos campos individuais, como o \gls{inr}, fármaco oral ou a data da visita. A principal diferenza apareceu na extracción da pauta diaria. O modelo \textit{Template} conservou de forma moito máis estable a agrupación dos días e das doses dentro das filas da táboa, mentres que o modelo \textit{Neural} fragmentou con frecuencia estes elementos en rexistros separados.
 
-A plataforma de Azure devolve a información extraída nun documento con formato JSON para que poida ser consumido. O problema subxacente desta mala lectura visual é que o JSON resultante herda todo este caos. Ao non seguir un patrón predicible na súa resposta (nalgúns casos o JSON devolve a data e a dose xuntas, noutros devólveas separadas en distintas filas do obxecto …), resulta practicamente imposible deseñar unha lóxica de extracción que sexa capaz de recoller a información correcta para o día adecuado de forma robusta e automática
+A plataforma de Azure devolve a información extraída nun documento con formato \gls{json} para que poida ser consumido. O problema subxacente desta mala lectura visual é que o \gls{json} resultante herda todo este caos. Ao non seguir un patrón predicible na súa resposta (nalgúns casos o \gls{json} devolve a data e a dose xuntas, noutros devólveas separadas en distintas filas do obxecto …), resulta practicamente imposible deseñar unha lóxica de extracción que sexa capaz de recoller a información correcta para o día adecuado de forma robusta e automática
 
 Un exemplo representativo desta diferenza pode observarse na folla F10 con iluminación normal. Como se mostra na Figura~\ref{fig:azure-comparacion-f10n}, o modelo \textit{Template} mantén nun mesmo rexistro os valores correspondentes aos sete días da semana. No modelo \textit{Neural}, pola contra, parte das datas e das doses son separadas en rexistros diferentes. Por exemplo, \textit{14 OCT} aparece separado da súa dose \textit{1/4}, dificultando a reconstrución directa da relación entre ambos elementos.
 
@@ -767,10 +767,10 @@ As probas realizadas permitiron comprobar que o principal reto non consiste unic
 Google ML Kit conseguiu recuperar unha parte importante do texto, pero a variabilidade da súa saída e os erros observados impediron establecer unha estrutura suficientemente estable para reconstruír a pauta. Tesseract presentou limitacións similares, o adestramento dun modelo específico mellorou o recoñecemento de determinados elementos, pero continuaron aparecendo erros
 nas datas, nas doses e na organización da táboa, que aumentaron nas fotografías realizadas en condicións menos favorables.
 
-Pola súa parte, YOLO mostrou unha capacidade elevada para localizar as representacións gráficas das pastillas, incluídas fotografías tomadas baixo diferentes condicións de iluminación e distancia. Non obstante, a detección destes elementos constitúe só unha parte do problema, xa que é necesario recuperar tamén a data e a dose correspondente e interpretar as celas nas que
+Pola súa parte, \gls{yolo} mostrou unha capacidade elevada para localizar as representacións gráficas das pastillas, incluídas fotografías tomadas baixo diferentes condicións de iluminación e distancia. Non obstante, a detección destes elementos constitúe só unha parte do problema, xa que é necesario recuperar tamén a data e a dose correspondente e interpretar as celas nas que
 non existe unha representación gráfica.
 
-A combinación de YOLO co modelo personalizado de Tesseract tampouco resolveu esta limitación. A posición das representacións gráficas permitiu aproximar a rexión da cela, pero os diferentes tamaños e disposicións das entradas impediron definir un recorte fixo que recuperase de maneira estable e exclusiva a data e a dose correspondentes. Por este motivo, esta aproximación foi igualmente descartada como solución principal.
+A combinación de \gls{yolo} co modelo personalizado de Tesseract tampouco resolveu esta limitación. A posición das representacións gráficas permitiu aproximar a rexión da cela, pero os diferentes tamaños e disposicións das entradas impediron definir un recorte fixo que recuperase de maneira estable e exclusiva a data e a dose correspondentes. Por este motivo, esta aproximación foi igualmente descartada como solución principal.
 
 Finalmente, a comparación dos modelos personalizados de Azure AI Document Intelligence mostrou un comportamento máis estable da arquitectura \textit{Template}, especialmente na extracción da táboa de doses. A súa capacidade para manter agrupadas a data e a dose facilita o posterior procesamento da resposta e permite evitar gran parte da lóxica adicional que sería necesaria co resto das alternativas avaliadas. Por este motivo, seleccionouse este modelo como base da extracción automática empregada na aplicación.
 

@@ -1,13 +1,13 @@
 \chapter{Detalle complementario das probas}
 \label{app:probas-complementarias}
 
-Este apéndice amplía a información presentada no Capítulo~\ref{chap:probas} e recolle exemplos representativos das probas realizadas sobre a API e a aplicación móbil. Inclúense a organización das probas, algúns dos casos empregados para verificar os compoñentes principais, os comandos empregados e as evidencias obtidas durante as comprobacións automatizadas e manuais.
+Este apéndice amplía a información presentada no Capítulo~\ref{chap:probas} e recolle exemplos representativos das probas realizadas sobre a \gls{api} e a aplicación móbil. Inclúense a organización das probas, algúns dos casos empregados para verificar os compoñentes principais, os comandos empregados e as evidencias obtidas durante as comprobacións automatizadas e manuais.
 
 Os fragmentos de código proceden das probas implementadas no proxecto. Co obxectivo de facilitar a súa lectura, nalgúns casos omítense partes de preparación que non resultan relevantes para comprender o comportamento que se está verificando.
 
 \section{Organización e alcance}
 
-As probas desenvolvéronse sobre diferentes niveis da solución. Na API comprobáronse tanto funcións concretas da lóxica de procesamento como o comportamento dos endpoints e das dependencias externas. No cliente avaliáronse os modelos, os modelos de vista, os servizos, a persistencia, o cifrado, os widgets e distintos fluxos nos que interveñen varias capas da aplicación.
+As probas desenvolvéronse sobre diferentes niveis da solución. Na \gls{api} comprobáronse tanto funcións concretas da lóxica de procesamento como o comportamento dos endpoints e das dependencias externas. No cliente avaliáronse os modelos, os modelos de vista, os servizos, a persistencia, o cifrado, os widgets e distintos fluxos nos que interveñen varias capas da aplicación.
 
 A Táboa~\ref{tab:matriz-probas} resume os principais grupos de probas e os aspectos cubertos en cada un deles.
 
@@ -67,9 +67,9 @@ A Táboa~\ref{tab:matriz-probas} resume os principais grupos de probas e os aspe
 
 \subsection{Preparación das probas dos endpoints}
 
-Para comprobar os endpoints empregouse TestClient, que permite realizar peticións HTTP directamente sobre a aplicación FastAPI durante a execución das probas. As dependencias que requiren comunicación con servizos externos substituíronse por obxectos simulados cando era necesario, permitindo preparar respostas coñecidas e reproducir situacións de éxito e de erro sen depender dunha conexión externa.
+Para comprobar os endpoints empregouse TestClient, que permite realizar peticións \gls{http} directamente sobre a aplicación FastAPI durante a execución das probas. As dependencias que requiren comunicación con servizos externos substituíronse por obxectos simulados cando era necesario, permitindo preparar respostas coñecidas e reproducir situacións de éxito e de erro sen depender dunha conexión externa.
 
-No caso de Azure Document Intelligence, o cliente utilizado pola aplicación substitúese por un MagicMock. Desta maneira pódense construír respostas coa mesma estrutura que as devoltas polo servizo e comprobar posteriormente como son procesadas pola API.
+No caso de Azure Document Intelligence, o cliente utilizado pola aplicación substitúese por un MagicMock. Desta maneira pódense construír respostas coa mesma estrutura que as devoltas polo servizo e comprobar posteriormente como son procesadas pola \gls{api}.
 
 \begin{lstlisting}[
     language=Python,
@@ -99,7 +99,7 @@ Esta preparación permite reproducir, entre outros casos, unha extracción corre
 
 \subsection{Procesamento e validación dos datos}
 
-As probas da lóxica interna verifican o tratamento dos datos extraídos antes de construír a resposta enviada ao cliente. Comprobáronse especialmente a interpretación das doses, o tratamento das datas e os cambios de ano, a detección dos días de control e as validacións realizadas sobre campos como o INR.
+As probas da lóxica interna verifican o tratamento dos datos extraídos antes de construír a resposta enviada ao cliente. Comprobáronse especialmente a interpretación das doses, o tratamento das datas e os cambios de ano, a detección dos días de control e as validacións realizadas sobre campos como o \gls{inr}.
 
 Tamén se incluíron entradas incorrectas ou incompletas co obxectivo de comprobar que a aplicación non produce resultados incoherentes cando a información recibida non é válida.
 
@@ -144,7 +144,7 @@ Estas probas resultan especialmente relevantes porque o preprocesamento inclúe 
 
 \subsection{Notificacións e dependencias externas}
 
-As chamadas ao SDK de Firebase simuláronse durante as probas automatizadas. Isto permite comprobar a información empregada para construír a notificación, o token de destino e o tratamento dos posibles erros sen enviar mensaxes reais.
+As chamadas ao \gls{sdk} de Firebase simuláronse durante as probas automatizadas. Isto permite comprobar a información empregada para construír a notificación, o token de destino e o tratamento dos posibles erros sen enviar mensaxes reais.
 
 \begin{lstlisting}[
     language=Python,
@@ -168,7 +168,7 @@ def test_aviso_desconecido_sen_notificacion(
     )
 \end{lstlisting}
 
-Ademais dos casos correctos, provocáronse erros durante o envío para comprobar que a API devolve a resposta correspondente.
+Ademais dos casos correctos, provocáronse erros durante o envío para comprobar que a \gls{api} devolve a resposta correspondente.
 
 O arranque da aplicación tamén foi probado baixo diferentes configuracións de Azure, Firebase e Key Vault, comprobando tanto a carga das credenciais desde as variables de contorna como a recuperación dos segredos externos.
 
@@ -177,7 +177,7 @@ O arranque da aplicación tamén foi probado baixo diferentes configuracións de
 
 \subsection{Comunicación coa API}
 
-A comunicación HTTP probouse substituíndo o cliente real por un MockClient. Deste modo é posible interceptar as peticións xeradas pola aplicación e comprobar o método HTTP empregado, a ruta, as cabeceiras e os datos enviados.
+A comunicación \gls{http} probouse substituíndo o cliente real por un MockClient. Deste modo é posible interceptar as peticións xeradas pola aplicación e comprobar o método \gls{http} empregado, a ruta, as cabeceiras e os datos enviados.
 
 \begin{lstlisting}[
     caption={Comprobación dunha petición realizada polo cliente},
@@ -240,7 +240,7 @@ expect(
 
 \subsection{Cifrado e integridade das mensaxes}
 
-As operacións criptográficas empregadas durante as probas son operacións AES-GCM reais. Só se substitúe o almacenamento empregado para conservar as claves, permitindo executar a suite sen depender do almacenamento seguro do dispositivo.
+As operacións criptográficas empregadas durante as probas son operacións \gls{aesgcm} reais. Só se substitúe o almacenamento empregado para conservar as claves, permitindo executar a suite sen depender do almacenamento seguro do dispositivo.
 
 Comprobouse que os datos poden descifrarse coa clave correspondente e que unha mensaxe modificada, un tipo de aviso diferente ou unha clave incorrecta provoca o rexeitamento da mensaxe.
 
@@ -314,7 +314,7 @@ Ademais de comprobar casos individuais, executáronse as suites completas para v
 
 \subsection{Execución da API}
 
-As probas da API executáronse desde a raíz do repositorio empregando Coverage.py:
+As probas da \gls{api} executáronse desde a raíz do repositorio empregando Coverage.py:
 
 \begin{lstlisting}[
     caption={Execución das probas e cálculo da cobertura da API}
@@ -379,9 +379,9 @@ A Figura~\ref{fig:cobertura-componentes} representa os valores de cobertura mái
     \label{fig:cobertura-componentes}
 \end{figure}
 
-A API presenta unha cobertura elevada e uniforme. As liñas que permanecen sen executar concéntranse no módulo de preprocesamento, que contén numerosas ramas destinadas a tratar diferentes características e posibles problemas das imaxes de entrada.
+A \gls{api} presenta unha cobertura elevada e uniforme. As liñas que permanecen sen executar concéntranse no módulo de preprocesamento, que contén numerosas ramas destinadas a tratar diferentes características e posibles problemas das imaxes de entrada.
 
-No cliente tamén se acadou unha cobertura elevada nos modelos, no acceso á API, na persistencia e no cifrado. A cobertura global é menor debido principalmente ás partes relacionadas coa interface e ás funcionalidades que dependen directamente do dispositivo, como Firebase Messaging ou o sistema de notificacións locais.
+No cliente tamén se acadou unha cobertura elevada nos modelos, no acceso á \gls{api}, na persistencia e no cifrado. A cobertura global é menor debido principalmente ás partes relacionadas coa interface e ás funcionalidades que dependen directamente do dispositivo, como Firebase Messaging ou o sistema de notificacións locais.
 
 Estas funcionalidades complementáronse mediante as comprobacións manuais descritas na seguinte sección.
 
@@ -394,12 +394,12 @@ As comprobacións incluíron:
 
 \begin{itemize}
     \item completar a configuración inicial como paciente e como supervisor;
-    \item incorporar unha folla mediante a cámara, a galería e un documento PDF;
+    \item incorporar unha folla mediante a cámara, a galería e un documento \gls{pdf};
     \item revisar e modificar os datos obtidos antes de gardar a pauta;
     \item comprobar a persistencia da información despois de pechar e volver abrir a aplicación;
     \item consultar o calendario e confirmar unha toma;
     \item comprobar a programación e recepción dos recordatorios;
-    \item vincular paciente e supervisor mediante un código QR;
+    \item vincular paciente e supervisor mediante un código \gls{qr};
     \item sincronizar a pauta e os estados das tomas entre dous dispositivos;
     \item comprobar a recepción das notificacións entre ambos;
     \item eliminar unha vinculación e verificar a actualización dos dous dispositivos;
@@ -411,7 +411,7 @@ Estas probas complementan a cobertura automatizada, especialmente nas funcionali
 
 \subsection{Evidencias das probas manuais}
 
-A Figura~\ref{fig:proba-vinculacion} mostra unha das comprobacións realizadas durante o proceso de vinculación entre paciente e supervisor mediante código QR.
+A Figura~\ref{fig:proba-vinculacion} mostra unha das comprobacións realizadas durante o proceso de vinculación entre paciente e supervisor mediante código \gls{qr}.
 
 % \begin{figure}[htbp]
 %     \centering

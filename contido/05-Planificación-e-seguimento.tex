@@ -14,11 +14,11 @@ De acordo co enfoque incremental descrito no Capítulo \ref{chap:metodoloxia}, o
 
     \item \textbf{Experimentación e selección da tecnoloxía de extracción :}  Recompiláronse follas de tratamento que se empregaron para probar as distintas tecnoloxías. As probas permitiron comparar a calidade da extracción, o esforzo necesario para preparar os datos, a facilidade de integración e as limitacións de cada alternativa. A partir destes resultados seleccionouse a tecnoloxía máis adecuada para continuar o proxecto.
 
-    \item \textbf{Primeira versión da API :} Desenvolveuse unha API sinxela capaz de recibir informes, invocar ao servizo de extracción, procesar o resultado e devolver os datos estruturados en formato JSON.
+    \item \textbf{Primeira versión da API :} Desenvolveuse unha \gls{api} sinxela capaz de recibir informes, invocar ao servizo de extracción, procesar o resultado e devolver os datos estruturados en formato \gls{json}.
 
     O obxectivo deste incremento foi obter unha proba de concepto funcional que permitise comprobar a comunicación co servizo de extracción e a transformación dos datos devoltos.
 
-    \item \textbf{Reorganización da API por capas :} Unha vez comprobado o funcionamento da primeira versión, a API reorganizouse para separar os puntos de entrada, a lóxica de negocio, os modelos de datos e as dependencias externas. 
+    \item \textbf{Reorganización da API por capas :} Unha vez comprobado o funcionamento da primeira versión, a \gls{api} reorganizouse para separar os puntos de entrada, a lóxica de negocio, os modelos de datos e as dependencias externas.
 
     %TODO: permitiu comprobar os seus compoñentes por separado
     Esta reorganización facilitou o mantemento, a realización de probas e a posible substitución dalgún dos servizos externos no futuro. Neste incremento incorporáronse tamén probas unitarias e probas de integración dos \textit{endpoints}.
@@ -27,7 +27,7 @@ De acordo co enfoque incremental descrito no Capítulo \ref{chap:metodoloxia}, o
 
     As funcionalidades da aplicación dividíronse en tarefas independentes para facilitar a súa implementación e revisión.
 
-    \item \textbf{Integración e estabilización :} Levouse a cabo a conexión completa da aplicación coa API e cos servizos de Firebase, unificando os distintos fluxos de navegación. Durante esta fase completouse a vinculación entre paciente e supervisor, a sincronización da información e o sistema de recordatorios. Unha vez conectados os compoñentes de forma progresiva, o sistema estabilizouse mediante a análise estática do código e a execución de probas unitarias, de \textit{widgets} e de uso en dispositivos reais. Por último, corrixíronse os erros detectados nos casos de uso principais e realizáronse os axustes necesarios para garantir un funcionamento robusto de extremo a extremo.
+    \item \textbf{Integración e estabilización :} Levouse a cabo a conexión completa da aplicación coa \gls{api} e cos servizos de Firebase, unificando os distintos fluxos de navegación. Durante esta fase completouse a vinculación entre paciente e supervisor, a sincronización da información e o sistema de recordatorios. Unha vez conectados os compoñentes de forma progresiva, o sistema estabilizouse mediante a análise estática do código e a execución de probas unitarias, de \textit{widgets} e de uso en dispositivos reais. Por último, corrixíronse os erros detectados nos casos de uso principais e realizáronse os axustes necesarios para garantir un funcionamento robusto de extremo a extremo.
 
     \item  \textbf{Documentación e entrega:} O último incremento abrangueu a revisión final da memoria, a elaboración dos diagramas definitivos e a preparación da presentación e dos materiais necesarios para a entrega.
 
@@ -78,7 +78,7 @@ Esta cifra empregouse como referencia para dimensionar o traballo, non como un l
 
 A planificación inicial tomou como punto de partida o 15 de outubro de 2025. A idea era rematar o desenvolvemento principal antes do verán: chegar a finais de maio cunha primeira versión funcional da aplicación e dedicar xuño á integración e ás probas. Así, xullo quedaba reservado para redactar e revisar a memoria, marcando o 31 de xullo de 2026 como data límite interna. Esta marxe pensouse para facilitarlles o traballo de revisión ás directoras, asegurando que houbese tempo para incorporar os seus cambios antes das vacacións de agosto. Por iso, o cronograma inicial deixou ese mes libre de tarefas, deixando todo preparado para o 11 de setembro de 2026, data da entrega oficial.
  
-A asignación inicial concentraba unha maior dedicación na experimentación práctica, na API e, especialmente, no desenvolvemento da aplicación. Para o estudo de viabilidade reservouse unha cantidade menor de horas, pois inicialmente esperábase realizar unha análise breve e pasar rapidamente ás probas coas diferentes tecnoloxías. Esta previsión resultou optimista, xa que a investigación e a experimentación precisaron finalmente máis traballo do esperado.
+A asignación inicial concentraba unha maior dedicación na experimentación práctica, na \gls{api} e, especialmente, no desenvolvemento da aplicación. Para o estudo de viabilidade reservouse unha cantidade menor de horas, pois inicialmente esperábase realizar unha análise breve e pasar rapidamente ás probas coas diferentes tecnoloxías. Esta previsión resultou optimista, xa que a investigación e a experimentación precisaron finalmente máis traballo do esperado.
 
 \begin{table}[htbp]
     \centering
@@ -171,7 +171,7 @@ Esta cifra supón un incremento de 90 horas, equivalente ao 30\,\% sobre a liña
 
 A primeira desviación produciuse na investigación e na experimentación coas tecnoloxías de procesamento automático das follas. A planificación inicial supoñía que sería posible atopar unha alternativa axeitada nun prazo relativamente curto. Porén, a obtención dunha solución fiable requiriu recompilar un conxunto suficiente de follas de tratamento, tarefa que resultou máis custosa do previsto, e probar varias alternativas. Para cada unha delas foi necesario preparar os exemplos e analizar os erros obtidos. Este proceso de proba, análise e descarte prolongouse ata seleccionar unha tecnoloxía que ofrecese unha calidade suficiente.
 
-No desenvolvemento da API, a desviación debeuse principalmente ao esforzo necesario para garantir a calidade e a coherencia dos datos devoltos. Ao tratarse de información relacionada coa medicación, non era suficiente con implementar os puntos de acceso e estruturar a resposta. Foi preciso analizar os posibles datos incorrectos ou incompletos, definir as regras para detectalos e decidir como debía responder o sistema en cada caso.
+No desenvolvemento da \gls{api}, a desviación debeuse principalmente ao esforzo necesario para garantir a calidade e a coherencia dos datos devoltos. Ao tratarse de información relacionada coa medicación, non era suficiente con implementar os puntos de acceso e estruturar a resposta. Foi preciso analizar os posibles datos incorrectos ou incompletos, definir as regras para detectalos e decidir como debía responder o sistema en cada caso.
 
 No caso da aplicación Android non se identificou unha única funcionalidade como responsable principal da desviación. Durante o desenvolvemento foron xurdindo novas funcionalidades e melloras que non estaban completamente concretadas na planificación inicial, pero que se consideraron útiles para completar a aplicación. Tamén se modificaron algunhas pantallas e fluxos de navegación a medida que se comprobaba o seu funcionamento, co obxectivo de facer o uso da aplicación máis claro e sinxelo.
 

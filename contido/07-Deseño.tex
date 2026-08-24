@@ -7,17 +7,17 @@ Neste capítulo descríbese o deseño da solución, presentando a arquitectura d
 
 \subsection{Visión xeral do sistema}
 
-A solución segue unha \textbf{arquitectura cliente-servidor} formada por unha aplicación móbil e unha API REST. A aplicación móbil serve como interface que xestiona a interacción coa persoa usuaria, a persistencia local, o seguimento do tratamento e as notificacións. 
+A solución segue unha \textbf{arquitectura cliente-servidor} formada por unha aplicación móbil e unha \gls{api} baseada no estilo \gls{rest}. A aplicación móbil serve como interface que xestiona a interacción coa persoa usuaria, a persistencia local, o seguimento do tratamento e as notificacións.
 
-A API proporciona as operacións necesarias para o procesamento das follas de tratamento, a consulta de información dos centros sanitarios e a comunicación entre os dispositivos vinculados. No procesamento das follas, encárgase de preparar o documento cando é necesario, interpretar os campos obtidos polo servizo de extracción, reconstruír a pauta diaria, normalizar e ordenar os datos e realizar comprobacións sobre os resultados antes de construír a resposta que recibe a aplicación. Ademais, a API actúa como punto de acceso aos servizos externos empregados pola solución, evitando que o cliente móbil teña que comunicarse directamente con eles.
+A \gls{api} proporciona as operacións necesarias para o procesamento das follas de tratamento, a consulta de información dos centros sanitarios e a comunicación entre os dispositivos vinculados. No procesamento das follas, encárgase de preparar o documento cando é necesario, interpretar os campos obtidos polo servizo de extracción, reconstruír a pauta diaria, normalizar e ordenar os datos e realizar comprobacións sobre os resultados antes de construír a resposta que recibe a aplicación. Ademais, a \gls{api} actúa como punto de acceso aos servizos externos empregados pola solución, evitando que o cliente móbil teña que comunicarse directamente con eles.
 
-A información relativa ao tratamento e ao seu seguimento almacénase de forma local nos dispositivos, polo que a API non mantén unha base de datos central coa información clínica das persoas usuarias. 
+A información relativa ao tratamento e ao seu seguimento almacénase de forma local nos dispositivos, polo que a \gls{api} non mantén unha base de datos central coa información clínica das persoas usuarias.
 
 \subsection{Arquitectura do cliente móbil}
 
 O cliente organízase seguindo o patrón \textit{Model-View-ViewModel} (MVVM). As \textbf{vistas} representan as pantallas e recollen as interaccións da persoa usuaria. Os \textbf{modelos de vista} manteñen o estado asociado ás distintas funcionalidades e coordinan as operacións necesarias. Pola súa parte, os \textbf{modelos} representan a información do dominio coa que traballa a aplicación.
 
-A estas capas engádese un conxunto de \textbf{servizos} encargados de encapsular as operacións que non pertencen directamente á interface, como o acceso á API, a persistencia local, o almacenamento seguro, as notificacións ou a sincronización entre dispositivos. Desta forma, as vistas non necesitan coñecer como se executan estas operacións e cada compoñente mantén unha responsabilidade diferenciada.
+A estas capas engádese un conxunto de \textbf{servizos} encargados de encapsular as operacións que non pertencen directamente á interface, como o acceso á \gls{api}, a persistencia local, o almacenamento seguro, as notificacións ou a sincronización entre dispositivos. Desta forma, as vistas non necesitan coñecer como se executan estas operacións e cada compoñente mantén unha responsabilidade diferenciada.
 
 A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes principais:
 
@@ -26,7 +26,7 @@ A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes
 
     \item \textbf{\textit{modelos}} agrupa as entidades e estruturas de datos empregadas pola aplicación.
 
-    \item \textbf{\textit{servizos}} reúne as operacións de acceso á API, a persistencia, as notificacións, o almacenamento seguro e a sincronización.
+    \item \textbf{\textit{servizos}} reúne as operacións de acceso á \gls{api}, a persistencia, as notificacións, o almacenamento seguro e a sincronización.
 
     \item \textbf{\textit{compoñentes}} contén elementos visuais reutilizables por distintas pantallas.
 
@@ -36,9 +36,9 @@ A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes
 
 \subsection{Arquitectura da API}
 
-A API deseñouse como un servizo sen estado , polo que cada petición contén a información necesaria para ser procesada e non depende dunha sesión almacenada no servidor.
+A \gls{api} deseñouse como un servizo sen estado , polo que cada petición contén a información necesaria para ser procesada e non depende dunha sesión almacenada no servidor.
 
-A súa estrutura separa os puntos de entrada HTTP, a lóxica de procesamento, os contratos de datos e as integracións externas do seguinte xeito:
+A súa estrutura separa os puntos de entrada \gls{http}, a lóxica de procesamento, os contratos de datos e as integracións externas do seguinte xeito:
 
 \begin{itemize}
     \item Os \textbf{puntos de entrada}: reciben e verifican as peticións.
@@ -49,9 +49,9 @@ A súa estrutura separa os puntos de entrada HTTP, a lóxica de procesamento, os
 
 Esta división permite, por exemplo, substituír o mecanismo de extracción documental sen modificar a interface empregada polo cliente, sempre que se manteña o mesmo contrato de saída.
 
-A comunicación co cliente realízase mediante un conxunto de contratos REST que agrupan as principais operacións da API. O endpoint \textbf{\textit{/extraccion/}} permite enviar unha folla de tratamento e obter a información procesada e estruturada. O endpoint \textbf{\textit{/notificar/enviar}} encárgase de reenviar as mensaxes intercambiadas entre os dispositivos vinculados. Finalmente, \textbf{\textit{/centros/buscar}} permite consultar a información asociada a un centro sanitario a partir do seu nome.
+A comunicación co cliente realízase mediante un conxunto de contratos \gls{rest} que agrupan as principais operacións da \gls{api}. O endpoint \textbf{\textit{/extraccion/}} permite enviar unha folla de tratamento e obter a información procesada e estruturada. O endpoint \textbf{\textit{/notificar/enviar}} encárgase de reenviar as mensaxes intercambiadas entre os dispositivos vinculados. Finalmente, \textbf{\textit{/centros/buscar}} permite consultar a información asociada a un centro sanitario a partir do seu nome.
 
-A Figura~\ref{fig:arquitectura-mvvm-api} mostra conxuntamente a organización do cliente e da API, así como a comunicación entre ambos.
+A Figura~\ref{fig:arquitectura-mvvm-api} mostra conxuntamente a organización do cliente e da \gls{api}, así como a comunicación entre ambos.
 
 \begin{figure}[htbp]
     \centering
@@ -69,7 +69,7 @@ A Figura~\ref{fig:arquitectura-mvvm-api} mostra conxuntamente a organización do
 O modelo de dominio representa a información obtida dunha folla de tratamento así como os datos necesarios para para revisala e posteriormente realizar o seguimento das tomas.  
 
 A entidade principal é a \textbf{análise}, que agrupa os distintos bloques de información presentes no documento. Está formada por tres partes: a cabeceira, a pauta diaria e
-o histórico de visitas. A cabeceira reúne os datos xerais do tratamento actual, como a data do informe, o INR, o fármaco, a dose semanal, a seguinte visita e o centro sanitario. A pauta diaria está formada polos días de tratamento, indicando para cada un deles a data, a dose ou acción correspondente e se se trata dun día de control. O histórico conserva a información das visitas anteriores incluídas no documento.
+o histórico de visitas. A cabeceira reúne os datos xerais do tratamento actual, como a data do informe, o \gls{inr}, o fármaco, a dose semanal, a seguinte visita e o centro sanitario. A pauta diaria está formada polos días de tratamento, indicando para cada un deles a data, a dose ou acción correspondente e se se trata dun día de control. O histórico conserva a información das visitas anteriores incluídas no documento.
 
 Sobre esta análise actúa a \textbf{revisión da pauta}, encargada de permitir a comprobación dos datos antes da súa confirmación. Durante esta etapa poden corrixirse as doses e as datas, engadir ou eliminar días, modificar a seguinte visita, ordenar a pauta e comprobar a súa consistencia. Desta forma, o resultado obtido automaticamente pode revisarse antes de incorporarse ao tratamento activo.
 
@@ -109,9 +109,9 @@ Finalmente, os \textbf{datos de configuración e seguridade}, como as claves de 
 Nesta sección descríbense dous dos fluxos máis relevantes da aplicación, o procesamento dunha folla de tratamento e a sincronización da información entre dispositivos.
 
 \subsection{Vinculación entre paciente e supervisor}
-A vinculación establécese mediante un código QR xerado no dispositivo do paciente. Este código contén  un identificador da vinculación, o identificador e o token de mensaxería do paciente e unha clave temporal empregada para protexer o intercambio inicial.
+A vinculación establécese mediante un código \gls{qr} xerado no dispositivo do paciente. Este código contén  un identificador da vinculación, o identificador e o token de mensaxería do paciente e unha clave temporal empregada para protexer o intercambio inicial.
 
-O supervisor escanea o QR e emprega estes datos para iniciar a asociación. Como resposta, envía ao paciente o seu identificador e token de mensaxería, xunto cunha nova clave compartida que se empregará nas comunicacións posteriores. Esta información transmítese cifrada mediante a clave temporal incluída no código QR. Unha vez completado o intercambio, ambos dispositivos dispoñen da información necesaria para identificarse e comunicarse de forma segura.
+O supervisor escanea o \gls{qr} e emprega estes datos para iniciar a asociación. Como resposta, envía ao paciente o seu identificador e token de mensaxería, xunto cunha nova clave compartida que se empregará nas comunicacións posteriores. Esta información transmítese cifrada mediante a clave temporal incluída no código \gls{qr}. Unha vez completado o intercambio, ambos dispositivos dispoñen da información necesaria para identificarse e comunicarse de forma segura.
 
 A Figura~\ref{fig:fluxo-vinculacion} mostra as principais etapas deste proceso.
 
@@ -124,9 +124,9 @@ A Figura~\ref{fig:fluxo-vinculacion} mostra as principais etapas deste proceso.
 
 
 \subsection{Procesamento dunha folla de tratamento}
- O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla de tratamento desde a aplicación móbil. O documento envíase á API, que realiza o preprocesamento se é necesario e solicita a extracción da información ao servizo de procesamento documental. 
+ O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla de tratamento desde a aplicación móbil. O documento envíase á \gls{api}, que realiza o preprocesamento se é necesario e solicita a extracción da información ao servizo de procesamento documental.
 
- A partir do resultado obtido, a API interpreta os campos, normaliza os datos, reconstrúe a pauta diaria e realiza certas comprobacións antes de devolver unha resposta ao cliente. Na aplicación, os  datos recibidos móstranse para a súa revisión, e unha vez confirmados, pasan a formar parte da pauta activa almacenada no dispositivo.
+ A partir do resultado obtido, a \gls{api} interpreta os campos, normaliza os datos, reconstrúe a pauta diaria e realiza certas comprobacións antes de devolver unha resposta ao cliente. Na aplicación, os  datos recibidos móstranse para a súa revisión, e unha vez confirmados, pasan a formar parte da pauta activa almacenada no dispositivo.
 
  A Figura~\ref{fig:fluxo-procesamento} representa as principais etapas deste
 proceso.
@@ -142,9 +142,9 @@ proceso.
 
 A sincronización permite compartir información entre o dispositivo do paciente e o do supervisor. Cando se produce un cambio que debe comunicarse (como realizar unha toma, esquecela ou escanear unha nova folla), o dispositivo de orixe prepara os datos e cifra o contido empregando a información establecida durante a vinculación.
 
-A mensaxe cifrada envíase a API, que actúa como intermediaria e reenvíaa empregando o servizo de mensaxería. Este encárgase de entregala ao dispositivo de destino, onde o contido é descifrado e empregado para actualizar a información almacenada. 
+A mensaxe cifrada envíase a \gls{api}, que actúa como intermediaria e reenvíaa empregando o servizo de mensaxería. Este encárgase de entregala ao dispositivo de destino, onde o contido é descifrado e empregado para actualizar a información almacenada.
 
-Deste xeito,a API participa no transporte das mensaxes sen necesitar almacenar a información clínica intercambiada entre os dispositivos. A Figura~\ref{fig:fluxo-sincronizacion} mostra as principais etapas deste fluxo.
+Deste xeito,a \gls{api} participa no transporte das mensaxes sen necesitar almacenar a información clínica intercambiada entre os dispositivos. A Figura~\ref{fig:fluxo-sincronizacion} mostra as principais etapas deste fluxo.
 
 \begin{figure}[htbp]
     \centering
@@ -159,12 +159,12 @@ Deste xeito,a API participa no transporte das mensaxes sen necesitar almacenar a
 O primeiro acceso á aplicación comeza coa selección do rol, decisión que determina o percorrido posterior e as funcionalidades dispoñibles. A partir deste punto distínguense dous fluxos principais:
 
 \begin{itemize}
-    \item No caso do \textbf{paciente}, tras seleccionar o rol accédese á pantalla de vinculación, na que se xera un código QR para establecer a relación cun supervisor. Unha vez completada esta fase, pásase a unha pantalla de configuración de permisos na que se decide quen será o encargado de dixitalizar os informes de tratamento. Aínda que o supervisor mantén sempre esta capacidade, pódese restrinxir esta función para o paciente co obxectivo de simplificar a súa interface. Despois, accédese á
+    \item No caso do \textbf{paciente}, tras seleccionar o rol accédese á pantalla de vinculación, na que se xera un código \gls{qr} para establecer a relación cun supervisor. Unha vez completada esta fase, pásase a unha pantalla de configuración de permisos na que se decide quen será o encargado de dixitalizar os informes de tratamento. Aínda que o supervisor mantén sempre esta capacidade, pódese restrinxir esta función para o paciente co obxectivo de simplificar a súa interface. Despois, accédese á
     configuración adicional para establecer datos como o nome da persoa usuaria e a hora habitual da toma. Finalizada esta configuración, móstrase a pantalla principal do paciente.
 
     Desde esta pantalla central accédese ás funcionalidades da aplicación, entre elas a consulta e seguimento da pauta, o calendario e o histórico, a incorporación dunha nova folla de tratamento e os axustes.
 
-    \item No caso do \textbf{supervisor}, despois de seleccionar o rol accédese á pantalla de vinculación, desde a cal se escanea o código QR xerado polo paciente. Tras formalizar a vinculación, móstrase a pantalla principal do supervisor, na que aparece a listaxe de pacientes vinculados.
+    \item No caso do \textbf{supervisor}, despois de seleccionar o rol accédese á pantalla de vinculación, desde a cal se escanea o código \gls{qr} xerado polo paciente. Tras formalizar a vinculación, móstrase a pantalla principal do supervisor, na que aparece a listaxe de pacientes vinculados.
 
     Ao seleccionar un paciente accédese á súa vista de detalle, desde a que se pode consultar a información do tratamento e realizar as funcionalidades de supervisión asociadas a esa persoa.
 \end{itemize}

@@ -98,11 +98,10 @@ A Figura~\ref{fig:anexo-fluxo-toma} mostra as interaccións principais deste pro
 
 O seguimento diario dunha dose prescrita pódese representar mediante catro estados principais:
 
-%TDO REVISAR BEN O DAS INTERVALOS DAS TOMAS NO CODIGO E MODIFICALO 
 \begin{itemize}
-    \item \textbf{Pendente:} Estado inicial no que se atopa calquera nova dose antes da súa confirmación.
-    \item \textbf{Tomada:} Estado que adquire a dose cando a persoa usuaria confirma a toma dentro do intervalo de tempo considerado como puntual.
-    \item \textbf{Tomada fóra de hora:} Estado asignado cando a confirmación se realiza, pero unha vez superada a marxe de tempo estipulada.
+    \item \textbf{Pendente:} Estado inicial no que se atopa calquera nova dose antes da súa confirmación. Cando chega a hora configurada, a aplicación emite un recordatorio e programa un segundo aviso aos trinta minutos se a dose continúa sen confirmar. Este horario serve de referencia para os avisos, pero non limita o momento en que a persoa usuaria pode rexistrar a toma durante o día.
+    \item \textbf{Tomada:} Estado que adquire a dose cando a persoa usuaria confirma a inxesta antes ou na hora habitual prevista.
+    \item \textbf{Tomada fóra de hora:} Estado asignado cando a confirmación se realiza unha vez superada a hora habitual da toma.
     \item \textbf{Non tomada:} Estado definitivo que acada a dose se remata a xornada sen que se rexistrase ningunha confirmación.
 \end{itemize}
 
@@ -118,6 +117,7 @@ Cómpre sinalar que este sistema de estados aplícase unicamente aos días nos q
 \begin{landscape}
 
 \section{Wireframes completos}
+\label{app:wireframes}
 A continuación amósanse todos os wireframes creados en Figma para o deseño da aplicación.
 
 \vspace{0.5cm} % Unha pequena marxe extra

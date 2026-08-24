@@ -1,9 +1,16 @@
 \chapter{Conclusións}
 \label{chap:conclusions}
 
-\lettrine{D}{erradeiro} capítulo da memoria, onde se presentará a
-situación final do traballo, as leccións aprendidas, a relación coas
-competencias da titulación en xeral e a mención en particular,
-posibles liñas futuras,\dots
+\lettrine{O} obxectivo principal deste traballo foi desenvolver unha solución móbil que facilitase o seguimento do tratamento anticoagulante con Sintrom, especialmente a interpretación da folla de tratamento e o control diario das tomas. Para iso desenvolveuse un cliente móbil en Flutter e unha API con FastAPI.
 
-\Blindtext
+A solución permite incorporar unha folla de tratamento mediante unha imaxe ou PDF, extraer automaticamente a información relevante e presentar a pauta de forma máis clara. A persoa usuaria pode revisar os datos antes de gardalos, consultar o calendario, confirmar as tomas e visualizar a súa evolución. Tamén se incorporaron recordatorios e un sistema de vinculación entre paciente e persoa supervisora, protexendo mediante cifrado a información intercambiada.
+
+Durante o desenvolvemento foi necesario afrontar retos como o tratamento de documentos capturados en distintas condicións e a transformación da información extraída nunha pauta coherente.
+
+Os obxectivos propostos considéranse cumpridos, xa que se obtivo un prototipo funcional cos principais fluxos definidos durante a análise. A aplicación foi validada mediante probas unitarias, de integración, de interface e comprobacións manuais en dispositivos Android.
+
+A principal limitación é que a extracción está deseñada para as follas de tratamento do SERGAS e pode verse afectada pola calidade da imaxe, polo que os datos deben revisarse antes de gardalos. Ademais, antes dunha posible utilización nun contexto real serían necesarias probas de usabilidade con participantes externos e unha validación por profesionais sanitarios.
+
+Como traballo futuro poderíase ampliar a compatibilidade con outros formatos de documentos, reforzar a sincronización entre dispositivos e estudar unha posible integración cos sistemas oficiais de saúde.
+
+En conclusión, o proxecto permitiu aplicar coñecementos de desenvolvemento móbil, APIs, procesamento documental, persistencia, seguridade e probas, obtendo unha base funcional para continuar desenvolvendo unha ferramenta de apoio ao tratamento anticoagulante.

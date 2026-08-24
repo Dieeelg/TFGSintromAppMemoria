@@ -1,215 +1,139 @@
-\chapter{Deseño técnico detallado da aplicación}
+\chapter{Deseño}
 \label{app:deseno-detallado}
 
-Este apéndice complementa o Capítulo~\ref{chap:deseño} coa información
-técnica necesaria para reproducir a estrutura da aplicación. Inclúense a
-organización interna do código, o mecanismo de comunicación entre
-dispositivos, o esquema completo de persistencia e os wireframes elaborados
-durante o deseño.
+\section{Organización interna dos compoñentes}
 
-\section{Estrutura interna da solución}
-\label{app:estrutura-interna}
-
-O código do cliente móbil distribúese en directorios segundo a
-responsabilidade de cada elemento:
-
-\begin{verbatim}
-client/lib/
-|-- componentes/
-|-- modelos/
-|-- modelos_vista/
-|   `-- autenticacion/
-|-- nucleo/
-|-- recursos/
-|-- servizos/
-|-- views/
-|   `-- camara/
-`-- main.dart
-\end{verbatim}
-
-Os directorios \textit{views}, \textit{modelos\_vista} e \textit{modelos}
-correspóndense respectivamente coas capas View, ViewModel e Model do patrón
-MVVM. O directorio \textit{servizos} contén as operacións de acceso á API,
-persistencia, notificacións, cifrado e sincronización, mentres que
-\textit{componentes} agrupa elementos visuais reutilizables.
-
-A API presenta a seguinte organización:
-
-\begin{verbatim}
-server/app/
-|-- data/
-|-- internal/
-|-- routers/
-|-- schemas/
-|-- dependencies.py
-`-- main.py
-\end{verbatim}
-
-\textit{main.py} crea a aplicación FastAPI e rexistra os routers.
-\textit{routers} define os endpoints, \textit{internal} contén a lóxica de
-procesamento, \textit{schemas} define os modelos de intercambio e
-\textit{dependencies.py} inicializa o acceso aos servizos externos.
-
-\section{Comunicación entre dispositivos}
-\label{app:comunicacion}
-
-A vinculación inicial permite establecer unha relación entre un paciente e
-un supervisor. O dispositivo do paciente xera un código QR que contén un
-identificador da vinculación, o identificador do paciente, o token de Firebase
-Cloud Messaging e unha clave temporal.
-
-O supervisor le este código e completa o proceso de vinculación. A partir
-dese momento mantense unha clave asociada á relación entre ambos dispositivos.
-As claves gárdanse mediante \textit{Secure Storage}.
-
-Para as comunicacións posteriores emprégase AES-GCM con claves de 256 bits.
-Cada mensaxe cifrada contén, como mínimo, a versión do protocolo, o
-identificador da vinculación, o \textit{nonce}, os datos cifrados e o código
-de autenticación da mensaxe. A API recibe este sobre cifrado e envíao ao
-dispositivo destinatario mediante Firebase Cloud Messaging.
+Como complemento á arquitectura xeral, a Figura~\ref{fig:anexo-componentes} recolle a organización interna da aplicación, detallando a distribución dos paquetes do cliente móbil e dos módulos da API.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]
-    {imaxes/07-Deseño/04_comunicacion_sincronizacion.png}
-    \caption{Detalle da vinculación e sincronización entre dispositivos.}
-    \label{fig:app-comunicacion}
+    % Subfigura A (esquerda)
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imaxes/07-Deseño/anexo/01_estrutura_paquetes_cliente (2).drawio.png}
+        \caption{Estrutura de paquetes do cliente móbil.}
+        \label{fig:anexo-paquetes-cliente}
+    \end{subfigure}
+    \hfill % Isto empurra a segunda imaxe cara á dereita para poñela na mesma liña
+    % Subfigura B (dereita)
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=0.95\textwidth]{imaxes/07-Deseño/anexo/02_estrutura_modulos_api.drawio.png}
+        \caption{Organización interna dos módulos da API.}
+        \label{fig:anexo-modulos-api}
+    \end{subfigure}
+    
+    \caption{Organización interna dos compoñentes da solución.}
+    \label{fig:anexo-componentes}
 \end{figure}
+\FloatBarrier
 
-Os datos dunha vinculación poden representarse mediante os seguintes
-elementos:
+\section{Fluxos complementarios da aplicación}
 
-\begin{center}
-\begin{tabular}{|p{0.27\textwidth}|p{0.60\textwidth}|}
-\hline
-\textbf{Campo} & \textbf{Descrición} \\ \hline
-\textit{id} & Identificador único da vinculación. \\ \hline
-\textit{uidRemoto} & Identificador Firebase do outro dispositivo. \\ \hline
-\textit{tokenRemoto} & Token empregado para o envío mediante FCM. \\ \hline
-\textit{claveBase64} & Clave AES-GCM compartida codificada en Base64. \\ \hline
-\textit{rolRemoto} & Tipo de usuario situado no outro extremo da vinculación. \\ \hline
-\end{tabular}
-\end{center}
+No capítulo principal represéntanse os fluxos de vinculación entre dispositivos, procesamento dunha folla de tratamento e sincronización. Como complemento, neste anexo descríbense dous fluxos internos que resultan relevantes para comprender o comportamento da aplicación unha vez recibidos os datos procesados: a revisión e confirmación dunha nova pauta e o seguimento dunha toma diaria.
 
+\subsection{Incorporación dunha nova pauta desde o supervisor}
 
-\section{Persistencia local detallada}
-\label{app:persistencia}
+A aplicación permite que a persoa supervisora dixitalice unha nova folla de tratamento en nome dun paciente vinculado. O proceso iníciase coa selección da persoa supervisada na pantalla principal, seguida da captura do documento e do seu envío á API para realizar a extracción dos datos.
 
-A base de datos SQLite emprega catro táboas principais. A
-Figura~\ref{fig:app-persistencia} mostra a súa organización.
+Tras recibir a resposta do servidor, preséntase a interface de revisión para que o supervisor poida comprobar e corrixir a información obtida antes de confirmar a nova pauta. A principal diferenza respecto ao fluxo realizado directamente polo paciente prodúcese nesta confirmación final: a pauta resultante non se garda como tratamento activo no dispositivo do supervisor. No seu lugar, a actualización transmítese ao dispositivo do paciente a través da canle cifrada establecida durante a vinculación.
+
+Unha vez que o dispositivo de destino recibe e descifra a información, a nova folla incorpórase como pauta activa do paciente e pasa a empregarse no seguimento diario do tratamento.
+
+A Figura~\ref{fig:anexo-pauta-supervisor} mostra as interaccións principais deste proceso.
 
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=\textwidth]
-    {imaxes/07-Deseño/06_persistencia_local.png}
-    \caption{Esquema completo da persistencia local.}
-    \label{fig:app-persistencia}
+    \includegraphics[width=\textwidth]{imaxes/07-Deseño/anexo/05_incorporacion_pauta_supervisor_secuencia_cores.drawio.png}
+    \caption{Fluxo de incorporación dunha nova pauta desde o dispositivo supervisor.}
+    \label{fig:anexo-pauta-supervisor}
 \end{figure}
 
-\begin{longtable}{|p{0.23\textwidth}|p{0.67\textwidth}|}
-\hline
-\textbf{Táboa} & \textbf{Campos} \\ \hline
-\endfirsthead
+\subsection{Tratamento dun resultado de extracción non válido}
 
-\hline
-\textbf{Táboa} & \textbf{Campos} \\ \hline
-\endhead
+O procesamento dunha folla de tratamento non conduce necesariamente á obtención dunha pauta válida. Se durante a análise non é posible recuperar a información necesaria, o resultado presenta unha fiabilidade insuficiente, ou se detectan datos incompletos e incoherentes, o proceso interrómpese e non se avanza cara á fase de revisión.
 
-\textit{analise\_actual} &
-\textit{id}, \textit{dataInforme}, \textit{proximaVisita},
-\textit{centro}, \textit{farmaco}, \textit{doseSemanal},
-\textit{documentoId}, \textit{inr}. \\ \hline
+Nestes casos, a aplicación informa á persoa usuaria de que o documento non puido procesarse de maneira satisfactoria e ofrécelle a posibilidade de realizar unha nova captura ou seleccionar un ficheiro distinto. Só cando a extracción supera as comprobacións internas da API se presentan os datos na interface para a súa revisión manual.
 
-\textit{pautas} &
-\textit{id}, \textit{data}, \textit{dia}, \textit{dose},
-\textit{accion}, \textit{eControl}, \textit{diaSemanaTexto},
-\textit{estado}, \textit{horaConfirmacion},
-\textit{desviacionMinutos}. \\ \hline
+Este deseño preventivo evita que un resultado considerado insuficiente ou dubidoso poida chegar a confirmarse e empregarse no seguimento diario do tratamento. A Figura~\ref{fig:anexo-extraccion-non-valida} representa este fluxo alternativo.
 
-\textit{historico\_visitas} &
-\textit{id}, \textit{data}, \textit{inr}, \textit{farmaco},
-\textit{dose}, \textit{apttInyectable},
-\textit{doseInyectable}, \textit{proximaVisita},
-\textit{comentarios}. \\ \hline
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{imaxes/07-Deseño/anexo/06_tratamento_extraccion_non_valida_secuencia_cores.drawio.png}
+    \caption{Tratamento dun resultado de extracción non válido.}
+    \label{fig:anexo-extraccion-non-valida}
+\end{figure}
 
-\textit{pacientes\_coidador} &
-\textit{uid}, \textit{token}, \textit{nome}, \textit{payload},
-\textit{actualizadoEn}. \\ \hline
+\subsection{Revisión e confirmación dunha nova pauta}
 
-\end{longtable}
+Unha vez que a aplicación recibe os datos extraídos dunha folla, estes non se incorporan directamente ao tratamento activo. Primeiro preséntanse á persoa usuaria para que poida revisar a pauta proposta. Durante esta fase é posible modificar os datos que sexan necesarios antes da confirmación.
 
-As táboas \textit{analise\_actual}, \textit{pautas} e
-\textit{historico\_visitas} representan partes dunha mesma análise, pero a
-relación entre elas mantense na lóxica da aplicación e non mediante claves
-foráneas.
+Cando se solicita a confirmación, a aplicación comproba a consistencia da pauta. Se se detecta algún problema, a información volve mostrarse para a súa corrección. Se a pauta é válida, substitúe á pauta activa anterior e pasa a empregarse no seguimento das tomas. Cando existe unha vinculación con outro dispositivo, a actualización comunícase tamén á outra persoa asociada.
 
-Determinados datos almacénanse fóra de SQLite mediante
-\textit{Flutter Secure Storage}. Entre os principais valores gárdanse:
+A Figura~\ref{fig:anexo-revision-pauta} representa este fluxo.
 
-\begin{center}
-\begin{tabular}{|p{0.39\textwidth}|p{0.51\textwidth}|}
-\hline
-\textbf{Clave} & \textbf{Finalidade} \\ \hline
-\textit{configuracion\_finalizada} &
-Indica que se completou a configuración inicial. \\ \hline
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=1\textwidth]{imaxes/07-Deseño/anexo/05_fluxo_revision_pauta.drawio.png}
+    \caption{Fluxo de revisión e confirmación dunha nova pauta.}
+    \label{fig:anexo-revision-pauta}
+\end{figure}
 
-\textit{rol\_usuario} &
-Identifica se a instalación corresponde a un paciente ou supervisor. \\ \hline
+\subsection{Seguimento dunha toma diaria}
 
-\textit{nome\_usuario} &
-Nome opcional empregado na interface e nas notificacións. \\ \hline
+Cada dose da pauta activa permanece inicialmente en estado pendente e pode ser confirmada como realizada durante todo o día correspondente. Cando chega a hora configurada para realizar a toma, a aplicación envía unha notificación a modo de recordatorio. Se a persoa usuaria confirma a inxesta, o seu estado actualízase en función do momento no que se realizou. Se ao finalizar o día non se produciu ningunha confirmación, a toma pasa a considerarse non realizada. Deste xeito, o sistema distingue entre unha toma pendente, unha toma realizada, unha toma realizada fóra da hora prevista e unha toma non realizada.
 
-\textit{hora\_toma} &
-Hora habitual configurada para a toma. \\ \hline
+Cando existe unha vinculación activa, os cambios relevantes no estado dunha toma poden comunicarse ao dispositivo asociado. Desta forma, o seguimento local e a supervisión remota manteñen unha visión coherente da situación máis recente dispoñible.
 
-\textit{modo\_sinxelo} &
-Configuración do modo simplificado da interface. \\ \hline
+A Figura~\ref{fig:anexo-fluxo-toma} mostra as interaccións principais deste proceso.
 
-\textit{p2p\_vinculacions\_seguras} &
-Información das vinculacións activas. \\ \hline
+\begin{figure}[htbp]
+    \centering
+   \includegraphics[width=1\textwidth]{imaxes/07-Deseño/anexo/06_fluxo_toma_diaria.drawio.png}
+    \caption{Fluxo de seguimento dunha toma diaria.}
+    \label{fig:anexo-fluxo-toma}
+\end{figure}
 
-\textit{p2p\_vinculacion\_pendente\_actual} &
-Identificador dunha vinculación que aínda non foi completada. \\ \hline
+\subsection{Estados dunha toma}
 
-\textit{p2p\_clave\_pendente\_<id>} &
-Clave temporal asociada ao proceso de vinculación indicado. \\ \hline
-\end{tabular}
-\end{center}
+O seguimento diario dunha dose prescrita pódese representar mediante catro estados principais:
 
-
-\section{Diagramas adicionais}
-\label{app:diagramas-adicionais}
-
-Nesta sección poden incluírse os diagramas empregados para representar con
-maior detalle os fluxos secundarios da aplicación. En particular, resulta
-útil conservar:
-
+%TDO REVISAR BEN O DAS INTERVALOS DAS TOMAS NO CODIGO E MODIFICALO 
 \begin{itemize}
-    \item a secuencia de vinculación entre paciente e supervisor;
-    \item a secuencia de sincronización segura;
-    \item o diagrama de estados dunha toma diaria;
-    \item os fluxos de desvinculación e actualización da información;
-    \item outros diagramas de secuencia empregados durante o deseño.
+    \item \textbf{Pendente:} Estado inicial no que se atopa calquera nova dose antes da súa confirmación.
+    \item \textbf{Tomada:} Estado que adquire a dose cando a persoa usuaria confirma a toma dentro do intervalo de tempo considerado como puntual.
+    \item \textbf{Tomada fóra de hora:} Estado asignado cando a confirmación se realiza, pero unha vez superada a marxe de tempo estipulada.
+    \item \textbf{Non tomada:} Estado definitivo que acada a dose se remata a xornada sen que se rexistrase ningunha confirmación.
 \end{itemize}
 
-Estes diagramas complementan os fluxos principais presentados no
-Capítulo~\ref{chap:deseño}, pero non son necesarios para comprender a
-arquitectura xeral da solución.
+Cómpre sinalar que este sistema de estados aplícase unicamente aos días nos que existe unha dose efectiva de medicación. Quedan fóra, polo tanto, aquelas xornadas nas que non se debe tomar o fármaco ou que están reservadas exclusivamente para un control médico. A Figura~\ref{fig:anexo-estados-toma} resume as transicións posibles entre estes estados.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{imaxes/07-Deseño/anexo/estados_dunha_toma.png}
+    \caption{Diagrama dos estados posibles dunha toma durante o seguimento.}
+    \label{fig:anexo-estados-toma}
+\end{figure}
+
+\begin{landscape}
 
 \section{Wireframes completos}
-\label{app:wireframes}
+A continuación amósanse todos os wireframes creados en Figma para o deseño da aplicación.
 
-Nesta sección recóllese o conxunto completo de wireframes realizados en Figma.
-Estes deseños mostran as distintas propostas de interface empregadas como
-referencia antes e durante a implementación.
+\vspace{0.5cm} % Unha pequena marxe extra
+\begin{center}
+    % Inserimos só a páxina 1 debaixo do texto. 
+    % Se o wireframe queda moi pequeno podes usar width=\textwidth
+    % Se o necesitas rotar, podes engadir a opción angle=90 dentro dos corchetes
+    \includegraphics[page=1, width=1.4\textwidth]{imaxes/07-Deseño/wireframes.pdf}
+\end{center}
+\end{landscape}
 
-% Require \usepackage{pdfpages}
-% Coloca Pantallas_mock_figma.pdf nunha ruta accesible desde o proxecto.
-\includepdf[
-    pages=-,
-    nup=2x2,
-    delta=4mm 4mm,
-    frame=false,
-    pagecommand={}
-]{imaxes/07-Deseño/Pantallas_mock_figma.pdf}
+\clearpage
+% 1. Inserimos dende a páxina 2 ata a penúltima (neste exemplo, a 9).
+% Mantemos o pagecommand={} para que sigan tendo o encabezado e pé do documento.
+\includepdf[pages=2-6, landscape=true, pagecommand={}, scale=0.85]{imaxes/07-Deseño/wireframes.pdf}
+
+% 2. Inserimos a última folla á parte (o paquete recoñece a palabra 'last').
+% Ao non poñer 'pagecommand={}', a páxina sairá completamente limpa por defecto.
+\includepdf[pages=last, landscape=true, scale=1]{imaxes/07-Deseño/wireframes.pdf}

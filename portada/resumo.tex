@@ -2,15 +2,18 @@
 
 \pagestyle{empty}
 \begin{abstract}
-  \blindtext % substitúe este comando polo resumo do teu TFG
-             % na lingua principal do documento (tipicamente: galego)
-
+    O tratamento anticoagulante con Sintrom require seguir unha pauta de doses variables que adoita entregarse nunha folla en papel, un formato que pode perderse ou estragarse e que dificulta a consulta diaria, aumentando o risco de erros.
+    Neste traballo desenvolveuse unha aplicación móbil que permite incorporar a folla de tratamento mediante unha fotografía, unha imaxe da galería ou un documento PDF e extraer automaticamente a información necesaria para reconstruír a pauta. A aplicación permite revisar os datos obtidos, consultar o calendario de doses, recibir recordatorios, confirmar as tomas e consultar a evolución do tratamento. Ademais, incorpora un sistema de vinculación entre paciente e supervisor para compartir o estado das tomas e recibir notificacións.
+    A solución está desenvolvida en Flutter e conta cunha API baseada en FastAPI encargada do procesamento dos documentos e da extracción da información. Os datos do tratamento almacénanse localmente no dispositivo e a comunicación entre dispositivos vinculados protéxese mediante cifrado.
+    
   \vspace*{25pt}
   \begin{segundoresumo}
-    \blindtext % substitúe este comando polo resumo do teu TFG
-               % na lingua secundaria do documento (tipicamente: inglés)
+  Sintrom anticoagulant treatment requires following a variable dosing schedule that is usually provided on a paper treatment sheet. This format can be lost or damaged and may make daily consultation more difficult, increasing the risk of errors.
+  This project presents the development of a mobile application that allows users to import a treatment sheet using a photograph, an image from the gallery, or a PDF document and automatically extract the information required to reconstruct the dosing schedule. The application allows users to review the extracted data, consult the dose calendar, receive reminders, confirm medication intake, and monitor treatment progress. It also includes a linking system between patient and supervisor devices to share intake status and receive notifications.
+  The solution is developed with Flutter and includes a FastAPI-based backend responsible for document processing and information extraction. Treatment data is stored locally on the device, while communication between linked devices is protected through encryption.
   \end{segundoresumo}
 \vspace*{25pt}
+
 \input{portada/palabras_chave}
 \end{abstract}
 \pagestyle{fancy}

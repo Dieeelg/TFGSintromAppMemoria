@@ -1,57 +1,42 @@
 \chapter{Deseño}
 \label{chap:deseño}
 
-Neste capítulo descríbese o deseño da solución, presentando a arquitectura do sistema, o modelo de dominio e de persistencia, as interaccións principais e o fluxo de navegación da interface. Os detalles adicionais necesarios para complementar este capítulo recóllense no Apéndice ~\ref{app:deseno-detallado} .
+Neste capítulo descríbese o deseño da solución, incluíndo a arquitectura do sistema, o modelo de información e de persistencia, os principais fluxos de interacción e a navegación da interface. O obxectivo é presentar as decisións que determinan a organización e o comportamento da aplicación, mentres que a súa materialización no código se explica no Capítulo~\ref{chap:implem}. Os diagramas e fluxos complementarios recóllense no Apéndice~\ref{app:deseno-detallado}.
 
 \section{Arquitectura da solución}
 
 \subsection{Visión xeral do sistema}
 
-A solución segue unha \textbf{arquitectura cliente-servidor} formada por unha aplicación móbil e unha \gls{api} baseada no estilo \gls{rest}. A aplicación móbil serve como interface que xestiona a interacción coa persoa usuaria, a persistencia local, o seguimento do tratamento e as notificacións.
+A solución segue unha \textbf{arquitectura cliente-servidor} formada por unha aplicación móbil e unha \gls{api} baseada no estilo \gls{rest}. O cliente constitúe o punto de interacción coa persoa usuaria e encárgase do seguimento do tratamento, a persistencia local e as notificacións. A \gls{api} centraliza o procesamento das follas, aplica as regras necesarias para reconstruír a pauta e proporciona acceso aos servizos externos empregados pola solución.
 
-A \gls{api} proporciona as operacións necesarias para o procesamento das follas de tratamento, a consulta de información dos centros sanitarios e a comunicación entre os dispositivos vinculados. No procesamento das follas, encárgase de preparar o documento cando é necesario, interpretar os campos obtidos polo servizo de extracción, reconstruír a pauta diaria, normalizar e ordenar os datos e realizar comprobacións sobre os resultados antes de construír a resposta que recibe a aplicación. Ademais, a \gls{api} actúa como punto de acceso aos servizos externos empregados pola solución, evitando que o cliente móbil teña que comunicarse directamente con eles.
+Esta separación evita incorporar no cliente as credenciais e a lóxica de acceso ao servizo de procesamento documental. Ademais, permite modificar ou substituír ese servizo sen alterar o fluxo empregado pola aplicación, sempre que se conserve o contrato de comunicación establecido.
 
-A información relativa ao tratamento e ao seu seguimento almacénase de forma local nos dispositivos, polo que a \gls{api} non mantén unha base de datos central coa información clínica das persoas usuarias.
+A información clínica e o seguimento das tomas almacénanse localmente nos dispositivos. En consecuencia, a \gls{api} non mantén unha base de datos central cos tratamentos das persoas usuarias e cada petición contén a información necesaria para ser procesada. Esta decisión reduce a cantidade de datos sensibles conservados no servidor e permite consultar a pauta xa gardada sen depender continuamente dunha conexión de rede.
+
+Outro criterio relevante foi non incorporar automaticamente os resultados da extracción ao tratamento activo. Debido a que o proceso documental pode producir datos incompletos ou incorrectos, a pauta pasa sempre por unha fase de revisión e validación antes de ser confirmada.
 
 \subsection{Arquitectura do cliente móbil}
 
-O cliente organízase seguindo o patrón \textit{Model-View-ViewModel} (MVVM). As \textbf{vistas} representan as pantallas e recollen as interaccións da persoa usuaria. Os \textbf{modelos de vista} manteñen o estado asociado ás distintas funcionalidades e coordinan as operacións necesarias. Pola súa parte, os \textbf{modelos} representan a información do dominio coa que traballa a aplicación.
+O cliente organízase seguindo o patrón \textit{Model-View-ViewModel} (MVVM). As \textbf{vistas} representan as pantallas e recollen as interaccións da persoa usuaria. Os \textbf{modelos de vista} manteñen o estado asociado ás distintas funcionalidades e coordinan as operacións necesarias. Pola súa parte, os \textbf{modelos} representan a información coa que traballa a aplicación.
 
-A estas capas engádese un conxunto de \textbf{servizos} encargados de encapsular as operacións que non pertencen directamente á interface, como o acceso á \gls{api}, a persistencia local, o almacenamento seguro, as notificacións ou a sincronización entre dispositivos. Desta forma, as vistas non necesitan coñecer como se executan estas operacións e cada compoñente mantén unha responsabilidade diferenciada.
+A estas capas engádese un conxunto de \textbf{servizos} que encapsulan as operacións que non pertencen directamente á interface, como o acceso á \gls{api}, a persistencia, as notificacións, o almacenamento seguro ou a sincronización. Esta separación permite que as pantallas non necesiten coñecer como se executan esas operacións e facilita probar a lóxica dos modelos de vista de maneira illada.
 
-A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes principais:
-
-\begin{itemize}
-    \item \textbf{\textit{views}} e \textbf{\textit{modelos\_vista}} conteñen, respectivamente, as pantallas e os modelos de vista asociados ás distintas funcionalidades.
-
-    \item \textbf{\textit{modelos}} agrupa as entidades e estruturas de datos empregadas pola aplicación.
-
-    \item \textbf{\textit{servizos}} reúne as operacións de acceso á \gls{api}, a persistencia, as notificacións, o almacenamento seguro e a sincronización.
-
-    \item \textbf{\textit{compoñentes}} contén elementos visuais reutilizables por distintas pantallas.
-
-    \item \textbf{\textit{nucleo}} e \textbf{\textit{recursos}} agrupan a configuración común e os recursos compartidos pola aplicación.
-\end{itemize}
-
+Os compoñentes visuais reutilizables e os recursos compartidos mantéñense tamén separados das funcionalidades concretas. A correspondencia entre estas responsabilidades e a estrutura de paquetes do proxecto móstrase no Apéndice~\ref{app:deseno-detallado}.
 
 \subsection{Arquitectura da API}
 
-A \gls{api} deseñouse como un servizo sen estado , polo que cada petición contén a información necesaria para ser procesada e non depende dunha sesión almacenada no servidor.
-
-A súa estrutura separa os puntos de entrada \gls{http}, a lóxica de procesamento, os contratos de datos e as integracións externas do seguinte xeito:
+A \gls{api} deseñouse como un servizo sen estado: cada petición é independente e non require unha sesión almacenada no servidor. A súa organización separa catro responsabilidades principais:
 
 \begin{itemize}
-    \item Os \textbf{puntos de entrada}: reciben e verifican as peticións.
-    \item A \textbf{lóxica interna}: realiza o preprocesamento, a interpretación, a transformación e a validación dos datos.
-    \item Os \textbf{esquemas}: definen a estrutura das entradas e das respostas.
-    \item As \textbf{dependencias}: proporcionan o acceso aos servizos externos.
+    \item os \textbf{puntos de entrada}, que reciben e verifican as peticións;
+    \item a \textbf{lóxica interna}, que preprocesa, interpreta, transforma e valida os datos;
+    \item os \textbf{esquemas}, que definen os contratos de entrada e saída;
+    \item as \textbf{dependencias}, que proporcionan o acceso aos servizos externos.
 \end{itemize}
 
-Esta división permite, por exemplo, substituír o mecanismo de extracción documental sen modificar a interface empregada polo cliente, sempre que se manteña o mesmo contrato de saída.
+Esta división evita mesturar a comunicación \gls{http} coa lóxica de procesamento e permite substituír as dependencias externas durante as probas. Os contratos \gls{rest} agrúpanse segundo a súa finalidade: extracción das follas, preprocesamento independente, consulta de centros sanitarios, comprobación do estado do servizo e reenvío de notificacións entre dispositivos vinculados.
 
-A comunicación co cliente realízase mediante un conxunto de contratos \gls{rest} que agrupan as principais operacións da \gls{api}. O endpoint \textbf{\textit{/extraccion/}} permite enviar unha folla de tratamento e obter a información procesada e estruturada. O endpoint \textbf{\textit{/notificar/enviar}} encárgase de reenviar as mensaxes intercambiadas entre os dispositivos vinculados. Finalmente, \textbf{\textit{/centros/buscar}} permite consultar a información asociada a un centro sanitario a partir do seu nome.
-
-A Figura~\ref{fig:arquitectura-mvvm-api} mostra conxuntamente a organización do cliente e da \gls{api}, así como a comunicación entre ambos.
+A Figura~\ref{fig:arquitectura-mvvm-api} mostra conxuntamente a organización do cliente e da \gls{api}, así como a comunicación cos servizos externos.
 
 \begin{figure}[htbp]
     \centering
@@ -60,42 +45,34 @@ A Figura~\ref{fig:arquitectura-mvvm-api} mostra conxuntamente a organización do
     \label{fig:arquitectura-mvvm-api}
 \end{figure}
 
-%TODO
-%A estrutura detallada dos paquetes e a correspondencia cos directorios da implementación recóllense no Apéndice~\ref{app:estrutura-paquetes}.
+\section{Modelo de información e persistencia}
 
-\section{Modelo de datos e persistencia}
+\subsection{Modelo de información da aplicación}
 
-\subsection{Modelo de dominio} %Quitar que é modelo de dominio
-O modelo de dominio representa a información obtida dunha folla de tratamento así como os datos necesarios para para revisala e posteriormente realizar o seguimento das tomas.  
+O modelo principal representa os datos obtidos dunha folla de tratamento e a información necesaria para revisalos e realizar posteriormente o seguimento das tomas.
 
-A entidade principal é a \textbf{análise}, que agrupa os distintos bloques de información presentes no documento. Está formada por tres partes: a cabeceira, a pauta diaria e
-o histórico de visitas. A cabeceira reúne os datos xerais do tratamento actual, como a data do informe, o \gls{inr}, o fármaco, a dose semanal, a seguinte visita e o centro sanitario. A pauta diaria está formada polos días de tratamento, indicando para cada un deles a data, a dose ou acción correspondente e se se trata dun día de control. O histórico conserva a información das visitas anteriores incluídas no documento.
+A entidade principal é a \textbf{análise}, que agrupa tres bloques: a cabeceira, a pauta diaria e o histórico de visitas. A cabeceira reúne datos xerais como a data do informe, o \gls{inr}, o fármaco, a dose semanal, a seguinte visita e o centro sanitario. A pauta diaria está formada polos días de tratamento e indica para cada un deles a data, a dose ou acción correspondente e se se trata dun día de control. O histórico conserva a información das visitas anteriores incluídas no documento.
 
-Sobre esta análise actúa a \textbf{revisión da pauta}, encargada de permitir a comprobación dos datos antes da súa confirmación. Durante esta etapa poden corrixirse as doses e as datas, engadir ou eliminar días, modificar a seguinte visita, ordenar a pauta e comprobar a súa consistencia. Desta forma, o resultado obtido automaticamente pode revisarse antes de incorporarse ao tratamento activo.
+Sobre esta análise actúa a \textbf{revisión da pauta}. Durante esta etapa poden corrixirse doses e datas, engadir ou eliminar días, modificar a seguinte visita, ordenar a pauta e comprobar a súa consistencia. Deste xeito, diferéncianse os datos propostos pola extracción automática dos datos que a persoa usuaria confirma finalmente.
 
-Unha vez confirmada a pauta, cada dose pasa a formar parte do \textbf{seguimento das tomas}. Ademais da información prescrita, mantense o estado de cada toma, permitindo distinguir se está pendente, foi realizada, se realizou fóra da hora prevista ou non se realizou. Así, o modelo diferencia a información procedente da folla de tratamento do estado que vai adquirindo cada toma durante o uso da aplicación.
+Unha vez confirmada a pauta, cada dose pasa a formar parte do \textbf{seguimento das tomas}. Ademais da información prescrita, consérvase o estado de cada toma para distinguir se permanece pendente, foi realizada, foi realizada fóra da hora prevista ou non se realizou.
 
-A Figura~\ref{fig:modelo-dominio} mostra os principais elementos do dominio e as relacións entre eles.
+A Figura~\ref{fig:modelo-dominio} mostra os principais elementos deste modelo e as relacións entre eles.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=0.8\textwidth]{imaxes/07-Deseño/modelo_dominio_uml_preview.png}
-    \caption{Modelo de dominio principal da aplicación.}
+    \caption{Modelo principal de información da aplicación.}
     \label{fig:modelo-dominio}
 \end{figure}
 
 \subsection{Modelo de persistencia}
-O almacenamento local da aplicación está deseñado para xestionar a pauta de tratamento e o seguimento das tomas. A información organízase en catro bloques principais.
 
-A \textbf{pauta vixente} reúne os datos da última folla confirmada e o plan diario de tratamento, incluíndo as doses prescritas e o estado das tomas. Cando se confirma unha nova folla, esta pasa a substituír a anterior, de forma que se mantén unha única pauta activa en cada momento.
+O almacenamento local organízase arredor da pauta vixente, o histórico de visitas e os datos necesarios para a supervisión. A \textbf{pauta vixente} reúne a última folla confirmada e o plan diario, incluíndo o estado das tomas. Cando se confirma unha nova folla, esta substitúe a pauta anterior, polo que só existe un tratamento activo en cada momento.
 
-O \textbf{histórico de visitas} consérvase separado da pauta vixente e recolle a información correspondente aos controis anteriores. Esta separación permite consultar a evolución do tratamento sen mesturala cos datos empregados no seguimento diario.
+O \textbf{histórico de visitas} consérvase separado da pauta vixente para permitir consultar a evolución sen mesturala cos datos empregados no seguimento diario. Nos dispositivos das persoas supervisoras almacénanse tamén os \textbf{datos de supervisión}, formados polas persoas vinculadas e pola última información recibida de cada unha delas.
 
-Nos dispositivos das persoas supervisoras almacénanse ademais os \textbf{datos de supervisión}, formados pola información das persoas vinculadas e polos últimos datos recibidos de cada unha delas. Deste modo, pode consultarse localmente a información máis recente dispoñible.
-
-Finalmente, os \textbf{datos de configuración e seguridade}, como as claves de cifrado asociadas ás vinculacións, mantéñense separados dos datos do tratamento e almacénanse mediante un mecanismo de almacenamento seguro.
-
-%FIGURA SOBRE A BD AO AP
+Finalmente, os \textbf{datos de configuración e seguridade}, como o rol, as preferencias e as claves asociadas ás vinculacións, mantéñense separados da base de datos clínica. As claves e os identificadores sensibles gárdanse mediante almacenamento seguro do sistema operativo.
 
 \begin{figure}[htbp]
     \centering
@@ -106,14 +83,13 @@ Finalmente, os \textbf{datos de configuración e seguridade}, como as claves de 
 
 \section{Deseño do comportamento}
 
-Nesta sección descríbense dous dos fluxos máis relevantes da aplicación, o procesamento dunha folla de tratamento e a sincronización da información entre dispositivos.
+Nesta sección descríbense os tres fluxos que conectan máis compoñentes da solución: a vinculación entre os dispositivos, o procesamento dunha folla e a sincronización do tratamento.
 
 \subsection{Vinculación entre paciente e supervisor}
-A vinculación establécese mediante un código \gls{qr} xerado no dispositivo do paciente. Este código contén  un identificador da vinculación, o identificador e o token de mensaxería do paciente e unha clave temporal empregada para protexer o intercambio inicial.
 
-O supervisor escanea o \gls{qr} e emprega estes datos para iniciar a asociación. Como resposta, envía ao paciente o seu identificador e token de mensaxería, xunto cunha nova clave compartida que se empregará nas comunicacións posteriores. Esta información transmítese cifrada mediante a clave temporal incluída no código \gls{qr}. Unha vez completado o intercambio, ambos dispositivos dispoñen da información necesaria para identificarse e comunicarse de forma segura.
+A vinculación establécese mediante un código \gls{qr} xerado no dispositivo do paciente. Este código contén un identificador da vinculación, os datos necesarios para localizar o dispositivo e unha clave temporal empregada para protexer o intercambio inicial.
 
-A Figura~\ref{fig:fluxo-vinculacion} mostra as principais etapas deste proceso.
+O supervisor escanea o código e utiliza estes datos para iniciar a asociación. Como resposta, envía a súa identificación xunto cunha nova clave compartida que se empregará nas comunicacións posteriores. A información transmítese cifrada coa clave temporal e, unha vez completado o intercambio, ambos os dispositivos dispoñen dos datos necesarios para identificarse e comunicarse de maneira segura.
 
 \begin{figure}[htbp]
     \centering
@@ -122,29 +98,24 @@ A Figura~\ref{fig:fluxo-vinculacion} mostra as principais etapas deste proceso.
     \label{fig:fluxo-vinculacion}
 \end{figure}
 
-
 \subsection{Procesamento dunha folla de tratamento}
- O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla de tratamento desde a aplicación móbil. O documento envíase á \gls{api}, que realiza o preprocesamento se é necesario e solicita a extracción da información ao servizo de procesamento documental.
 
- A partir do resultado obtido, a \gls{api} interpreta os campos, normaliza os datos, reconstrúe a pauta diaria e realiza certas comprobacións antes de devolver unha resposta ao cliente. Na aplicación, os  datos recibidos móstranse para a súa revisión, e unha vez confirmados, pasan a formar parte da pauta activa almacenada no dispositivo.
+O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla desde a aplicación. O documento envíase á \gls{api}, que comproba o formato, realiza o preprocesamento cando é necesario e solicita a extracción ao servizo documental.
 
- A Figura~\ref{fig:fluxo-procesamento} representa as principais etapas deste
-proceso.
+A partir do resultado, a \gls{api} normaliza os campos, reconstrúe a pauta diaria e realiza as validacións definidas antes de devolver unha resposta. No cliente, os datos móstranse nunha pantalla de revisión e só pasan a formar parte da pauta activa despois da confirmación. Se a extracción non supera as comprobacións mínimas, o fluxo interrómpese e solicítase unha nova captura.
 
 \begin{figure}[htbp]
     \centering
-     \includegraphics[width=0.9\textwidth]{imaxes/07-Deseño/secuencia_procesamento_UML.drawio.png}
+    \includegraphics[width=0.9\textwidth]{imaxes/07-Deseño/secuencia_procesamento_UML.drawio.png}
     \caption{Fluxo de procesamento dunha folla de tratamento.}
     \label{fig:fluxo-procesamento}
 \end{figure}
 
 \subsection{Sincronización entre dispositivos}
 
-A sincronización permite compartir información entre o dispositivo do paciente e o do supervisor. Cando se produce un cambio que debe comunicarse (como realizar unha toma, esquecela ou escanear unha nova folla), o dispositivo de orixe prepara os datos e cifra o contido empregando a información establecida durante a vinculación.
+Cando se produce un cambio que debe compartirse, como a confirmación dunha toma ou a incorporación dunha nova folla, o dispositivo de orixe prepara a información e cífraa empregando a clave acordada durante a vinculación. A mensaxe cifrada envíase á \gls{api}, que actúa como intermediaria e a reenvía mediante o servizo de mensaxería.
 
-A mensaxe cifrada envíase a \gls{api}, que actúa como intermediaria e reenvíaa empregando o servizo de mensaxería. Este encárgase de entregala ao dispositivo de destino, onde o contido é descifrado e empregado para actualizar a información almacenada.
-
-Deste xeito,a \gls{api} participa no transporte das mensaxes sen necesitar almacenar a información clínica intercambiada entre os dispositivos. A Figura~\ref{fig:fluxo-sincronizacion} mostra as principais etapas deste fluxo.
+O dispositivo de destino autentica e descifra a mensaxe antes de actualizar a súa información local. Deste xeito, a \gls{api} participa no transporte sen necesitar interpretar nin almacenar o contido clínico intercambiado.
 
 \begin{figure}[htbp]
     \centering
@@ -156,21 +127,12 @@ Deste xeito,a \gls{api} participa no transporte das mensaxes sen necesitar almac
 \section{Deseño da navegación e da interface}
 
 \subsection{Fluxo de navegación}
-O primeiro acceso á aplicación comeza coa selección do rol, decisión que determina o percorrido posterior e as funcionalidades dispoñibles. A partir deste punto distínguense dous fluxos principais:
 
-\begin{itemize}
-    \item No caso do \textbf{paciente}, tras seleccionar o rol accédese á pantalla de vinculación, na que se xera un código \gls{qr} para establecer a relación cun supervisor. Unha vez completada esta fase, pásase a unha pantalla de configuración de permisos na que se decide quen será o encargado de dixitalizar os informes de tratamento. Aínda que o supervisor mantén sempre esta capacidade, pódese restrinxir esta función para o paciente co obxectivo de simplificar a súa interface. Despois, accédese á
-    configuración adicional para establecer datos como o nome da persoa usuaria e a hora habitual da toma. Finalizada esta configuración, móstrase a pantalla principal do paciente.
+O primeiro acceso comeza coa selección do rol, decisión que determina as funcionalidades e o percorrido posterior. No caso do \textbf{paciente}, o fluxo inclúe a xeración do código \gls{qr}, a configuración dos permisos de dixitalización e a introdución de datos como o nome e a hora habitual da toma. A pantalla principal permite acceder á pauta, ao calendario, ao progreso, á incorporación dunha nova folla e aos axustes.
 
-    Desde esta pantalla central accédese ás funcionalidades da aplicación, entre elas a consulta e seguimento da pauta, o calendario e o histórico, a incorporación dunha nova folla de tratamento e os axustes.
+No caso da \textbf{persoa supervisora}, o proceso inicial emprega a cámara para escanear o código xerado polo paciente. Tras completar a vinculación, a pantalla principal mostra as persoas supervisadas. Ao seleccionar unha delas accédese ao seu tratamento, ao estado das tomas e ás operacións dispoñibles para a súa supervisión.
 
-    \item No caso do \textbf{supervisor}, despois de seleccionar o rol accédese á pantalla de vinculación, desde a cal se escanea o código \gls{qr} xerado polo paciente. Tras formalizar a vinculación, móstrase a pantalla principal do supervisor, na que aparece a listaxe de pacientes vinculados.
-
-    Ao seleccionar un paciente accédese á súa vista de detalle, desde a que se pode consultar a información do tratamento e realizar as funcionalidades de supervisión asociadas a esa persoa.
-\end{itemize}
-
-
-A Figura~\ref{fig:navegacion-pantallas} representa as principais pantallas e as transicións existentes entre elas.
+A separación por roles evita mostrar opcións que non corresponden á responsabilidade seleccionada e simplifica os percorridos máis habituais de cada tipo de persoa usuaria.
 
 \begin{figure}[htbp]
     \centering
@@ -181,9 +143,9 @@ A Figura~\ref{fig:navegacion-pantallas} representa as principais pantallas e as 
 
 \subsection{Wireframes da interface}
 
-Antes da implementación elaboráronse en Figma distintos wireframes co obxectivo de definir a distribución da información e comprobar os principais percorridos da aplicación. Estes deseños serviron como referencia inicial para a construción das pantallas, aínda que algúns elementos foron modificados durante o desenvolvemento.
+Antes da implementación elaboráronse en Figma distintos wireframes para definir a distribución da información e comprobar os principais percorridos. Estes deseños serviron como referencia inicial, aínda que algúns elementos se adaptaron durante o desenvolvemento ao comprobar o seu funcionamento en dispositivos reais.
 
-Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes máis representativos, correspondentes á selección do tipo de usuario, á pantalla principal do paciente, á incorporación dunha nova folla e á pantalla principal do supervisor.
+Na Figura~\ref{fig:wireframes-principais} móstranse os wireframes máis representativos: selección do rol, pantalla principal do paciente, incorporación dunha folla e pantalla principal da persoa supervisora. O conxunto completo, incluíndo as pantallas de vinculación, revisión, calendario, progreso e configuración, recóllese no Apéndice~\ref{app:wireframes}.
 
 \begin{figure}[htbp]
     \centering
@@ -191,6 +153,3 @@ Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes mái
     \caption{Wireframes representativos da interface da aplicación.}
     \label{fig:wireframes-principais}
 \end{figure}
-
-O conxunto completo de wireframes, incluíndo as pantallas de vinculación, revisión da pauta, confirmación das tomas, progreso, calendario e configuración, recóllese no Apéndice ~\ref{app:wireframes}.
-

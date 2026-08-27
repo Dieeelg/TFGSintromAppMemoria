@@ -1,73 +1,130 @@
 \chapter{Implementación}
 \label{chap:implem}
 
+Neste capítulo explícase como se materializou a arquitectura presentada no Capítulo~\ref{chap:deseño}. Seleccionáronse os mecanismos máis representativos da \gls{api} e do cliente móbil, evitando describir individualmente todas as clases e pantallas. En particular, preséntanse a inicialización das dependencias, o procesamento das follas, a xestión do estado, a persistencia, os recordatorios e a comunicación cifrada entre dispositivos.
 
 \section{Implementación da API}
-%meter en apéndice
-% - Exemplos do JSON devolto por cada endpoint,, exemplos de código e igual unha foto do swagger e de algunha chamada.
-% - Os modelos de pydantic
-% - Mteer igual cousas mais concretas dos edpoint auxiliares
 
-
-A \gls{api} implementouse con FastAPI e mantén separadas a configuración dos servizos externos, os puntos de entrada, os esquemas de datos e a lóxica auxiliar. 
+A \gls{api} implementouse con FastAPI e estrutúrase en módulos diferenciados. Os módulos de rutas conteñen os puntos de entrada; \texttt{internal} agrupa a lóxica e o preprocesamento; \texttt{schemas} define os modelos de Pydantic; e \texttt{dependencies} xestiona a inicialización e o acceso aos servizos externos. Esta correspondencia coa arquitectura por capas evita que os endpoints teñan que crear directamente as súas dependencias ou coñecer como se recuperan as credenciais.
 
 \subsection{Inicialización e acceso aos servizos externos}
 
-A conexión cos servizos externos realízase durante o arranque da \gls{api}, antes de que esta comece a atender peticións. Para iso emprégase o mecanismo de ciclo de vida de \textit{FastAPI}, no que se inicializan \textit{Azure Document Intelligence} e \textit{Firebase Admin} e se recuperan as credenciais necesarias para acceder a estes servizos.
+A conexión con Azure Document Intelligence e Firebase Admin realízase durante o arranque mediante o ciclo de vida de FastAPI. A función \texttt{lifespan} execútase antes de aceptar peticións e prepara os recursos que serán reutilizados durante toda a execución.
 
-A obtención das credenciais segue unha estratexia común nos dous casos. En primeiro lugar, compróbase se están dispoñibles nas variables de contorno do sistema. Este mecanismo facilita a execución da \gls{api} durante o desenvolvemento sen necesidade de acceder a servizos adicionais. Se as credenciais non están presentes, utilízase \textit{DefaultAzureCredential} para autenticarse contra \textit{Azure Key Vault} e recuperar os segredos correspondentes.
+Para Azure compróbase primeiro a variable de contorno \texttt{DOC\_INTEL\_KEY}. Esta opción facilita a execución local e evita depender dun servizo adicional durante o desenvolvemento. Se non está dispoñible, emprégase \texttt{DefaultAzureCredential} para autenticarse en Azure Key Vault e recuperar o segredo. Coa clave resultante créase unha única instancia de \texttt{DocumentIntelligenceClient}, que se almacena en \texttt{app.state}.
 
-Unha vez obtida a clave de \textit{Azure Document Intelligence}, créase unha instancia de \textit{DocumentIntelligenceClient}. Esta instancia almacénase no estado da aplicación e reutilízase durante todo o seu ciclo de vida. As rutas que necesitan realizar a extracción reciben o cliente mediante o sistema de inxección de dependencias de \textit{FastAPI}, evitando así ter que crealo e configuralo para cada petición.
+As rutas que precisan procesar documentos reciben esta instancia mediante \texttt{Depends(obter\_cliente\_azure)}. A inxección evita crear un cliente por petición e permite substituílo por unha simulación durante as probas.
 
-No caso de \textit{Firebase Admin}, as credenciais recuperadas conteñen a configuración da conta de servizo. A partir delas inicialízase o SDK de administración de Firebase. Antes de realizar esta operación compróbase se xa existe unha instancia inicializada, evitando rexistrar a aplicación máis dunha vez durante a execución. Unha vez configurado, o servizo de mensaxería de Firebase pode empregarse desde as rutas encargadas do envío de notificacións.
-
-%Esta implementación centraliza a configuración dos servizos externos no arranque da \gls{api}, mantén a xestión das credenciais separada da lóxica das rutas e permite reutilizar os recursos xa inicializados. Ademais, a combinación de variables de contorno e \textit{Azure Key Vault} facilita o uso de configuracións diferentes segundo o contorno de execución sen incorporar credenciais directamente no código fonte.
-
-Esta implementación centraliza a configuración dos servizos externos e mantén a xestión das credenciais separada da lóxica dos endpoints.
+Para Firebase Admin séguese unha estratexia equivalente. A configuración da conta de servizo recupérase primeiro da variable de contorno \texttt{FIREBASE-CREDENTIALS}. Se non está dispoñible, emprégase a autenticación de Azure para obter o segredo correspondente de Key Vault. O contido recuperado deserialízase e utilízase para inicializar o \gls{sdk} de administración de Firebase. Antes de realizar esta operación compróbase que non exista xa unha instancia activa, evitando inicializar a aplicación máis dunha vez. Unha vez configurado, Firebase Cloud Messaging pode empregarse desde os endpoints encargados do envío de notificacións.
 
 \subsection{Implementación do procesamento dunha folla}
-A solución seleccionada no Capítulo~\ref{chap:procesamento-follas} integrouse no endpoint \textit{/extraccion/}. Ademais de  invocar ao servizo de procesamento documental, o endpoint executa as operacións necesarias para preparar e comprobar os resultados. %Meter preprocesamento
 
-%TODO-> Meter no anexo como funciona ben o preprocesamento (Como se implementa). Revisar capitulo de procesamento 
-Antes de realizar a extracción compróbase que o ficheiro se corresponda con algún dos formatos admitidos. A continuación aplícase a etapa de preprocesamento e envíase o resultado ao modelo personalizado de Azure. Se o servizo non identifica ningún documento ou a confianza global da extracción é inferior ao 60\%, a petición considérase non válida e non se constrúe a pauta.
+A solución seleccionada no Capítulo~\ref{chap:procesamento-follas} integrouse no endpoint \texttt{/extraccion/}. A operación recibe o documento mediante \texttt{UploadFile} e admite imaxes JPEG, PNG, HEIC e HEIF, ademais de documentos \gls{pdf}. Se o tipo recibido non pertence a esta listaxe, a petición rexéitase antes de contactar co servizo externo.
 
-Unha vez obtidos os campos, realízanse distintas comprobacións para evitar resultados incoherentes. A data da próxima visita compárase coa data do informe e rexéitase a extracción se é anterior. O valor do INR normalízase para admitir tanto coma como punto decimal, compróbase que poida converterse a un valor numérico, que se atope dentro dun intervalo lóxico de 0,5 a 10 e que a confianza proporcionada por Azure sexa polo menos do 80\,\%.
+O contido pasa primeiro por \texttt{preprocesar\_documento}. Esta función conserva o ficheiro orixinal cando non é necesario aplicar ningunha corrección e devolve unha versión transformada cando detecta unha perspectiva que pode corrixirse con suficiente fiabilidade. O resultado envíase ao modelo personalizado de Azure Document Intelligence e compróbase que exista polo menos un documento recoñecido e que a confianza media alcance o 60\,\%.
 
-A táboa de doses procésase cela a cela para obter a data, a dose e a acción correspondente. Durante esta transformación compróbase que o día e o mes permitan construír unha data válida e tense en conta o cambio de ano cando a pauta pasa de decembro a xaneiro. As celas que indican \textit{NO TOMAR} convértense nunha dose cero, mentres que as identificadas como \textit{CONTROL} reciben un tratamento específico. Se non é posible recuperar correctamente a data da cela de control, emprégase a data da próxima visita. Do mesmo xeito, se a data extraída non coincide coa próxima visita, substitúese por esta para manter a coherencia entre ambos campos. Finalmente, se non se consegue recuperar ningunha entrada válida da táboa, a extracción é rexeitada.
+Unha vez recuperados os campos, a lóxica interna normaliza e valida os datos antes de crear a resposta. A data da seguinte visita non pode ser anterior á do informe. O valor do \gls{inr} admite coma ou punto decimal, debe converterse correctamente a número e situarse entre 0,5 e 10. Ademais, cando Azure proporciona unha confianza individual para este campo, esíxese un valor mínimo do 80\,\%.
 
-O histórico transfórmase ao formato interno conservando unicamente as filas nas que se recuperou polo menos a data ou o INR. Unha vez procesada e validada a información, os resultados organízanse empregando os modelos de Pydantic cos que se implementou a estrutura definida no deseño. A resposta constrúese mediante \textit{AnalisisResponse}, garantindo que os datos enviados ao cliente móbil manteñan o formato establecido pola \gls{api}.
+Unha vez recuperada a táboa de doses, cada entrada interprétase mediante \texttt{parsear\_cela\_dose} para obter a data, a dose e a acción correspondente. Durante este proceso valídase que as datas sexan correctas e resólvese o cambio de ano nas pautas que comezan en decembro e continúan en xaneiro. As indicacións \textit{NON TOMAR} represéntanse mediante unha dose de valor cero, mentres que os días de \textit{CONTROL} se identifican de maneira específica.
+
+Para estes últimos emprégase como referencia a data da seguinte visita indicada na cabeceira do documento. Se a data da cela non pode recuperarse ou non coincide con esta referencia, utilízase a data da seguinte visita para manter a coherencia da pauta. Finalmente, se non se obtén ningunha entrada válida, considérase que non é posible construír o calendario de doses e a extracción é rexeitada.
+
+O histórico conserva unicamente as filas nas que se obtivo algún dato relevante. Finalmente, a información transfórmase nos modelos \texttt{CabeceiraResponse}, \texttt{DoseDia}, \texttt{ItemHistorico} e \texttt{AnaliseResponse}. Pydantic comproba o contrato final e FastAPI serializa a resposta en formato \gls{json} para o cliente.
 
 \subsection{Endpoints auxiliares}
-Ademais do procesamento das follas, a \gls{api} incorpora varios endpoints auxiliares. O endpoint de centros sanitarios permite buscar os datos dun centro a partir do seu nome, empregando o catálogo almacenado na \gls{api} e admitindo pequenas variacións na denominación. O endpoint de estado permite comprobar que a \gls{api} está operativa e devolve o estado, a data e hora da consulta e a versión en execución, mentres que o de preprocesamento permite aplicar esta etapa de forma independente, sen realizar a extracción con Azure, facilitando así a comprobación do resultado xerado.
 
-A \gls{api} tamén intervén na comunicación entre os dispositivos vinculados mediante o endpoint \textit{/notificar/enviar}. Este recibe o token do dispositivo destinatario, o tipo de aviso e un \textit{payload} que xa foi cifrado no dispositivo de orixe. A API non necesita interpretar o seu contido, senón que actúa como intermediaria e emprega Firebase Cloud Messaging para reenvialo ao destinatario. Para determinados avisos engádese unha notificación visible cun título e unha mensaxe xenéricos, mantendo a información sensible exclusivamente no \textit{payload} cifrado.
+Ademais da extracción, implementáronse endpoints para buscar centros sanitarios, comprobar o estado da \gls{api}, executar o preprocesamento de maneira independente e reenviar notificacións. O endpoint \texttt{/notificar/enviar} recibe o token de destino, o tipo de aviso e un contido xa cifrado polo dispositivo de orixe. A \gls{api} non interpreta ese contido, senón que o entrega a Firebase Cloud Messaging para que chegue ao dispositivo correspondente.
 
 \subsection{Tratamento de erros}
-Diferéncianse os erros segundo a súa orixe. Os ficheiros ou resultados que non superan as comprobacións da extracción devolven un erro 400 \textit{(Bad Request)}, mentres que os erros de validación dos parámetros de entrada son xestionados por FastAPI mediante unha resposta 422\textit{ (Unprocessable Entity)}. Os fallos de comunicación con Azure devolven un 502 \textit{(Bad Gateway)} e os erros inesperados da aplicación un 500 \textit{(Internal Server Error)}. Noutros endpoints empréganse tamén códigos específicos, como o 404\textit{ (Not Found)} cando non se localiza un centro sanitario ou o 503 \textit{(Service Unavailable)} cando non se pode acceder ao catálogo. Esta diferenciación permite que o cliente identifique mellor a causa do problema e mostre unha mensaxe adecuada á persoa usuaria.
+
+Os erros diferéncianse segundo a súa orixe. Un formato non admitido, unha confianza insuficiente ou uns datos incoherentes producen unha resposta 400 \textit{Bad Request}. Se falta algún parámetro obrigatorio ou o seu formato non é válido, FastAPI devolve automaticamente unha resposta 422 \textit{Unprocessable Entity}. Os fallos de comunicación con Azure devólvense como 502 \textit{Bad Gateway} e os erros inesperados da aplicación como 500 \textit{Internal Server Error}.
+
+Os endpoints auxiliares empregan tamén respostas específicas, como 404 \textit{Not Found} cando non se localiza un centro sanitario ou 503 \textit{Service Unavailable} cando non se pode acceder ao catálogo. Esta diferenciación permite que o cliente identifique a causa do problema e mostre unha mensaxe adecuada, en lugar dun erro xenérico.
+
+% CAPTURA RECOMENDADA 1:
+% Gardar como imaxes/08-Implementacion/swagger-extraccion.png.
+% Mostrar Swagger coa listaxe de endpoints e /extraccion/ despregado, evitando que aparezan claves ou datos reais.
+\IfFileExists{imaxes/08-Implementacion/swagger-extraccion.png}{
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{imaxes/08-Implementacion/swagger-extraccion.png}
+    \caption{Documentación interactiva dos endpoints proporcionada por FastAPI.}
+    \label{fig:implementacion-swagger}
+\end{figure}
+}{}
 
 \section{Implementación do cliente móbil}
 
-%Revisa rintroducció
-%A aplicación móbil implementouse en Flutter seguindo o patrón MVVM definido no deseño. As vistas xestionan a interacción coa persoa usuaria, os modelos de vista manteñen o estado e coordinan as operacións, e os modelos representan os datos empregados pola aplicación. Os servizos encapsulan o acceso á \gls{api}, á persistencia, ás notificacións e á sincronización.
+O cliente implementouse con Flutter seguindo a separación MVVM definida no deseño. As vistas constrúen a interface, os modelos de vista estenden \texttt{ChangeNotifier} para manter o estado observable e os servizos encapsulan a comunicación, a persistencia, as notificacións e o cifrado. As dependencias principais proporciónanse aos modelos de vista mediante os seus construtores, o que permite substituílas nas probas sen modificar o comportamento empregado pola aplicación real.
 
 \subsection{Inicialización da aplicación}
 
-Antes de mostrar a interface, a aplicación inicializa os servizos necesarios para o seu funcionamento mediante a clase \textit{InicializadorAplicacion}.
+Antes de mostrar a interface, \texttt{main} chama a \texttt{InicializadorAplicacion}. Este compoñente inicializa Firebase, rexistra o tratamento das mensaxes recibidas en primeiro e segundo plano, solicita os permisos de notificación e prepara o servizo de avisos locais.
 
-Neste proceso configúrase Firebase, prepárase a recepción de mensaxes tanto en primeiro como en segundo plano e solicítanse os permisos necesarios para as notificacións. Tamén se recupera do almacenamento seguro a información da configuración previa, como o rol seleccionado e se o proceso inicial xa foi completado.
+A configuración gardada en \textit{Flutter Secure Storage} determina a ruta inicial. Se o proceso de configuración aínda non rematou, móstrase a selección do rol. En caso contrario, accédese directamente á pantalla principal do paciente ou da persoa supervisora. Cando o rol é paciente tamén se recuperan a hora habitual e os estados gardados para restaurar os recordatorios pendentes despois dun reinicio da aplicación.
 
-A partir destes datos determínase a pantalla que debe mostrarse ao iniciar a aplicación. Se a configuración está pendente, accédese ao fluxo inicial. Se xa foi completada, móstrase directamente a interface de paciente ou de persoa supervisora. No caso do paciente, tamén se restauran os recordatorios asociados á pauta activa.
+Os modelos de vista de alcance xeral rexístranse mediante \texttt{MultiProvider}. Desta maneira, as pantallas poden observar os cambios de estado e reconstruír unicamente os compoñentes afectados.
 
-\subsection{Incorporación e revisión dunha folla de tratamento}
-A incorporación dunha folla de tratamento divídese en 3 pasos: o envñio á \gls{api}, a revisión dos resultados e a confirmación final. O ficheiro pode obterse mediante a cámara, a galería ou o selector de documentos. O modelo de vista de captura mantén o estado do proceso e xestiona os posibles erros.
+\subsection{Captura, envío e revisión dunha folla}
 
-O envío realízase mediante \textit{ApiService}, empregando unha petición \gls{http} de tipo \textit{multipart}. Se a extracción é correcta, o \gls{json} devolto transfórmase nun \textit{AnaliseModel}. Se se produce un erro, a mensaxe recibida trasládase á interface para informar á persoa usuaria.
+A incorporación dunha folla divídese en tres etapas: selección do ficheiro, revisión dos resultados e confirmación. A imaxe pode proceder da cámara ou da galería, mentres que os documentos poden escollerse mediante o selector de ficheiros. \texttt{CapturaInformeViewModel} mantén o nome do documento, o indicador de procesamento e a mensaxe de erro que debe presentar a interface.
 
-Antes de gardar a pauta, os datos pasan por unha fase de revisión xestionada por \textit{RevisionPauta}. Esta permite modificar, engadir ou eliminar días, cambiar doses e marcar días de control. Tamén comproba que a pauta non estea baleira, que as datas sexan válidas e non estean duplicadas, e que as doses teñan un formato admitido.
+O método \texttt{ServizoApi.enviarInforme} constrúe unha petición \gls{http} \textit{multipart}, incorpora o ficheiro sen cargalo previamente por completo na memoria e envíao a \texttt{/extraccion/}. Se a resposta é correcta, o \gls{json} transfórmase nun \texttt{AnaliseModel}. Se a \gls{api} devolve un erro, o detalle incorpórase ao estado do modelo de vista para que a pantalla poida informar á persoa usuaria e permitir un novo intento.
 
-Tras a confirmación, o comportamento depende do dispositivo. Se a folla foi incorporada polo paciente, gárdase como pauta activa, reprograman os recordatorios e notifícase o cambio ás persoas supervisoras vinculadas. Se foi incorporada desde o dispositivo supervisor, a pauta revisada envíase ao paciente para que sexa almacenada como tratamento activo.
+Os datos recuperados pasan a \texttt{RevisionPauta}, que ofrece operacións para modificar, inserir, eliminar e ordenar días. Antes da confirmación, \texttt{validar} comproba que a pauta conteña polo menos unha entrada, que as datas sexan válidas e non estean repetidas e que cada dose teña un número ou unha fracción admitida. Os días de control reciben un tratamento independente e non requiren unha dose.
 
+Ao confirmar, \texttt{CapturaInformeViewModel.completar} decide o destino do resultado. Se a folla foi incorporada no dispositivo do paciente, gárdase localmente, reprográmanse os recordatorios e notifícase o cambio ás persoas supervisoras. Se foi incorporada desde un dispositivo supervisor, envíase cifrada ao paciente e non se establece como pauta activa no dispositivo de orixe.
 
+% CAPTURA RECOMENDADA 2:
+% Gardar como imaxes/08-Implementacion/fluxo-incorporacion.png.
+% Crear unha composición con tres pantallas: selección/captura, revisión da pauta e confirmación.
+\IfFileExists{imaxes/08-Implementacion/fluxo-incorporacion.png}{
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{imaxes/08-Implementacion/fluxo-incorporacion.png}
+    \caption{Principais etapas da incorporación e revisión dunha folla de tratamento.}
+    \label{fig:implementacion-incorporacion}
+\end{figure}
+}{}
 
+\subsection{Persistencia e seguimento das tomas}
 
+A persistencia clínica implementouse con SQLite mediante \textit{sqflite}. \texttt{ServizoBaseDatos} mantén unha única conexión e crea as táboas correspondentes á pauta, á análise actual, ao histórico e ás persoas supervisadas. A configuración e as claves non se gardan nestas táboas, senón no almacenamento seguro do sistema operativo.
 
+O gardado dunha análise execútase dentro dunha transacción. Primeiro xérase un identificador a partir da cabeceira e do calendario. Se o documento coincide coa folla xa almacenada, recupéranse os estados e as horas de confirmación das tomas anteriores. A pauta e o histórico substitúense e, para as datas coincidentes, restáuranse eses estados. Esta decisión permite volver importar a mesma folla sen perder o seguimento realizado, mentres que unha folla diferente pasa a ser o novo tratamento activo.
+
+Cada dose efectiva comeza en estado pendente. Cando a persoa usuaria confirma a inxesta, gárdanse o novo estado, a hora de confirmación e a desviación respecto da hora habitual. As doses non confirmadas péchanse como non tomadas unha vez rematado o día. Estes rexistros utilízanse para construír o calendario e calcular as métricas de cumprimento mostradas na sección de progreso.
+
+\subsection{Recordatorios e notificacións}
+
+O cálculo dos avisos está separado da súa programación no sistema operativo. \texttt{PlanificadorRecordatorios} recibe a hora configurada, as datas con dose e os estados actuais. Para cada día tomable crea un aviso á hora prevista e outro trinta minutos despois, destinado a lembrar unha posible omisión. Non se programan avisos para doses cero, días de control ou tomas xa pechadas.
+
+\texttt{ServizoNotificacionsLocais} transforma estes recordatorios en notificacións locais. Ao confirmar unha toma cancélase o aviso de esquecemento correspondente; ao gardar unha nova pauta ou cambiar a hora habitual, os avisos calcúlanse de novo. A inicialización da aplicación repite esta comprobación para recuperar unha planificación coherente tras pechar ou reiniciar o dispositivo.
+
+\subsection{Vinculación, cifrado e sincronización}
+
+O servizo \texttt{ServizoCifradoP2P} implementa a protección das comunicacións entre dispositivos. Durante a vinculación, o paciente xera un identificador e unha clave temporal de 256 bits que se incorporan ao código \gls{qr} xunto cos datos necesarios para iniciar o contacto. O supervisor utiliza esta clave para protexer a primeira resposta e proporciona unha clave permanente, que se conserva no almacenamento seguro de ambos os dispositivos.
+
+As mensaxes posteriores cífranse mediante \gls{aesgcm}. Cada mensaxe emprega un nonce novo e inclúe o texto cifrado e o código de autenticación. O identificador da vinculación e o tipo de aviso incorpóranse como datos autenticados adicionais, de maneira que unha modificación do contido ou do contexto provoca o rexeitamento da mensaxe durante o descifrado.
+
+\texttt{ServizoSincronizacionP2P} prepara os datos, solicita o cifrado e utiliza a \gls{api} para entregalos a Firebase Cloud Messaging. No destino comproba o tipo de aviso, autentica e descifra o contido e actualiza a base de datos. Este mecanismo emprégase para a vinculación, a confirmación ou omisión dunha toma, os cambios de configuración, a sincronización completa e a desvinculación.
+
+Unha folla completa pode superar o tamaño adecuado para unha mensaxe. Por este motivo, \texttt{enviarInformeRemoto} serializa a análise, divídea en fragmentos identificados mediante un número de orde e envía cada parte de maneira cifrada. O paciente almacena temporalmente os fragmentos, reconstrúe o \gls{json} cando os recibe todos, garda a nova pauta e elimina as partes temporais.
+
+\section{Resultado final}
+
+O resultado é unha aplicación cunha interface diferenciada para paciente e persoa supervisora. No perfil de paciente, a pantalla principal resume a dose actual e permite acceder ao calendario, ao progreso, á incorporación dunha folla e á configuración. No perfil de supervisión, a pantalla inicial presenta as persoas vinculadas e permite consultar o estado máis recente de cada tratamento ou incorporar unha nova folla no seu nome.
+
+Para documentar o resultado final convén empregar capturas con datos ficticios e manter o mesmo dispositivo, escala e tema visual. No corpo do capítulo son suficientes dúas composicións: unha co fluxo de incorporación, xa indicada anteriormente, e outra coas pantallas finais máis representativas. As pantallas secundarias poden trasladarse ao apéndice de implementación.
+
+% CAPTURA RECOMENDADA 3:
+% Gardar como imaxes/08-Implementacion/interfaces-principais.png.
+% Crear unha composición coa pantalla principal do paciente, calendario ou progreso e pantalla da persoa supervisora.
+\IfFileExists{imaxes/08-Implementacion/interfaces-principais.png}{
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.95\textwidth]{imaxes/08-Implementacion/interfaces-principais.png}
+    \caption{Interfaces finais de seguimento e supervisión do tratamento.}
+    \label{fig:implementacion-interfaces}
+\end{figure}
+}{}

@@ -183,11 +183,11 @@ A comunicación \gls{http} probouse substituíndo o cliente real por un MockClie
     caption={Comprobación dunha petición realizada polo cliente},
     label={lst:flutter-mock-http}
 ]
-final api = ApiService(
+final api = ServizoApi(
   client: MockClient((request) async {
     expect(request.method, 'POST');
     expect(request.url.path,
-        AppConstants.endpointEnviarNotif);
+        ConstantesAplicacion.endpointEnviarNotif);
 
     expect(jsonDecode(request.body), {
       'token_destino': 'token',

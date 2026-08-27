@@ -17,7 +17,7 @@ Un fallo na dosificación pode ter consecuencias moi negativas na saúde do paci
 
 Outro inconveniente do formato físico é a dificultade para consultar a evolución do tratamento ao longo do tempo. O paciente adoita tirar os informes vellos, perdendo a información de como evoluciona o \gls{inr} ou as súas doses nos últimos meses. A dixitalización permite manter un histórico que facilita ao paciente unha perspectiva para ver os seus avances.
 
-Ademais, o seguimento manual carece de mecanismos de notificación ou confirmación das tomas, o que limita a capacidade de supervisión por parte dos coidadores. Isto xera incerteza e preocupación, xa que non poden saber se o paciente tomou a dose sen falar directamente con el, quen á súa vez pode non lebrar se a tomou ou non. Como consecuencia, aumenta o risco de non actuar a tempo ante un esquecemento.
+Ademais, o seguimento manual carece de mecanismos de notificación ou confirmación das tomas, o que limita a capacidade de supervisión por parte dos supervisores. Isto xera incerteza e preocupación, xa que non poden saber se o paciente tomou a dose sen falar directamente con el, quen á súa vez pode non lebrar se a tomou ou non. Como consecuencia, aumenta o risco de non actuar a tempo ante un esquecemento.
 
 \begin{figure}[h!]
 \centering
@@ -30,11 +30,11 @@ Ademais, o seguimento manual carece de mecanismos de notificación ou confirmaci
 
 \section{Motivación}
 
-Este proxecto nace coa premisa de achegar seguridade ao tratamento e maior tranquilidade tanto aos pacientes como aos seus familiares e coidadores. Como se expuxo na sección anterior, no sistema actual, moitos pacientes viven coa constante preocupación de perder ou estragar a folla de tratamento. Ademais deben interpretar a pauta diaria a partir dunha táboa que pode resultar complexa e difícil de ler debido ao reducido tamaño de letra. Ao mesmo tempo, o proxecto busca aliviar os familiares ou coidadores, que adoitan vivir coa incerteza de non saber se a toma foi realizada correctamente.
+Este proxecto nace coa premisa de achegar seguridade ao tratamento e maior tranquilidade tanto aos pacientes como aos seus familiares e supervisores. Como se expuxo na sección anterior, no sistema actual, moitos pacientes viven coa constante preocupación de perder ou estragar a folla de tratamento. Ademais deben interpretar a pauta diaria a partir dunha táboa que pode resultar complexa e difícil de ler debido ao reducido tamaño de letra. Ao mesmo tempo, o proxecto busca aliviar os familiares ou supervisores, que adoitan vivir coa incerteza de non saber se a toma foi realizada correctamente.
 
 A motivación principal deste proxecto é aproveitar as posibilidades que nos ofrecen os dispositivos móbiles para simplificar e reducir estes riscos ao mínimo. A aplicación pretende dixitalizar a información do tratamento a partir dunha simple fotografía da folla de prescrición, permitindo extraer automaticamente toda a información necesaria e xerar recordatorios diarios para o paciente.
 
-Ademais, incorporarase un sistema de confirmación das tomas. O paciente pode marcar na aplicación cando realiza a toma da dose que lle corresponde e, no caso de que esta non sexa rexistrada nun intervalo de tempo, o sistema envía unha notificación a un familiar ou coidador para que poida comprobar a situación e actuar no caso de que sexa necesario.
+Ademais, incorporarase un sistema de confirmación das tomas. O paciente pode marcar na aplicación cando realiza a toma da dose que lle corresponde e, no caso de que esta non sexa rexistrada nun intervalo de tempo, o sistema envía unha notificación a un familiar ou supervisor para que poida comprobar a situación e actuar no caso de que sexa necesario.
 
 Deste modo, a aplicación busca transformar un proceso actualmente manual e dependente do papel nun sistema dixital e accesible que mellore a seguridade do paciente e facilite o seguimento do tratamento anticoagulante no día a día.
 
@@ -44,8 +44,8 @@ O obxectivo principal deste proxecto é desenvolver unha aplicación móbil mult
 \begin{itemize}
     \item\textbf{ Eliminar a dependencia do papel:} Ao dixitalizar o informe, a información estará sempre dispoñible no móbil, evitando desprazamentos ao centro médico no caso de perda ou estragamento do documento orixinal.
     \item \textbf{Automatizar a entrada de datos mediante técnicas de procesado de imaxe:} Substituír a carga manual de información por un sistema que lea a imaxe da folla médica, reducindo os posibles erros ao copiar as doses.
-    \item \textbf{Mellorar a seguridade nas tomas:} Reducir o risco de esquecementos mediante recordatorios programados e un sistema de avisos automáticos aos coidadores.
-    \item \textbf{Facilitar o control a pacientes e coidadores: } Proporcionando un seguimento detallado das tomas e ofrecendo un rexistro visual e sinxelo sobre a evolución histórica dos valores de \gls{inr} e da dose.
+    \item \textbf{Mellorar a seguridade nas tomas:} Reducir o risco de esquecementos mediante recordatorios programados e un sistema de avisos automáticos aos supervisores.
+    \item \textbf{Facilitar o control a pacientes e supervisores: } Proporcionando un seguimento detallado das tomas e ofrecendo un rexistro visual e sinxelo sobre a evolución histórica dos valores de \gls{inr} e da dose.
     \item \textbf{Garantir a privacidade dos datos:} Protexer a información médica evitando a súa persistencia nos servidores da aplicación, almacenando de forma segura os datos sensibles no dispositivo e cifrando a nivel de aplicación as mensaxes intercambiadas entre os dispositivos vinculados.
 \end{itemize}
 
@@ -112,7 +112,7 @@ Existen algunhas solucións deseñadas especificamente para este tratamento como
   \textit{Recordatorios Sonoros} & Si & Si & Si & Si \\
   \textit{Histórico INR} & Non & Si & Si & Si \\
   \textit{Entrada por técnicas de procesado de imaxe} & Non & Non & Non & Si \\
-  \textit{Aviso a coidadores} & Algunhas & Non & Non & Si \\
+  \textit{Aviso a supervisores} & Algunhas & Non & Non & Si \\
   \textit{Dose diaria variable} & Manual & Manual & Manual & Automática \\
   \end{tabular}
   }
@@ -127,7 +127,7 @@ Para dar resposta a estas limitacións, a nosa proposta introduce unha solución
 \begin{itemize}
     \item \textbf{Automatización mediante procesado de imaxe:} A aplicación \textbf{será capaz} de ler e interpretar a folla do SERGAS mediante a cámara do dispositivo, eliminando por completo a necesidade de que o paciente teña que teclear as súas doses.
     \item \textbf{Adaptación nativa a pautas variables:} A lóxica do sistema \textbf{estará deseñada} especificamente para o Sintrom, xestionando de forma autónoma as doses cambiantes de cada día sen requirir múltiples configuracións manuais.
-    \item \textbf{Rede de seguridade familiar:} \textbf{Integrarase} un sistema de notificacións que avisará automaticamente aos coidadores ou familiares en caso de que o paciente se esqueza da súa toma diaria.
+    \item \textbf{Rede de seguridade familiar:} \textbf{Integrarase} un sistema de notificacións que avisará automaticamente aos supervisores ou familiares en caso de que o paciente se esqueza da súa toma diaria.
     \item \textbf{Foco na fenda dixital:} Para romper as barreiras de adopción tecnolóxica, a interface \textbf{contará} cun ``modo sinxelo'' pensado especificamente para persoas de avanzada idade.
 \end{itemize}
 

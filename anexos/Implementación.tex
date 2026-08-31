@@ -1,229 +1,269 @@
-\chapter{Detalles técnicos da implementación}
+\chapter{Detalles da implementación}
 \label{app:detalles-implementacion}
 
-Este anexo amplía os aspectos técnicos descritos no
-Capítulo~\ref{chap:implem}. Inclúense exemplos das interfaces proporcionadas
-pola \gls{api}, fragmentos representativos do código e detalles internos da
-implementación que non resultan necesarios para comprender o funcionamento
-xeral da solución, pero permiten documentar con maior precisión as decisións
-adoptadas.
-
-\section{Detalles da implementación da API}
-
-\subsection{Documentación e endpoints dispoñibles}
-
-FastAPI xera automaticamente unha especificación OpenAPI a partir das rutas,
-dos modelos de entrada e saída e das respostas declaradas. Esta especificación
-permite consultar e executar os endpoints desde unha interface Swagger sen
-necesidade dun cliente adicional.
-
-% IMAXE 1
-% Facer unha captura da pantalla inicial de Swagger na que aparezan:
-% Procesamento de informes
-% Preprocesamento de informes
-% Centros sanitarios
-% Sistema
-% Comunicación P2P
-\IfFileExists{imaxes/anexos/implementacion/swagger-api.png}{
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.95\textwidth]
-    {imaxes/anexos/implementacion/swagger-api.png}
-    \caption{Documentación OpenAPI xerada automaticamente pola API.}
-    \label{fig:anexo-swagger}
-\end{figure}
-}{}
-
-Na Figura~\ref{fig:anexo-swagger} poden observarse as operacións agrupadas
-segundo a súa responsabilidade. O procesamento principal realízase mediante
-\textit{/extraccion/}, mentres que o resto das rutas permiten comprobar o
-estado do servizo, consultar centros sanitarios, probar o preprocesamento de
-forma independente e reenviar as mensaxes destinadas á sincronización entre
-dispositivos.
+\section{Implementación da API}
+A \gls{api} está organizada en rutas independentes, a táboa~\ref{tab:anexo-endpoints} resume as operacións dispoñibles.
 
 \begin{table}[htbp]
     \centering
-    \caption{Principais endpoints implementados na API.}
+    \caption{Endpoints implementados na API.}
     \label{tab:anexo-endpoints}
-    \resizebox{\columnwidth}{!}{
-    \begin{tabular}{p{0.16\textwidth} p{0.27\textwidth} p{0.47\textwidth}}
-        \hline
-        \textbf{Método} & \textbf{Endpoint} & \textbf{Finalidade} \\
-        \hline
-        POST & /extraccion/ &
-        Procesar unha folla e devolver os datos estruturados. \\
-
-        POST & /preprocesamento/ &
-        Aplicar unicamente o preprocesamento e devolver o ficheiro resultante. \\
-
-        GET & /centros/buscar &
-        Recuperar a información dun centro sanitario a partir do seu nome. \\
-
-        GET & /health/ &
-        Comprobar o estado e a versión da API. \\
-
-        POST & /notificar/enviar &
-        Reenviar mediante Firebase Cloud Messaging unha mensaxe preparada polo cliente. \\
-        \hline
-    \end{tabular}
-    }
+    \begin{tabularx}{\textwidth}{l l X}
+        \toprule
+        \textbf{Método} & \textbf{Ruta} & \textbf{Finalidade} \\
+        \midrule
+        POST & \texttt{/extraccion/} & Extraer e estruturar os datos dunha folla. \\
+        POST & \texttt{/preprocesamento/} & Corrixir a imaxe sen executar o recoñecemento. \\
+        GET & \texttt{/centros/buscar} & Localizar un centro sanitario polo seu nome. \\
+        GET & \texttt{/estado/} & Consultar a dispoñibilidade e a versión da API. \\
+        POST & \texttt{/notificar/enviar} & Reenviar unha mensaxe cifrada mediante FCM. \\
+        \bottomrule
+    \end{tabularx}
 \end{table}
 
+A Figura~\ref{fig:swagger-api} mostra os endpoints publicados pola \gls{api} e a súa agrupación na interface de Swagger.
 
-\subsection{Exemplo de extracción}
-
-A Figura~\ref{fig:anexo-extraccion} mostra unha chamada realizada directamente
-desde Swagger. A entrada da operación é o documento orixinal, mentres que a
-resposta xa contén a información transformada á estrutura utilizada polo
-cliente móbil.
-
-% IMAXE 2
-% Captura de POST /extraccion/
-% Ideal: que se vexa o ficheiro seleccionado, código 200 e o inicio do JSON.
-% Usa unha folla de proba, nunca datos persoais reais.
-\IfFileExists{imaxes/anexos/implementacion/chamada-extraccion.png}{
-\begin{figure}[htbp]
+\begin{figure}
     \centering
-    \includegraphics[width=0.95\textwidth]
-    {imaxes/anexos/implementacion/chamada-extraccion.png}
-    \caption{Exemplo dunha extracción realizada desde Swagger.}
-    \label{fig:anexo-extraccion}
+    \includegraphics[width=1\linewidth]{imaxes/08-Implementacion/anexo/swagger-api.png}
+    \caption{Endpoints dispoñibles na interface de swagger da API}
+    \label{fig:swagger-api}
 \end{figure}
-}{}
-
-Neste exemplo pode apreciarse que o cliente non recibe a saída orixinal de
-Azure Document Intelligence. A API realiza previamente a interpretación e
-validación dos campos e constrúe unha resposta formada pola cabeceira, o
-calendario de doses, o histórico e os metadatos da análise.
-
-Unha resposta simplificada, empregando datos ficticios, presenta a seguinte
-estrutura:
-
-\begin{lstlisting}[
-    caption={Exemplo simplificado da resposta de /extraccion/.},
-    label={lst:json-extraccion}
-]
-{
-  "cabeceira": {
-    "dataInforme": "2025-01-14",
-    "inr": "2,5",
-    "farmaco": "Sintrom 4 mg",
-    "doseSemanal": "13,5 mg",
-    "proximaVisita": "21/01/2025",
-    "centro": "C.S. EXEMPLO"
-  },
-  "calendario": [
-    {
-      "data": "2025-01-15",
-      "dia": 15,
-      "dose": "1/2",
-      "accion": "TOMAR",
-      "eControl": false,
-      "diaSemanaTexto": "MERCORES"
-    }
-  ],
-  "historico": [],
-  "metadatos": {
-    "confianzaGlobal": 0.94,
-    "modelo": "M1"
-  }
-}
-\end{lstlisting}
-
-
-\subsection{Modelos de resposta}
-
-O contrato devolto ao cliente defínese mediante modelos Pydantic. Estes modelos
-permiten establecer os campos obrigatorios, os tipos esperados e a estrutura
-xerárquica da resposta antes de que FastAPI a serialice como \gls{json}.
-
-O seguinte fragmento mostra dous dos modelos empregados para representar o
-calendario e a resposta completa:
-
-\begin{lstlisting}[
-    language=Python,
-    caption={Fragmento dos modelos Pydantic empregados pola API.},
-    label={lst:pydantic-response}
-]
-class DoseDia(BaseModel):
-    data: str
-    dia: int
-    dose: str | None
-    accion: str
-    eControl: bool
-    diaSemanaTexto: str
-
-class AnalisisResponse(BaseModel):
-    cabeceira: CabeceiraResponse
-    calendario: List[DoseDia]
-    historico: List[ItemHistorico]
-    metadatos: MetadatosResponse
-\end{lstlisting}
-
-A separación en modelos específicos evita construír unha resposta sen unha
-estrutura definida e serve ademais como base para a documentación OpenAPI.
-
 
 \subsection{Inicialización dos servizos externos}
 
-Durante o ciclo de vida de FastAPI créase o cliente de Azure Document
-Intelligence unha única vez e almacénase no estado da aplicación. As rutas
-poden recuperalo posteriormente mediante inxección de dependencias.
+O ciclo de vida de FastAPI crea unha soa instancia de cada cliente compartido. As credenciais obtéñense primeiro da contorna local e, cando non están
+dispoñibles, recupéranse de Azure Key Vault. O cliente de Document Intelligence gárdase en \texttt{app.state}. Firebase Admin só se inicializa cando aínda non existe unha instancia activa.
 
-\begin{lstlisting}[
-    language=Python,
-    caption={Inicialización e recuperación do cliente de Azure.},
-    label={lst:azure-dependency}
-]
-client = DocumentIntelligenceClient(
+\begin{lstlisting}[language=Python,
+    caption={Creación dos clientes compartidos durante o arranque.},
+    label={lst:servizos-externos}]
+api_key = os.getenv("DOC_INTEL_KEY")
+if not api_key:
+    kv_client = SecretClient(
+        vault_url=KEY_VAULT_URL,
+        credential=credential,
+    )
+    api_key = kv_client.get_secret(SECRET_NAME).value
+
+app.state.doc_intel_client = DocumentIntelligenceClient(
     endpoint=DOC_INTEL_ENDPOINT,
     credential=AzureKeyCredential(api_key),
-    api_version="2024-11-30"
 )
-app.state.doc_intel_client = client
 
-# ...
+firebase_json = os.getenv("FIREBASE-CREDENTIALS")
+if not firebase_json:
+    kv_client = SecretClient(
+        vault_url=KEY_VAULT_URL,
+        credential=credential,
+    )
+    firebase_json = kv_client.get_secret(FIREBASE_NAME).value
 
-def get_azure_client(request: Request):
-    client = request.app.state.doc_intel_client
-    if not client:
-        raise HTTPException(
-            status_code=500,
-            detail="Servizo Azure non dispoñible"
-        )
-    return client
+if firebase_json and not firebase_admin._apps:
+    cred = credentials.Certificate(json.loads(firebase_json))
+    firebase_admin.initialize_app(cred)
 \end{lstlisting}
 
-Esta implementación permite reutilizar a mesma conexión durante a vida da API
-e facilita tamén a súa substitución por unha implementación simulada durante
-as probas.
+\subsection{\textit{POST /extraccion/}}
+
+Tras comprobar o tipo do ficheiro, a imaxe preprocesada envíase ao modelo configurado. A operación de Azure é asíncrona e o resultado só continúa cando
+contén polo menos un documento recoñecido.
+
+\begin{lstlisting}[language=Python,
+    caption={Preprocesamento e chamada a Azure Document Intelligence.},
+    label={lst:extraccion-azure}]
+image_content = await file.read()
+resultado_preprocesamento = preprocesar_documento(
+    image_content, file.content_type
+)
+image_content = resultado_preprocesamento.contido
+
+ocr_operation = client.begin_analyze_document(
+    model_id=MODEL_ID,
+    body=image_content,
+    content_type="application/octet-stream",
+    locale="es-ES",
+)
+result = ocr_operation.result()
+
+if not result.documents:
+    raise HTTPException(
+        status_code=400,
+        detail="Non se detectou ningún documento",
+    )
+document = result.documents[0]
+\end{lstlisting}
+
+Os campos devoltos por Azure non se incorporan directamente á resposta. En primeiro lugar, a táboa procésase cela a cela mediante \textit{parsear\_cela\_dose}, que transforma o texto recoñecido na data, na dose e na acción empregadas polo cliente.
+
+\begin{lstlisting}[language=Python, caption={}, label={lst: }]
+if campo_dose and campo_dose.value_array:
+    # Percorremos cada fila da táboa
+    for fila in campo_dose.value_array:
+        if fila.value_object:
+            # Percorremos cada columna (LUNES, MARTES...)
+            for dia_sem in DOSE_COLS:
+                celda = fila.value_object.get(dia_sem)
+                if celda:
+                    datos = parsear_cela_dose(celda.content, ano_actual, mes_actual, dt_prox)
+                    if datos:
+                        if datos["control"] and dt_prox:
+                            data_celda = parsear_data(datos["data"])
+                            if data_celda.date() != dt_prox.date():
+                                logging.warning("A data do control extraída da táboa é errónea, collendo a de próxima visita.")
+                                # Poñemos a data de próxima visita
+                                datos["data"] = dt_prox.date().isoformat()
+                                datos["dia"] = dt_prox.day
+
+                        datos["diaSemanaTexto"] = dia_sem
+                        lista_doses.append(datos)
+
+if not lista_doses:
+    raise HTTPException(
+        status_code=400,
+        detail="Táboa de dose non atopada, asegúrese de que se vexa enteira na imaxe."
+    )
+\end{lstlisting}
+%Mellorar
+
+O Listado~\ref{lst:interpretacion-dose} reúne fragmentos non consecutivos da función \texttt{parsear\_cela\_dose} e da ruta. Neles móstranse as transformacións de \textit{NO TOMAR} e \textit{CONTROL}, a validación da data e o cambio de ano.
 
 
-\subsection{Preprocesamento das imaxes}
+%Meter algo que indique que son troos e hai ocos no medio
+\begin{lstlisting}[language=Python,
+    caption={Tratamento das doses e dos días de control.},
+    label={lst:interpretacion-dose}]
+    
+if not mes_match and es_control and dt_proxima_visita:
+    return {
+        "data": dt_proxima_visita.date().isoformat(),
+        "dia": dt_proxima_visita.day,
+        "dose": None,
+        "accion": "CONTROL",
+        "control": True,
+    }
 
-O preprocesamento implementouse de maneira conservadora. O seu obxectivo non é
-transformar todas as imaxes recibidas, senón corrixilas unicamente cando
-existen evidencias suficientes dunha inclinación ou deformación da folla.
+if "NO TOMAR" in texto:
+    dose = "0"
+    accion = "NON TOMAR"
+elif es_control:
+    dose = None
+    accion = "CONTROL"
+elif dose == "0":
+    accion = "NON TOMAR"
+else:
+    accion = "TOMAR"
 
-Inicialmente compróbase o tipo e o tamaño do documento. Os PDF e os formatos
-que non poden ser modificados de maneira segura continúan sen cambios. Nas
-imaxes decodificables redúcese temporalmente a resolución empregada para a
-detección, convértese a imaxe a escala de grises e extráense os bordos.
+ano = ano_base
+if mes_base == 12 and mes == 1:
+    ano += 1
+try:
+    data_iso = datetime(ano, mes, dia).date().isoformat()
+except ValueError:
+    return None
 
-A detección tenta localizar primeiro un contorno cuadrilateral compatible coa
-xeometría dunha folla. Se esta estratexia non proporciona un resultado fiable,
-téntase localizar unha superficie clara e, posteriormente, estimar a
-inclinación a partir das liñas detectadas. A corrección só se aplica cando se
-superan os limiares de confianza establecidos. Ante un resultado dubidoso ou
-un erro, consérvase o ficheiro orixinal.
+datos = parsear_cela_dose(
+    cela.content,
+    ano_actual,
+    mes_actual,
+    dt_prox,
+)
+if datos and datos["control"] and dt_prox:
+    if parsear_data(datos["data"]).date() != dt_prox.date():
+        datos["data"] = dt_prox.date().isoformat()
+        datos["dia"] = dt_prox.day
+\end{lstlisting}
 
-O seguinte fragmento resume esta estratexia:
+Unha vez transformados os campos, a API aplica varias validacións antes de construír a resposta. En primeiro lugar, a confianza media dos campos
+recoñecidos debe ser igual ou superior ao 60\,\%. Ademais, cando se recuperan as dúas datas, a próxima visita non pode ser anterior á data do informe.
 
-\begin{lstlisting}[
-    language=Python,
-    caption={Selección conservadora do preprocesamento dunha imaxe.},
-    label={lst:preprocesamento}
-]
+\begin{lstlisting}[language=Python,
+    caption={Validación da confianza global e da orde das datas.},
+    label={lst:validacion-confianza-datas}]
+confianza = calcular_confianza_media(document)
+if confianza < 0.6:
+    raise HTTPException(
+        status_code=400,
+        detail="O documento non é lexible",
+    )
+
+if dt_prox and dt_prox.date() < dt_informe.date():
+    raise HTTPException(
+        status_code=400,
+        detail="A data de próxima visita parece incorrecta",
+    )
+\end{lstlisting}
+
+O INR normalízase substituíndo a coma decimal por un punto e convértese nun valor numérico. A extracción só se acepta se o valor está entre 0,5 e 10 e se a confianza específica deste campo alcanza o 80\,\%. Estes límites actúan como unha medida técnica para detectar posibles erros de lectura, non como un rango terapéutico. Tamén se comproba que a interpretación da táboa producise polo menos unha entrada válida.
+
+\begin{lstlisting}[language=Python,
+    caption={Validación do INR e do calendario extraído.},
+    label={lst:validacion-inr-calendario}]
+inr_limpo = inr_texto.replace(",", ".").strip()
+inr_valor = float(inr_limpo)
+
+if inr_valor < INR_MIN_LOGICO or inr_valor > INR_MAX_LOGICO:
+    raise HTTPException(
+        status_code=400,
+        detail="O valor de INR non parece correcto",
+    )
+if inr_field.confidence < 0.8:
+    raise HTTPException(
+        status_code=400,
+        detail="Non se pode asegurar a precisión do INR",
+    )
+
+if not lista_doses:
+    raise HTTPException(
+        status_code=400,
+        detail="Táboa de doses non atopada",
+    )
+\end{lstlisting}
+
+Só despois de superar estas comprobacións se constrúe a resposta que recibirá o cliente móbil.
+
+\begin{lstlisting}[language=Python,
+        caption={Creación da resposta.},
+    label={lst:resposta}]
+     return AnaliseResponse(
+        cabeceira=CabeceiraResponse(
+                dataInforme=data_informe_limpa,
+                inr=get_text("inr"),
+                farmaco=get_text("farmaco oral"),
+                doseSemanal=extraer_dose_semanal(get_text("dosis semanal")),
+                proximaVisita=prox_visit_limpa,
+                centro=get_text("centro visita")
+            ),
+
+            calendario=[
+                DoseDia(
+                    data=d["data"],
+                    dia=d["dia"],
+                    dose=d["dose"],
+                    accion=d["accion"],
+                    eControl=d["control"],
+                    diaSemanaTexto=d["diaSemanaTexto"]
+                ) for d in lista_doses
+            ],
+            historico=lista_ruv,
+            metadatos=MetadatosResponse(
+                confianzaGlobal=confianza,
+                modelo=MODEL_ID
+            )
+        )
+
+\end{lstlisting}
+
+
+\subsection{\textit{POST /preprocesamento/}}
+O Listado~\ref{lst:preprocesamento} mostra a selección entre a detección por bordos, a procura dunha superficie clara e a corrección da inclinación. Se non existe confianza suficiente, devólvese a imaxe orixinal.
+
+\begin{lstlisting}[language=Python,
+    caption={Selección progresiva do método de preprocesamento.},
+    label={lst:preprocesamento}]
+imaxe_deteccion, escala = _preparar_deteccion(imaxe)
+gris, bordos = _detectar_bordos(imaxe_deteccion)
+
 candidato = _buscar_folla(gris, bordos)
 if candidato is not None:
     cuadrilatero, confianza = candidato
@@ -242,585 +282,503 @@ candidato_claro = _buscar_folla_clara(
     gris,
     bordos,
 )
+if candidato_claro is not None:
+    cuadrilatero, confianza = candidato_claro
+    resultado = _corrixir_perspectiva(
+        contido,
+        imaxe,
+        cuadrilatero / escala,
+        confianza,
+        tipo,
+        motivo="silueta_clara_da_folla",
+    )
+    if resultado is not None:
+        return resultado
 
-# Se non existe unha correccion fiable,
-# conservase o documento orixinal.
+correccion = _estimar_inclinacion(bordos)
+if correccion is None:
+    return _sen_cambios(
+        contido,
+        "deteccion_sen_confianza",
+        dimensions,
+    )
 \end{lstlisting}
 
-% IMAXE 3
-% A mellor figura do anexo.
-% Esquerda: foto inclinada tomada co móbil.
-% Dereita: saída de /preprocesamento/.
-% Emprega a MESMA imaxe nas dúas partes.
-\IfFileExists{imaxes/anexos/implementacion/preprocesamento-comparativa.png}{
+O endpoint de preprocesamento permite observar este proceso de forma illada. Nas Figuras ~\ref{fig:anexo-preprocesamento} podemos ver o resultado deste procesamento. Na figura~\ref{fig:anexo-cabeceira-preprocesamento} podemos observar que as cabeceiras indican que se aplicou unha corrección de perspectiva cunha confianza de 0,837 e que a saída pasou de $3000\times4000$ a  $2050\times2845$ píxeles. 
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.95\textwidth]
-    {imaxes/anexos/implementacion/preprocesamento-comparativa.png}
-    \caption{Comparación entre o documento orixinal e o resultado do preprocesamento.}
+
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imaxes/08-Implementacion/anexo/T2.jpg}
+        \caption{Documento orixinal.}
+        \label{fig:anexo-preprocesamento-orixinal}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imaxes/08-Implementacion/anexo/T2-preprocesada.jpg}
+        \caption{Documento co preprocesamento aplicado.}
+        \label{fig:anexo-preprocesamento-resultado}
+    \end{subfigure}
+
+    \caption{Comparativa entre o documento orixinal e o resultado tras aplicar o preprocesamento.}
     \label{fig:anexo-preprocesamento}
 \end{figure}
-}{}
 
-Na Figura~\ref{fig:anexo-preprocesamento} obsérvase o efecto da corrección sobre
-unha fotografía tomada con perspectiva. O documento resultante presenta unha
-xeometría máis próxima á dunha folla escaneada, facilitando a posterior análise
-polo modelo documental. Se a detección non alcanza unha confianza suficiente,
-esta transformación non se aplica.
-
-Para facilitar a comprobación desta etapa implementouse ademais
-\textit{/preprocesamento/}. A resposta inclúe cabeceiras de diagnóstico que
-indican se se aplicou unha transformación, o método empregado, o motivo, o
-ángulo detectado, a confianza e as dimensións de entrada e saída.
-
-
-\subsection{Endpoints auxiliares}
-
-O endpoint \textit{/health/} proporciona unha comprobación mínima da
-dispoñibilidade da API:
-
-\begin{lstlisting}[
-    caption={Exemplo de resposta do endpoint de estado.},
-    label={lst:health-json}
-]
-{
-  "status": "OK",
-  "timestamp": "2026-08-27T20:15:32.425",
-  "version": "1.0.0"
-}
-\end{lstlisting}
-
-Para os centros sanitarios utilízase un catálogo KML. Antes da procura
-normalízase o nome recibido, eliminando diferenzas de maiúsculas, acentos e
-algunhas variacións na forma de escribir ``C.S.''. Os candidatos compáranse
-posteriormente mediante similitude textual.
-
-A resposta presenta unha estrutura como a seguinte:
-
-\begin{lstlisting}[
-    caption={Exemplo ilustrativo da resposta dunha procura de centro.},
-    label={lst:centro-json}
-]
-{
-  "nome": "CENTRO DE SAUDE EXEMPLO",
-  "enderezo": "Rua Exemplo, 1",
-  "concello": "Exemplo",
-  "telefono": "982000000",
-  "fonte": "Xunta de Galicia - Mapa dos servizos sanitarios (CC BY-SA 4.0)"
-}
-\end{lstlisting}
-
-Finalmente, \textit{/notificar/enviar} non interpreta o contido clínico
-intercambiado entre dispositivos. Recibe un token, un tipo de aviso e o
-\textit{payload} xa cifrado polo dispositivo de orixe e utiliza Firebase Cloud
-Messaging para reenvialo. Unha resposta correcta contén unicamente o resultado
-do envío e o identificador xerado por Firebase:
-
-\begin{lstlisting}[
-    caption={Estrutura da resposta dun envío mediante Firebase.},
-    label={lst:notificacion-response}
-]
-{
-  "success": true,
-  "message_id": "projects/.../messages/..."
-}
-\end{lstlisting}
-
-
-
-\section{Detalles da implementación do cliente móbil}
-
-\subsection{Inicialización e recuperación do estado}
-
-O proceso de inicialización concentra as operacións que deben completarse antes
-de mostrar a interface. \textit{main} prepara Flutter e chama a
-\textit{InicializadorAplicacion}, que inicializa Firebase e as notificacións,
-rexistra os receptores de Firebase Cloud Messaging e recupera a configuración
-persistente.
-
-Unha vez coñecidos o estado da configuración e o rol gardado, a aplicación
-selecciona a ruta inicial. Se se trata dun paciente previamente configurado,
-tamén se reconstrúe a planificación dos recordatorios da pauta activa.
-
-% IMAXE 4
-% Eu FARIA ESTA EN DRAW.IO, non captura.
-% Participantes:
-% main
-% InicializadorAplicacion
-% Firebase
-% Flutter Secure Storage
-% LocalNotificationService
-% DatabaseService
-% MyApp
-%
-% Secuencia:
-% main -> Inicializador: inicializar()
-% Inicializador -> Firebase: initializeApp()
-% Inicializador -> Firebase: onBackgroundMessage / onMessage
-% Inicializador -> Notificacions: inicializar()
-% Inicializador -> SecureStorage: configuracion_finalizada + rol_usuario
-% [Paciente] -> SecureStorage: hora_toma
-% [Paciente] -> DatabaseService: obterEstados()
-% [Paciente] -> Notificacions: programarTomasPaciente()
-% Inicializador --> main: ResultadoInicializacion
-% main -> MyApp: runApp()
-\IfFileExists{imaxes/anexos/implementacion/inicializacion-cliente.png}{
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.92\textwidth]
-    {imaxes/anexos/implementacion/inicializacion-cliente.png}
-    \caption{Secuencia de inicialización do cliente móbil.}
-    \label{fig:anexo-inicializacion}
+   \includegraphics[width=1\textwidth]{imaxes/08-Implementacion/anexo/cabeceira-preprocesam.png}
+    \caption{Cabeceira devolta polo endpoint de preprocesamento.}
+    \label{fig:anexo-cabeceira-preprocesamento}
 \end{figure}
-}{}
 
-A Figura~\ref{fig:anexo-inicializacion} permite observar que a selección da
-pantalla inicial non depende unicamente dunha variable en memoria. O estado
-persistente recupérase antes de construír a aplicación e, no caso do paciente,
-tamén se comproba a planificación das notificacións.
+\subsection{\textit{ /centros/buscar}}
+
+A procura normaliza os nomes, calcula a súa similitude e só acepta coincidencias cunha puntuación igual ou superior a 0,45. A carga do ficheiro emprégase cunha caché dunha única entrada para non analizar de novo o KML en cada petición.
 
 
-\subsection{Estado da captura e revisión}
+\begin{lstlisting}[language=Python,
+    caption={Normalización e procura aproximada dun centro sanitario.},
+    label={lst:busqueda-centros}]
+def _normalizar(texto: str) -> str:
+    texto = unicodedata.normalize("NFKD", texto)
+    texto = texto.encode("ascii", "ignore").decode()
+    texto = texto.upper()
+    texto = re.sub(
+        r"\bC\s*\.?\s*S\s*\.?\b", "CENTRO SAUDE", texto
+    )
+    texto = texto.replace(
+        "CENTRO DE SAUDE", "CENTRO SAUDE"
+    )
+    return re.sub(r"[^A-Z0-9]+", " ", texto).strip()
 
-O modelo de vista encargado da captura mantén un estado reducido composto polo
-nome do ficheiro, a posible mensaxe de erro e un indicador booleano que sinala
-se existe unha operación en curso:
+@lru_cache(maxsize=1)
+def _cargar_centros() -> list[dict[str, str | None]]:
+    raiz = ET.parse(KML_PATH).getroot()
+    centros = []
+    for marca in raiz.findall(".//kml:Placemark", KML_NS):
+        nome = marca.findtext(
+            "kml:name", default="", namespaces=KML_NS
+        ).strip()
+        descripcion = marca.findtext(
+            "kml:description", default="", namespaces=KML_NS
+        )
+        campos = _campos_descripcion(descripcion)
+        if nome and campos.get("TELEFONO"):
+            centros.append({
+                "nome": campos.get("NOMBRE") or nome,
+                "nome_normalizado": _normalizar(
+                    campos.get("NOMBRE") or nome
+                ),
+                "telefono": campos.get("TELEFONO"),
+                "enderezo": campos.get("DIRECCION"),
+                "concello": campos.get("CONCELLO"),
+            })
+    return centros
 
-\begin{lstlisting}[
-    caption={Estado mantido por ReportCaptureViewModel.},
-    label={lst:report-capture-state}
-]
-bool _procesando = false;
-String? _nomeFicheiro;
-String? _erro;
+consulta = _normalizar(nome)
+for centro in _cargar_centros():
+    nome_centro = str(centro["nome_normalizado"])
+    coincidencia = SequenceMatcher(
+        None, consulta, nome_centro
+    ).ratio()
+    if consulta in nome_centro or nome_centro in consulta:
+        coincidencia += 1
+    candidatos.append((coincidencia, centro))
 
-bool get procesando => _procesando;
-String? get nomeFicheiro => _nomeFicheiro;
-String? get erro => _erro;
+puntuacion, centro = max(candidatos, key=lambda x: x[0])
+if puntuacion < 0.45:
+    raise HTTPException(status_code=404)
 \end{lstlisting}
 
-A vista observa estes valores mediante \textit{Provider}. Cando
-\textit{procesando} é verdadeiro, as opcións de selección substitúense por un
-indicador de progreso. O propio modelo de vista non contén elementos gráficos,
-senón unicamente o estado empregado pola interface.
+\subsection{\textit{POST /notificar/enviar}}
+Esta ruta recibe o token, o tipo de aviso e o contido xa cifrado. A API engade un texto visible para os tipos que deben producir un aviso e reenvía a mensaxe mediante Firebase Cloud Messaging sen descifrar a información clínica.
 
-A revisión posterior permite actualizar ou eliminar días e modificar a
-seguinte visita. Antes de confirmar a pauta execútanse as seguintes
-comprobacións:
+\begin{lstlisting}[language=Python,
+    caption={Reenvío dunha mensaxe mediante Firebase.},
+    label={lst:endpoint-notificacions}]
+@router.post(
+    "/enviar",
+    response_model=NotificacionResponse,
+)
+async def enviar_notif(data: NotificacionP2P):
+    textos = {
+        "TOMA_CONFIRMADA": (
+            "Toma confirmada",
+            "A persoa supervisada confirmou a toma.",
+        ),
+        "NOVO_INFORME": (
+            "Novo informe",
+            "Actualizouse a folla de tratamento.",
+        ),
+        "TOMA_PENDENTE": (
+            "Hora da toma",
+            "Hai unha toma pendente de confirmar.",
+        ),
+        "TOMA_ESQUECIDA": (
+            "Toma sen confirmar",
+            "A toma segue sen confirmarse.",
+        ),
+    }
 
-\begin{itemize}
-    \item debe existir polo menos unha entrada no calendario;
-    \item as datas deben ser válidas;
-    \item unha mesma data non pode aparecer dúas veces;
-    \item os días normais deben conter unha dose;
-    \item admítense doses numéricas e fraccións cun denominador diferente de cero;
-    \item os días de control non requiren dose;
-    \item se existe unha data de seguinte visita, esta tamén debe ser válida.
-\end{itemize}
+    titulo_corpo = textos.get(data.tipo_aviso)
+    message = messaging.Message(
+        data={
+            "payload": data.payload,
+            "tipo_aviso": data.tipo_aviso,
+        },
+        notification=(
+            messaging.Notification(
+                title=titulo_corpo[0],
+                body=titulo_corpo[1],
+            )
+            if titulo_corpo else None
+        ),
+        token=data.token_destino,
+    )
 
-% IMAXE 5 OPCIONAL
-% Captura da pantalla de revisión cun erro provocado expresamente:
-% data duplicada ou dose non válida.
-% Ao lado, mesma pauta xa corrixida.
-\IfFileExists{imaxes/anexos/implementacion/validacion-pauta.png}{
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.88\textwidth]
-    {imaxes/anexos/implementacion/validacion-pauta.png}
-    \caption{Exemplo da detección e corrección dun dato durante a revisión da pauta.}
-    \label{fig:anexo-validacion}
-\end{figure}
-}{}
+    message_id = messaging.send(message)
+    return NotificacionResponse(
+        success=True,
+        message_id=message_id,
+    )
+\end{lstlisting}
 
-A Figura~\ref{fig:anexo-validacion} ilustra a función da revisión manual como
-última comprobación antes de converter os datos extraídos nun tratamento
-activo.
+\subsection{\textit{GET /estado/}}
+O endpoint de estado ofrece unha comprobación básica de que o proceso da API responde. Non verifica a dispoñibilidade de Azure, Firebase nin do  catálogo de centros.
+\begin{lstlisting}[language=Python,
+    caption={Comprobación básica do estado da API.},
+    label={lst:endpoint-estado}]
+@router.get(
+    "/",
+    response_model=EstadoResponse,
+    summary="Estado da API",
+)
+def comprobar_estado():
+    return {
+        "status": "OK",
+        "timestamp": datetime.now().isoformat(),
+        "version": "1.0.0",
+    }
+\end{lstlisting}
 
+\clearpage
+\section{Implementación do cliente móbil}
 
-\subsection{Estrutura da persistencia local}
+\subsection{Inicialización da aplicación}
 
-SQLite mantén catro conxuntos principais de información:
+O Listado~\ref{lst:inicializacion-cliente} mostra a orde das operacións executadas antes de escoller a pantalla inicial.
+
+\begin{lstlisting}[
+    caption={Secuencia principal de inicialización do cliente.},
+    label={lst:inicializacion-cliente}]
+await _inicializarFirebase();
+_rexistrarBackground(backgroundHandler);
+await _solicitarPermisos();
+await _inicializarNotificacions();
+_escoitarMensaxes(_procesarMensaxe);
+
+final configuracionFinalizada =
+    await _ler('configuracion_finalizada');
+final rolUsuario = await _ler('rol_usuario');
+
+if (configuracionFinalizada != null &&
+    rolUsuario == 'PACIENTE') {
+  await _restaurarRecordatoriosPaciente();
+}
+return ResultadoInicializacion(
+  xaConfigurado: configuracionFinalizada != null,
+  rolUsuario: rolUsuario,
+);
+\end{lstlisting}
+
+\subsection{Persistencia e conservación do seguimento}
+
+SQLite separa a pauta activa, a cabeceira, o histórico e os datos das persoas supervisadas. A información máis importante para o seguimento dunha toma
+mantense na táboa \texttt{pautas}.
+
+Para distinguir unha reimportación dunha pauta nova calcúlase un identificador determinista. Os textos normalízanse, o calendario ordénase por data e
+concaténanse os datos clínicos que definen o tratamento. Non se inclúen o estado, a hora de confirmación nin a desviación, xa que son datos de seguimento que deben conservarse. O identificador non é un valor aleatorio nin un resumo criptográfico.
+
+\begin{lstlisting}[
+    caption={Cálculo do identificador dunha folla.},
+    label={lst:identificador-documento}]
+String _identificadorDocumento(AnaliseModel analise) {
+  String limpar(String? valor) =>
+      (valor ?? '').trim().toUpperCase();
+  final calendario = [...analise.calendario]
+    ..sort((a, b) => a.data.compareTo(b.data));
+
+  return [
+    limpar(analise.cabeceira.dataInforme),
+    limpar(analise.cabeceira.proximaVisita),
+    limpar(analise.cabeceira.centro),
+    limpar(analise.cabeceira.farmaco),
+    ...calendario.map(
+      (dia) =>
+          '${dia.data}|${limpar(dia.dose)}|'
+          '${limpar(dia.accion)}',
+    ),
+  ].join('::');
+}
+\end{lstlisting}
 
 \begin{table}[htbp]
     \centering
-    \caption{Táboas creadas pola aplicación móbil.}
-    \label{tab:sqlite-anexo}
-    \resizebox{\columnwidth}{!}{
-    \begin{tabular}{p{0.25\textwidth} p{0.66\textwidth}}
-        \hline
-        \textbf{Táboa} & \textbf{Información almacenada} \\
-        \hline
-        pautas &
-        Data, día, dose, acción, control, día da semana, estado,
-        hora de confirmación e desviación en minutos. \\
-
-        analise\_actual &
-        Data do informe, seguinte visita, centro, fármaco, dose semanal,
-        INR e identificador do documento. \\
-
-        historico\_visitas &
-        Visitas anteriores, INR, fármaco, doses, seguinte visita e comentarios. \\
-
-        pacientes\_coidador &
-        UID, token, nome, resumo sincronizado e momento da última actualización
-        das persoas supervisadas. \\
-        \hline
-    \end{tabular}
-    }
+    \caption{Información persistida polo cliente.}
+    \label{tab:persistencia-cliente}
+    \begin{tabularx}{\textwidth}{l X}
+        \toprule
+        \textbf{Táboa} & \textbf{Contido principal} \\
+        \midrule
+        \texttt{pautas} & Data, dose, acción, estado, hora de confirmación e desviación. \\
+        \texttt{analise\_actual} & Cabeceira activa e identificador do documento. \\
+        \texttt{historico\_visitas} & INR, fármacos, doses e comentarios de visitas anteriores. \\
+        \texttt{pacientes\_supervisor} & Identificadores, tokens e resumos das persoas supervisadas. \\
+        \bottomrule
+    \end{tabularx}
 \end{table}
 
-O gardado completo dunha análise execútase mediante unha transacción. Antes de
-substituír a pauta actual calcúlase un identificador a partir dos campos
-principais do documento e do calendario. Se coincide co identificador xa
-almacenado, recupéranse os estados das datas existentes.
+\FloatBarrier
+
+O gardado execútase nunha transacción. Se o identificador coincide co gardado,
+recupéranse por data os datos de seguimento. Se cambia, as doses da nova pauta
+comezan co estado \texttt{PENDENTE}.
 
 \begin{lstlisting}[
-    caption={Recuperación dos estados ao importar novamente a mesma folla.},
-    label={lst:mesma-folla}
-]
+    caption={Conservación do seguimento ao importar a mesma folla.},
+    label={lst:conservar-seguimento}]
 final documentoId = _identificadorDocumento(analise);
-
-final eMesmaFolla =
-    actual.isNotEmpty &&
+final actual = await txn.query(
+  'analise_actual',
+  columns: ['documentoId'],
+  where: 'id = 1',
+);
+final eMesmaFolla = actual.isNotEmpty &&
     actual.first['documentoId'] == documentoId;
 
-final rexistrosAnteriores =
-    <String, Map<String, Object?>>{};
-
+final anteriores = <String, Map<String, Object?>>{};
 if (eMesmaFolla) {
-  final filas = await txn.query(
-    'pautas',
-    columns: [
-      'data',
-      'estado',
-      'horaConfirmacion',
-      'desviacionMinutos'
-    ],
+  for (final fila in await txn.query('pautas')) {
+    anteriores[fila['data'] as String] = fila;
+  }
+}
+
+await txn.insert('pautas', {
+  'data': dia.data,
+  'dose': dia.dose,
+  'estado': anteriores[dia.data]?['estado'] ?? 'PENDENTE',
+  'horaConfirmacion': anteriores[dia.data]?['horaConfirmacion'],
+  'desviacionMinutos': anteriores[dia.data]?['desviacionMinutos'],
+});
+\end{lstlisting}
+
+\subsection{Recordatorios locais}
+
+O Listado~\ref{lst:recordatorios} mostra a creación do aviso da toma e do aviso
+de esquecemento trinta minutos posterior. Antes deste fragmento o planificador
+elimina datas repetidas e descarta controis, doses cero e estados pechados. 
+
+\begin{lstlisting}[
+    caption={Creación dos recordatorios dunha toma pendente.},
+    label={lst:recordatorios}]
+final datasOrdenadas = datasConToma.toSet().toList()..sort();
+for (final data in datasOrdenadas) {
+  if (_estadoPechado(estados[data])) continue;
+
+  final toma = DateTime(
+    ano,
+    mes,
+    dia,
+    horaNumero,
+    minutoNumero,
+  );
+  final esquecemento = toma.add(
+    Duration(minutes: marxeEsquecementoMinutos),
   );
 
-  for (final fila in filas) {
-    rexistrosAnteriores[fila['data'] as String] = fila;
+  if (toma.isAfter(agora)) {
+    resultado.add(
+      RecordatorioToma(
+        data: data,
+        instante: toma,
+        tipo: TipoRecordatorioToma.toma,
+      ),
+    );
+  }
+  if (esquecemento.isAfter(agora)) {
+    resultado.add(
+      RecordatorioToma(
+        data: data,
+        instante: esquecemento,
+        tipo: TipoRecordatorioToma.esquecemento,
+      ),
+    );
   }
 }
 \end{lstlisting}
 
-Deste xeito, a reimportación dunha folla xa coñecida non elimina a información
-de seguimento rexistrada previamente.
+A Figura~\ref{fig:anexo-notificacions} mostra ambos os recordatorios no dispositivo Android.
 
-
-\subsection{Estados dunha toma}
-
-Cada día con dose efectiva pode pasar polos seguintes estados:
-
-\begin{table}[htbp]
-    \centering
-    \caption{Estados empregados para o seguimento das tomas.}
-    \label{tab:estados-toma}
-    \begin{tabular}{p{0.31\textwidth} p{0.58\textwidth}}
-        \hline
-        \textbf{Estado} & \textbf{Significado} \\
-        \hline
-        PENDENTE &
-        A toma aínda non foi confirmada. \\
-
-        TOMADA &
-        A persoa confirmou a toma sen superar a hora prevista. \\
-
-        TOMADA\_FORA\_HORA &
-        A confirmación produciuse despois da hora configurada. \\
-
-        NON\_TOMADA &
-        O día rematou sen que a toma fose confirmada. \\
-        \hline
-    \end{tabular}
-\end{table}
-
-Cando se confirma unha toma calcúlase a diferenza en minutos respecto da hora
-habitual e almacénase xunto co instante de confirmación. Isto permite conservar
-non só se a dose foi tomada, senón tamén cando se realizou.
-
-
-\subsection{Planificación das notificacións}
-
-A creación dos recordatorios realízase independentemente da API concreta de
-notificacións. \textit{PlanificadorRecordatorios} recibe a pauta, a hora
-configurada e os estados e devolve os avisos que aínda deben producirse.
-
-Para unha toma pendente poden existir dous recordatorios: un á hora
-configurada e un segundo, por defecto trinta minutos máis tarde, se continúa
-sen confirmar. Os estados xa pechados non xeran novos avisos.
-
-\begin{lstlisting}[
-    caption={Cálculo dos dous recordatorios asociados a unha toma.},
-    label={lst:recordatorios}
-]
-final toma = DateTime(
-  ano,
-  mes,
-  dia,
-  horaNumero,
-  minutoNumero,
-);
-
-final esquecemento = toma.add(
-  Duration(minutes: marxeEsquecementoMinutos),
-);
-
-if (toma.isAfter(agora)) {
-  // Engadir aviso da toma
-}
-
-if (esquecemento.isAfter(agora)) {
-  // Engadir aviso de esquecemento
-}
-\end{lstlisting}
-
-% IMAXE 6
-% Facer dúas capturas reais de Android:
-% 1. "Hora da toma"
-% 2. "Toma sen confirmar"
-% Podes xuntalas nunha soa figura.
-\IfFileExists{imaxes/anexos/implementacion/notificacions.png}{
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.75\textwidth]
-    {imaxes/anexos/implementacion/notificacions.png}
-    \caption{Notificación da hora da toma e aviso posterior de toma sen confirmar.}
+    \includegraphics[width=0.72\textwidth]{imaxes/08-Implementacion/anexo/notificacions.png}
+    \caption{Aviso da toma e recordatorio posterior en Android.}
     \label{fig:anexo-notificacions}
 \end{figure}
-}{}
-
-A Figura~\ref{fig:anexo-notificacions} mostra os dous tipos de aviso xerados
-localmente. Se a toma se confirma antes do segundo aviso, a notificación de
-esquecemento é cancelada.
 
 
-\subsection{Vinculación segura entre dispositivos}
+\subsection{Vinculación e sincronización cifrada}
 
-A vinculación comeza no dispositivo do paciente. Para cada tentativa xérase un
-identificador novo e unha clave provisional de 256 bits. O código QR contén a
-versión do protocolo, o identificador da vinculación, o UID e o token Firebase
-do paciente e a clave provisional.
-
-A seguinte representación emprega datos deliberadamente ficticios:
+O Listado~\ref{lst:qr-vinculacion} concreta a xeración do identificador e da
+clave temporal incorporados ao código \gls{qr}. Se existe unha vinculación
+pendente anterior, elimínase antes de gardar a nova.
 
 \begin{lstlisting}[
-    caption={Estrutura do código QR empregado durante a vinculación.},
-    label={lst:qr-vinculacion}
-]
-{
-  "version": 1,
-  "vinculacionId": "K8x...ficticio",
-  "uidPaciente": "uid-de-proba",
-  "tokenPaciente": "token-fcm-de-proba",
-  "clave": "clave-base64-de-proba"
+    caption={Datos incorporados ao código de vinculación.},
+    label={lst:qr-vinculacion}]
+final claveBase64 = await xerarClaveBase64();
+final idBytes = await (
+  await _algoritmo.newSecretKey()
+).extractBytes();
+final id = base64UrlEncode(
+  idBytes.sublist(0, 16),
+).replaceAll('=', '');
+
+final anterior = await _storage.read(
+  key: _storagePendenteActual,
+);
+if (anterior != null && anterior != id) {
+  await _storage.delete(key: '$_prefixoPendente$anterior');
 }
+await _storage.write(key: _storagePendenteActual, value: id);
+await _storage.write(
+  key: '$_prefixoPendente$id',
+  value: claveBase64,
+);
+
+return jsonEncode({
+  'version': _versionProtocolo,
+  'vinculacionId': id,
+  'uidPaciente': uidPaciente,
+  'tokenPaciente': tokenPaciente,
+  'clave': claveBase64,
+});
 \end{lstlisting}
 
-% IMAXE 7
-% Composición:
-% esquerda: QR no paciente
-% dereita: cámara do supervisor escaneándoo
-% O QR DEBE SER DE PROBA.
-\IfFileExists{imaxes/anexos/implementacion/vinculacion-qr.png}{
+Despois da vinculación, cada envío emprega a clave permanente e un
+\gls{nonce} novo. O identificador e o tipo de aviso incorpóranse como datos
+autenticados, polo que unha modificación do contido ou do contexto provoca o
+rexeitamento da mensaxe.
+
+\begin{lstlisting}[
+    caption={Cifrado e creación dunha mensaxe P2P.},
+    label={lst:cifrado-p2p}]
+final nonce = _algoritmo.newNonce();
+final caixa = await _algoritmo.encrypt(
+  utf8.encode(payload),
+  secretKey: SecretKey(
+    base64Decode(vinculacion.claveBase64),
+  ),
+  nonce: nonce,
+  aad: utf8.encode(
+    'sintrom-p2p-v$_versionProtocolo|'
+    '${vinculacion.id}|$tipoAviso',
+  ),
+);
+
+return jsonEncode({
+  'version': _versionProtocolo,
+  'vinculacionId': vinculacion.id,
+  'nonce': base64Encode(caixa.nonce),
+  'datos': base64Encode(caixa.cipherText),
+  'mac': base64Encode(caixa.mac.bytes),
+});
+\end{lstlisting}
+
+A Figura~\ref{fig:anexo-vinculacion} mostra o código \gls{qr} xerado polo paciente e a pantalla empregada polo supervisor para lelo.
+
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.90\textwidth]
-    {imaxes/anexos/implementacion/vinculacion-qr.png}
-    \caption{Inicio da vinculación entre paciente e persoa supervisora mediante código QR.}
-    \label{fig:anexo-qr}
+
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imaxes/08-Implementacion/anexo/vinculación-paciente.jpg}
+        \caption{Código QR xerado polo paciente.}
+        \label{fig:anexo-vinculacion-qr}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\textwidth]{imaxes/08-Implementacion/anexo/vinculacion-coidador.jpg}
+        \caption{Proceso de vinculación desde o dispositivo do supervisor.}
+        \label{fig:anexo-vinculacion-supervisor}
+    \end{subfigure}
+    \caption{Inicio da vinculación entre paciente e supervisor.}
+    \label{fig:anexo-vinculacion}
 \end{figure}
-}{}
-
-Na Figura~\ref{fig:anexo-qr} represéntase a única etapa na que é necesaria unha
-acción presencial entre os dous dispositivos. O QR proporciona os datos
-iniciais necesarios para establecer unha canle segura, pero a clave incluída
-nel non é a empregada para as comunicacións posteriores.
-
-
-\subsection{Intercambio e almacenamento das claves}
-
-Tras ler o QR, o dispositivo supervisor crea unha nova clave permanente de
-256 bits. Esta clave envíase ao paciente dentro da primeira mensaxe, protexida
-coa clave provisional do QR.
-
-O proceso pode resumirse nas seguintes etapas:
-
-\begin{enumerate}
-    \item o paciente xera o identificador e a clave provisional;
-    \item o supervisor escanea o QR;
-    \item o supervisor xera unha nova clave permanente;
-    \item a clave permanente envíase cifrada coa clave provisional;
-    \item o paciente autentica e descifra a primeira mensaxe;
-    \item ambos dispositivos conservan a clave permanente mediante
-    \textit{Flutter Secure Storage};
-    \item a clave provisional pendente elimínase no paciente.
-\end{enumerate}
-
-Deste xeito, unha captura posterior do código QR non proporciona a clave que se
-está empregando nas comunicacións dunha vinculación xa establecida.
-
-
-\subsection{Formato das mensaxes cifradas}
-
-As mensaxes posteriores empréganse con AES-GCM de 256 bits. Para cada envío
-xérase un \textit{nonce} novo e o resultado serialízase nun envelope coa
-seguinte estrutura:
-
-\begin{lstlisting}[
-    caption={Estrutura dun envelope cifrado AES-GCM.},
-    label={lst:aes-envelope}
-]
-{
-  "version": 1,
-  "vinculacionId": "...",
-  "nonce": "...",
-  "datos": "...",
-  "mac": "..."
-}
-\end{lstlisting}
-
-O identificador da vinculación e o tipo de aviso non se inclúen no texto
-cifrado, senón que se empregan tamén como datos autenticados adicionais:
-
-\begin{lstlisting}[
-    caption={Construción dos datos autenticados adicionais.},
-    label={lst:aad}
-]
-utf8.encode(
-  'sintrom-p2p-v1|$id|$tipoAviso'
-);
-\end{lstlisting}
-
-Isto vincula criptograficamente o contido ao seu contexto. Se se modifica o
-tipo de mensaxe, o identificador, o texto cifrado ou o código de autenticación,
-o descifrado non pode completarse correctamente.
-
-
-\subsection{Tipos de mensaxes sincronizadas}
-
-A sincronización utiliza o campo \textit{tipo\_aviso} para indicar a operación
-que debe executar o receptor.
-
-\begin{table}[htbp]
-    \centering
-    \caption{Principais mensaxes empregadas na sincronización P2P.}
-    \label{tab:tipos-p2p}
-    \resizebox{\columnwidth}{!}{
-    \begin{tabular}{p{0.37\textwidth} p{0.52\textwidth}}
-        \hline
-        \textbf{Tipo} & \textbf{Finalidade} \\
-        \hline
-        VINCULACION\_INICIAL &
-        Completar o intercambio inicial de claves. \\
-
-        ESTADO\_COMPLETO &
-        Transferir ao supervisor o estado actual do paciente. \\
-
-        SOLICITAR\_SINCRONIZACION &
-        Solicitar novamente o estado actualizado. \\
-
-        TOMA\_CONFIRMADA &
-        Informar da confirmación dunha dose. \\
-
-        TOMA\_ESQUECIDA &
-        Informar dunha toma que quedou sen confirmar. \\
-
-        NOVO\_INFORME &
-        Indicar que a pauta do paciente foi modificada. \\
-
-        CONFIGURACION\_ACTUALIZADA &
-        Sincronizar cambios de nome ou hora habitual. \\
-
-        INFORME\_FRAGMENTO &
-        Transferir unha parte dunha folla completa. \\
-
-        DESVINCULAR\_PACIENTE /
-        DESVINCULAR\_COIDADOR &
-        Eliminar unha vinculación nos dous extremos. \\
-        \hline
-    \end{tabular}
-    }
-\end{table}
-
 
 \subsection{Fragmentación dunha folla completa}
 
-Unha análise completa pode ter un tamaño elevado para enviala directamente
-nunha única mensaxe. Por este motivo, \textit{enviarInformeRemoto} serializa a
-análise e divídea en fragmentos de ata 2200 caracteres.
-
-Cada fragmento contén un identificador común, a súa posición dentro da
-secuencia, o número total de partes e a porción correspondente dos datos:
+As follas completas divídense en fragmentos de ata 2200 caracteres para non
+superar o tamaño adecuado dunha mensaxe de FCM. Cada parte leva un identificador
+común, a súa posición e o número total de fragmentos.
 
 \begin{lstlisting}[
-    caption={Estrutura empregada para fragmentar un informe.},
-    label={lst:fragmento-informe}
-]
-{
-  "id": id,
-  "indice": i,
-  "total": total,
-  "datos": json.substring(i * tamanho, fin)
-}
-\end{lstlisting}
-
-No receptor, cada parte almacénase temporalmente empregando unha clave formada
-polo identificador do informe e o índice do fragmento. A reconstrución só
-continúa cando están dispoñibles todas as partes.
-
-\begin{lstlisting}[
-    caption={Reconstrución dun informe a partir dos fragmentos recibidos.},
-    label={lst:reconstrucion-informe}
-]
-final partes = <String>[];
+    caption={División e envío dunha folla en fragmentos cifrados.},
+    label={lst:fragmentacion}]
+final id = DateTime.now()
+    .microsecondsSinceEpoch
+    .toString();
+const tamanho = 2200;
+final total = (json.length / tamanho).ceil();
 
 for (var i = 0; i < total; i++) {
-  final parte = await _storage.read(
-    key: 'informe_${id}_$i',
+  final fin = (i + 1) * tamanho > json.length
+      ? json.length
+      : (i + 1) * tamanho;
+  await _enviarCifrado(
+    vinculacion: vinculacion,
+    payload: jsonEncode({
+      'id': id,
+      'indice': i,
+      'total': total,
+      'datos': json.substring(i * tamanho, fin),
+    }),
+    tipoAviso: 'INFORME_FRAGMENTO',
   );
-
-  if (parte == null) return;
-  partes.add(parte);
 }
-
-final analise = AnaliseModel.fromJson(
-  jsonDecode(partes.join()),
-);
-
-await _db.gardarAnalise(analise);
 \end{lstlisting}
 
-% IMAXE 8 OPCIONAL
-% Diagrama moi pequeno:
-%
-% AnaliseModel
-%     |
-% serializacion JSON
-%     |
-% +--------+--------+--------+
-% | frag 0 | frag 1 | frag 2 |
-% +--------+--------+--------+
-%     |        |        |
-%   AES-GCM  AES-GCM  AES-GCM
-%     \        |        /
-%        dispositivo paciente
-%                |
-%         reconstruccion
-%                |
-%          AnaliseModel
-%
-\IfFileExists{imaxes/anexos/implementacion/fragmentacion-informe.png}{
+O receptor garda cada parte temporalmente e só reconstrúe o \gls{json} cando
+dispón de todos os índices. Despois crea o modelo, garda a pauta, recalcula os
+recordatorios e elimina os fragmentos. Así non se incorpora unha folla
+incompleta cando falta algunha mensaxe.
+
+% Captura opcional: crear imaxes/anexos/implementacion/fluxo-incorporacion.png
+% Mostrar selección da imaxe, revisión dos datos e pauta finalmente gardada.
 \begin{figure}[htbp]
     \centering
-    \includegraphics[width=0.82\textwidth]
-    {imaxes/anexos/implementacion/fragmentacion-informe.png}
-    \caption{Fragmentación, transferencia e reconstrución dunha folla enviada desde o dispositivo supervisor.}
-    \label{fig:anexo-fragmentacion}
+    \includegraphics[width=1\textwidth]{imaxes/08-Implementacion/anexo/fluxo-incorporacion.png}
+    \caption{Selección, revisión e incorporación dunha folla no cliente.}
+    \label{fig:anexo-fluxo-incorporacion}
 \end{figure}
-}{}
 
-A Figura~\ref{fig:anexo-fragmentacion} resume este proceso. Cada fragmento
-mantén a protección criptográfica da comunicación e o tratamento activo só se
-actualiza cando se puido reconstruír correctamente a análise completa. Unha vez
-gardada, reprográmanse os recordatorios e elimínanse os fragmentos temporais.
+\begin{landscape}
+\section{Interface final}
+\label{sec:galeria-interface-final}
+\vspace{0.5cm} % Unha pequena marxe extra
+\begin{center}
+    % Inserimos só a páxina 1 debaixo do texto. 
+    % Se o wireframe queda moi pequeno podes usar width=\textwidth
+    % Se o necesitas rotar, podes engadir a opción angle=90 dentro dos corchetes
+    \includegraphics[page=1, width=1.4\textwidth]{imaxes/08-Implementacion/anexo/Pantalla Inicio.pdf}
+\end{center}
+\end{landscape}
+
+\clearpage
+% 1. Inserimos dende a páxina 2 ata a penúltima (neste exemplo, a 9).
+% Mantemos o pagecommand={} para que sigan tendo o encabezado e pé do documento.
+\includepdf[page=2-11,landscape=true, pagecommand={}, scale=0.85]{imaxes/08-Implementacion/anexo/Pantalla Inicio.pdf}

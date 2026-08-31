@@ -45,12 +45,22 @@ Finalmente, a información transfórmase nos modelos \textit{CabeceiraResponse},
 
 Ademais da extracción, a \gls{api} incorpora endpoints para consultar centros sanitarios, comprobar o estado do servizo, executar o preprocesamento de maneira independente e reenviar mensaxes entre dispositivos.
 
-O endpoint\textit{GET /centros/buscar} recibe o nome dun centro como parámetro e compárao co catálogo sanitario da Xunta de Galicia almacenado en formato KML. Na primeira consulta, o ficheiro procésase e os centros recuperados mantéñense en memoria mediante \textit{lru\_cache}, evitando ler e interpretar o catálogo en cada petición. Antes da procura, o nome do centro normalízase para reducir diferenzas de escritura e, a continuación, \textit{SequenceMatcher} calcula a similitude coa listaxe de centros. Selecciónase a coincidencia que supera o limiar establecido de 0,45 e devólvense o nome, o enderezo, o concello e o teléfono do centro.
+O endpoint\textit{GET /centros/buscar} recibe o nome dun centro como parámetro e compárao co catálogo sanitario en formato KML publicado pola Consellería de Sanidade no Portal Abertos da Xunta de Galicia, baixo licenza CC BY-SA 4.0 \cite{XuntaMapaServizosSanitarios}. Na primeira consulta, o ficheiro procésase e os centros recuperados mantéñense en memoria mediante \textit{lru\_cache}, evitando ler e interpretar o catálogo en cada petición. Antes da procura, o nome do centro normalízase para reducir diferenzas de escritura e, a continuación, \textit{SequenceMatcher} calcula a similitude coa listaxe de centros. Selecciónase a coincidencia que supera o limiar establecido de 0,45 e devólvense o nome, o enderezo, o concello e o teléfono do centro.
 
 O endpoint\textit{GET /estado/} devolve o estado da \gls{api}, a data e hora da consulta e a versión en execución. Pola súa parte, \textit{POST /preprocesamento/} permite aplicar a corrección da imaxe sen realizar a extracción con Azure, facilitando así a comprobación do resultado xerado. 
 
 A comunicación entre os dispositivos emprega o endpoint \textit{POST /notificar/enviar}. Este recibe o token do dispositivo destinatario, o tipo de aviso e un \textit{payload}  previamente cifrado no dispositivo de orixe. A \gls{api} non interpreta o seu contido e actúa unicamente como intermediaria entre o cliente e Firebase Cloud Messaging. Porén, consulta o tipo de aviso para decidir se debe engadir unha notificación visible. Por exemplo, para unha toma confirmada envía o título \textit{Toma confirmada} e a mensaxe \textit{A persoa supervisada confirmou a toma}, mentres que para unha nova folla emprega \textit{Novo informe} e \textit{Actualizouse a folla de tratamento}. Estes textos son fixos e non conteñen nomes, doses nin outra información clínica, que permanece exclusivamente dentro do contido cifrado.
 
+% Captura opcional da documentación da API.
+% Descomentar se queda espazo no capítulo.
+%
+% \begin{figure}[htbp]
+%     \centering
+%     \includegraphics[width=0.95\textwidth]
+%     {imaxes/08-Implementacion/swagger-endpoints.png}
+%     \caption{Documentación interactiva dos endpoints da API mediante Swagger.}
+%     \label{fig:implementacion-swagger}
+% \end{figure}
 
 \subsection{Tratamento de erros}
 Os erros diferéncianse segundo a súa orixe. Un formato non admitido, unha confianza insuficiente ou uns datos incoherentes producen unha resposta 400 \textit{Bad Request}. Se falta algún parámetro obrigatorio ou o seu formato non é válido, FastAPI devolve automaticamente unha resposta 422 \textit{Unprocessable Entity}.Os fallos de comunicación con Azure devólvense como 502 \textit{Bad Gateway} e os erros inesperados da aplicación como 500 \textit{Internal Server Error}. Os endpoints auxiliares empregan tamén respostas específicas, como 404 \textit{Not Found} cando non se localiza un centro ou 503 \textit{(Service Unavailable)} cando o catálogo non está dispoñible. O cliente utiliza esta información para mostrar unha mensaxe adecuada en lugar dun erro xenérico.
@@ -83,6 +93,37 @@ O método \textit{ServizoApi.enviarInforme} crea unha petición \gls{http} de ti
 Antes de gardar a información, a pauta pasa por unha pantalla de revisión controlada por \textit{RevisionPautaViewModel}. A clase \textit{RevisionPauta} concentra as operacións de inserción, modificación, eliminación e ordenación das entradas. Antes da confirmación compróbase que exista polo menos un día, que as datas sexan válidas e non estean repetidas e que as doses teñan un formato numérico ou fraccionario admitido. Os días de control non necesitan unha dose.
 
 Ao confirmar, \textit{CapturaInformeViewModel.completar} determina o destino da análise. Se a folla foi incorporada polo paciente, gárdase localmente, reprográmanse os recordatorios e notifícase o cambio ás persoas supervisoras vinculadas. Se a folla foi incorporada desde un dispositivo supervisor, envíase cifrada ao paciente e non se establece como pauta activa no dispositivo de orixe.
+
+% Captura opcional do fluxo de incorporación dunha folla.
+% Descomentar se queda espazo no capítulo.
+%
+% \begin{figure}[htbp]
+%     \centering
+%
+%     \begin{subfigure}[t]{0.30\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]
+%         {imaxes/08-Implementacion/seleccion-folla.png}
+%         \caption{Selección da folla.}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}[t]{0.30\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]
+%         {imaxes/08-Implementacion/revision-pauta.png}
+%         \caption{Revisión dos datos.}
+%     \end{subfigure}
+%     \hfill
+%     \begin{subfigure}[t]{0.30\textwidth}
+%         \centering
+%         \includegraphics[width=\textwidth]
+%         {imaxes/08-Implementacion/confirmacion-pauta.png}
+%         \caption{Pauta incorporada.}
+%     \end{subfigure}
+%
+%     \caption{Fluxo de incorporación e revisión dunha folla de tratamento.}
+%     \label{fig:implementacion-incorporacion}
+% \end{figure}
 
 
 % ANEXO:
@@ -137,34 +178,28 @@ O paciente almacena temporalmente os fragmentos recibidos. Cando están dispoñi
 \section{Interface resultante}
 A implementación produce dúas interfaces diferenciadas. O perfil de paciente mostra a dose actual e permite acceder ao calendario, ao progreso, á incorporación dunha folla e aos axustes. O perfil de supervisión presenta as persoas vinculadas e permite consultar o estado máis recente de cada tratamento ou incorporar unha nova folla no seu nome.
 
-As interfaces máis representativas do resultado final poden observarse na Figura~\ref{fig:implementacion-interfaces}. Estas mostran o seguimento diario realizado polo paciente e a consulta da información desde o perfil supervisor. No corpo do capítulo inclúense unicamente as pantallas máis representativas. O resto das interfaces e os fragmentos de código complementarios recóllense no Apéndice~\ref{app:detalles-implementacion}.
-
-\IfFileExists{imaxes/08-Implementacion/inicio-paciente.png}{
+As interfaces máis representativas do resultado final poden observarse na Figura~\ref{fig:implementacion-interfaces}. Estas mostran o seguimento diario realizado polo paciente e a consulta da información desde o perfil supervisor. No corpo do capítulo inclúense unicamente as pantallas máis representativas. O resto das interfaces e os fragmentos de código complementarios recóllense no Apéndice~\ref{{sec:galeria-interface-final}.
 \begin{figure}[htbp]
     \centering
 
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\textwidth]
-        {imaxes/08-Implementacion/inicio-paciente.png}
+        \includegraphics[width=\textwidth]{imaxes/08-Implementacion/Inicio-paciente.jpg}
         \caption{Inicio do paciente.}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\textwidth]
-        {imaxes/08-Implementacion/progreso-paciente.png}
+        \includegraphics[width=\textwidth]{imaxes/08-Implementacion/O-meu-progreso.jpg}
         \caption{Seguimento do tratamento.}
     \end{subfigure}
     \hfill
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\textwidth]
-        {imaxes/08-Implementacion/inicio-supervisor.png}
+        \includegraphics[width=\textwidth]{imaxes/08-Implementacion/Inicio-supervisor.jpg}
         \caption{Perfil supervisor.}
     \end{subfigure}
 
     \caption{Interfaces finais de seguimento e supervisión do tratamento.}
     \label{fig:implementacion-interfaces}
 \end{figure}
-}{}

@@ -26,8 +26,6 @@ Ademais, o seguimento manual carece de mecanismos de notificación ou confirmaci
 \label{fig:follasintrom}
 \end{figure}
 
-\FloatBarrier
-
 \section{Motivación}
 
 Este proxecto nace coa premisa de achegar seguridade ao tratamento e maior tranquilidade tanto aos pacientes como aos seus familiares e coidadores. Como se expuxo na sección anterior, no sistema actual, moitos pacientes viven coa constante preocupación de perder ou estragar a folla de tratamento. Ademais deben interpretar a pauta diaria a partir dunha táboa que pode resultar complexa e difícil de ler debido ao reducido tamaño de letra. Ao mesmo tempo, o proxecto busca aliviar os familiares ou coidadores, que adoitan vivir coa incerteza de non saber se a toma foi realizada correctamente.
@@ -57,46 +55,17 @@ Para avaliar a viabilidade deste proxecto, realizouse unha análise das solució
 \label{subsec:aplicacións_xenericas}
 Nesta categoría inclúense ferramentas que permiten a xestión xeral da medicación, permitindo crear recordatorios e rexistrar diferentes fármacos. 
 
-Algunhas das app máis populares desta categoría son, por exemplo, \textit{Medisafe} \cite{AppMedisafe} (Figura \ref{fig:AppMedisafe}) ou \textit{MyTherapy} \cite{AppMyTherapy} (Figura \ref{fig:AppMyTherapy}). Malia ser aplicacións bastante completas para o control de medicación xeral, non están adaptadas ás características específicas do tratamento anticoagulante. Algunhas das principais limitacións atopadas nestas solucións son:
+Algunhas das app máis populares desta categoría son, por exemplo, \textit{Medisafe} \cite{AppMedisafe} ou \textit{MyTherapy} \cite{AppMyTherapy}. As capturas de ambas aplicacións recóllense no Apéndice~\ref{app:capturas-estudo-mercado}. Malia ser aplicacións bastante completas para o control de medicación xeral, non están adaptadas ás características específicas do tratamento anticoagulante. Algunhas das principais limitacións atopadas nestas solucións son:
 \begin{itemize}
     \item \textbf{Xestión de pautas variables:} Estas aplicacións están deseñadas só para tratamentos recorrentes ou con doses fixas (ex. unha pastilla cada 8 horas, media pastilla cada 3 horas, unha pastilla diaria ...). Se quixésemos empregar este tipo de apps para levar o control do tratamento de Sintrom teríamos que configurar, por exemplo, para unha folla cunha pauta de 7 días cunha dose cambiante diariamente, sete alarmas distintas con doses diferentes, o que induce ao erro.
     \item \textbf{Carga manual de datos:}  O usuario debe escribir cada medicamento e dose. Para unha persoa de avanzada idade isto resulta complexo e pode inducir a erros, creando unha gran barreira de uso da app.
 \end{itemize}
 
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.8\textwidth]{imaxes/Introducion/Medisafe.png}
-    \caption{Capturas de pantalla da app Medisafe}
-     \label{fig:AppMedisafe}
-\end{figure}
-\begin{figure}[h!]
-    \centering
-    \includegraphics[width=0.8\textwidth]{imaxes/Introducion/MyTherapy.png}
-    \caption{Capturas de pantalla da app MyTherapy}
-     \label{fig:AppMyTherapy}
-\end{figure}
-
-\FloatBarrier
-
 \subsection{Aplicacións especializadas}
 Existen algunhas solucións deseñadas especificamente para este tratamento como por exemplo:
 \begin{itemize}
-    \item \textbf{AnticoagulApp} \cite{AppAnticoagulApp} (Figura \ref{fig:AnticoagulApp}): Esta é unha aplicación lanzada pola \textit{Sociedade Española de Cardioloxía} que permite rexistrar o \gls{inr}, as doses e ofrece consellos de saúde. Pero seguimos coa mesma barreira mencionada na sección anterior, o rexistro das doses é manual, aínda que moito máis sinxelo que nas apps xenéricas, xa que si permite a correcta xestión das pautas variables. Non ten capacidade de interpretar documentos físicos, obrigando ao paciente a ler e transcribir a folla do médico. \footnote{Durante o período de redacción da memoria deste traballo esta aplicación non está dispoñible xa que se atopa en proceso de actualizacións.}
-
-        \begin{figure}[h!]
-            \centering
-            \includegraphics[width=0.6\textwidth]{imaxes/Introducion/AnticoagulApp.png}
-            \caption{Capturas de pantalla de AnticoagulApp}
-            \label{fig:AnticoagulApp}
-            
-        \end{figure}
-    \item \textbf{INR Diary} \cite{AppINRDiary} (Figura \ref{fig:AppINRDiary}):  Aínda que permite un rexistro detallado do \gls{inr} e das doses tomadas, a entrada de datos segue a ser completamente manual. Ademais esta aplicación é de pago, o que supón unha barreira económica engadida que limita a súa accesibilidade para gran parte dos pacientes.
-    \begin{figure}[h]
-        \centering
-        \includegraphics[width=0.8\textwidth]{imaxes/Introducion/DiarioINR.png}
-        \caption{Capturas de pantalla da app INR Diary}
-        \label{fig:AppINRDiary}
-    \end{figure}
+    \item \textbf{AnticoagulApp} \cite{AppAnticoagulApp}: Esta é unha aplicación lanzada pola \textit{Sociedade Española de Cardioloxía} que permite rexistrar o \gls{inr}, as doses e ofrece consellos de saúde. Pero seguimos coa mesma barreira mencionada na sección anterior, o rexistro das doses é manual, aínda que moito máis sinxelo que nas apps xenéricas, xa que si permite a correcta xestión das pautas variables. Non ten capacidade de interpretar documentos físicos, obrigando ao paciente a ler e transcribir a folla do médico. A súa interface pode consultarse na Figura~\ref{fig:AppAnticoagulApp} do Apéndice~\ref{app:capturas-estudo-mercado}. \footnote{Durante o período de redacción da memoria deste traballo esta aplicación non está dispoñible xa que se atopa en proceso de actualizacións.}
+    \item \textbf{INR Diary} \cite{AppINRDiary}:  Aínda que permite un rexistro detallado do \gls{inr} e das doses tomadas, a entrada de datos segue a ser completamente manual. Ademais esta aplicación é de pago, o que supón unha barreira económica engadida que limita a súa accesibilidade para gran parte dos pacientes.  A súa interface móstrase na Figura~\ref{fig:AppINRDiary} do Apéndice~\ref{app:capturas-estudo-mercado}.
 \end{itemize}
 
 \FloatBarrier
@@ -135,7 +104,7 @@ Con este conxunto de funcionalidades, o proxecto \textbf{buscará} cubrir un oco
 
 
 
-\FloatBarrier
+
 
 \section{Estrutura do documento}
 

@@ -361,7 +361,7 @@ A Figura~\ref{fig:mlkit-f01n-entrada} mostra un fragmento dunha das cinco fotogr
     % RECOMENDACIÓN: recortar desde
     % "DOSIS DIARIA DE ANTICOAGULANTE"
     % ata o final da primeira fila (08--14 SEP).
-    \includegraphics[width=0.75\textwidth]{imaxes/06-Procesamento automático das follas de tratamento/mlkit-f01n-pauta.jpg}
+    \includegraphics[width=0.0.6\textwidth]{imaxes/06-Procesamento automático das follas de tratamento/mlkit-f01n-pauta.jpg}
     \caption{Fragmento dunha fotografía tomada con iluminación normal
     empregada na avaliación de Google ML Kit.}
     \label{fig:mlkit-f01n-entrada}
@@ -444,15 +444,6 @@ A maior dificultade apareceu novamente na táboa de doses diarias. Aínda que na
 
 Un dos exemplos máis representativos obsérvase na folla F01. Como mostra o Listing~\ref{lst:tesseract-estandar-f01}, a saída conserva algúns elementos recoñecibles, pero introduce numerosos caracteres incorrectos e perde a estrutura necesaria para asociar de forma fiable cada data coa súa dose.
 
-\begin{figure}[h!]
-    \centering
-    % Recorte da táboa da folla F01 escaneada.
-    \includegraphics[width=0.65\textwidth]{imaxes/06-Procesamento automático das follas de tratamento/mlkit-f01n-pauta.jpg}
-    \caption{Fragmento dunha folla escaneada empregada na avaliación do
-    modelo estándar de Tesseract.}
-    \label{fig:tesseract-estandar-f01}
-\end{figure}
-
 \begin{lstlisting}[
     frame=single,
     rulecolor=\color{gray!60},
@@ -483,18 +474,7 @@ Dado que estas limitacións apareceron xa nas follas escaneadas, non se consider
 
 \subsubsection{Modelo personalizado}
 
-O adestramento do modelo \textit{sintromv2} mostrou unha redución progresiva da taxa de erro ao longo do proceso. Como se observa na
-Figura~\ref{fig:tesseract-sintromv2-adestramento}, o \gls{bcer} pasou de valores próximos ao 39\,\% nas primeiras iteracións ata alcanzar un mínimo do \textbf{10,878\,\%}.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.75\textwidth]
-    {imaxes/06-Procesamento automático das follas de tratamento/sintromv2.plot_cer.png}
-    \caption{Evolución do BCER durante o adestramento do modelo
-    \textit{sintromv2}.}
-    \label{fig:tesseract-sintromv2-adestramento}
-\end{figure}
-
+O adestramento do modelo \textit{sintromv2} mostrou unha redución progresiva da taxa de erro. O \gls{bcer} pasou de valores próximos ao 39\,\% ata alcanzar un mínimo do 10,878\,\%. A evolución completa pode consultarse na Figura~\ref{fig:anexo-bcer-tesseract} do Apéndice~\ref{app:resultados-procesamento}.
 O proceso completou as \textbf{10\,000 iteracións} empregadas por defecto por \textit{tesstrain} e obtivo o mellor resultado na
 \textbf{iteración 4\,911}, cun \gls{bcer} do \textbf{10,878\,\%} e un \gls{bwer} do \textbf{20,409\,\%}. O punto de control correspondente a este resultado foi empregado para xerar o modelo final \textit{sintromv2}.
 
@@ -565,26 +545,7 @@ En conxunto, o adestramento específico permitiu mellorar o recoñecemento de de
 
 \subsection{Resultados da aproximación baseada en YOLO}
 
-O detector mostrou un rendemento elevado no conxunto de validación. A curva Precision-Recall alcanzou un \gls{map05} de \textbf{0,989} e a curva F1 acadou un valor máximo de \textbf{0,98} cun limiar de confianza de \textbf{0,603}. Na matriz de confusión rexistráronse \textbf{130 deteccións correctas} da clase \textit{pastilla} e \textbf{5 falsos positivos}.
-
-\begin{figure}[htbp]
-    \centering
-    \begin{subfigure}[t]{0.4\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/BoxPR_curve.png}
-        \caption{Curva Precision-Recall.}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.5\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]{imaxes/06-Procesamento automático das follas de tratamento/confusion_matrix.png}
-        \caption{Matriz de confusión.}
-    \end{subfigure}
-
-    \caption{Resultados obtidos durante a validación do detector YOLO.}
-    \label{fig:yolo-resultados}
-\end{figure}
-
+O detector mostrou un rendemento elevado no conxunto de validación. A curva Precision-Recall (Figura~\ref{fig:anexo-yolo-pr}) alcanzou un \gls{map05} de 0,989 e a puntuación F1 acadou un máximo de 0,98 cun limiar de confianza de 0,603. Na matriz de confusión (Figura~\ref{fig:anexo-yolo-confusion}) rexistráronse 130 deteccións correctas da clase \textit{pastilla} e 5 falsos positivos. 
 
 Para comprobar a capacidade de xeneralización do detector, o modelo final aplicouse sobre as follas F09--F11, que non foran empregadas durante o adestramento nin durante a validación. Para estas probas utilizouse o limiar de confianza de \textbf{0,603} obtido a partir da curva F1.
 

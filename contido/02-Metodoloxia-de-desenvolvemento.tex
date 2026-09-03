@@ -19,7 +19,7 @@ Os incrementos concretos nos que se dividiu o desenvolvemento e o seu seguimento
 
 \section{Aplicación de Kanban}
 
-Kanban é un método de xestión visual que permite representar as tarefas do proxecto segundo o seu estado. Cada tarefa móvese entre distintas columnas a medida que avanza o seu desenvolvemento, o que facilita coñecer o traballo pendente, identificar as actividades que se están realizando e comprobar as que xa foron completadas.  Para aplicar Kanban no proxecto empregouse un taboleiro de GitHub Projects con catro estados:
+Kanban é un método de xestión visual que permite representar as tarefas do proxecto segundo o seu estado. Cada tarefa móvese entre distintas columnas a medida que avanza o seu desenvolvemento, o que facilita coñecer o traballo pendente, identificar as actividades que se están realizando e comprobar as que xa foron completadas. Para aplicar Kanban no proxecto empregouse un taboleiro de GitHub Projects con catro estados:
 \begin{itemize}
     \item \textbf{Para máis adiante:} ideas, melloras ou tarefas que se consideraban útiles, pero que non formaban parte do traballo inmediato.
     \item \textbf{Por facer:} tarefas xa definidas, revisadas e priorizadas que estaban preparadas para comezar.
@@ -31,13 +31,13 @@ Na Figura~\ref{fig:taboleiro-kanban} móstrase o estado do taboleiro
 Kanban nun momento do desenvolvemento, coas tarefas
 distribuídas segundo o seu estado.
 
-O movemento das tarefas entre as columnas non se realizaba automaticamente. As tarefas situadas en \textit{Para máis adiante} revisábanse periodicamente e trasladábanse a \textit{Por facer} cando pasaban a formar parte dos obxectivos próximos do proxecto. Nese momento comprobábase tamén que estivesen suficientemente definidas e que a prioridade asignada seguise sendo adecuada.
+O movemento das tarefas entre as columnas non se realizou automaticamente. As tarefas situadas en \textit{Para máis adiante} revisáronse periodicamente e trasladáronse a \textit{Por facer} cando pasaban a formar parte dos obxectivos próximos do proxecto. Nese momento comprobouse tamén que estivesen suficientemente definidas e que a prioridade asignada seguise sendo adecuada.
 
-Para iniciar unha nova tarefa seleccionábase unha das actividades da columna \textit{Por facer}, atendendo en primeiro lugar á prioridade que tiña asignada. Cando varias tarefas compartían o mesmo nivel, tíñanse en conta as dependencias con outras actividades, a incerteza técnica e a existencia de posibles bloqueos. Antes de movela a \textit{En curso}, comprobábase tamén que non se superase o límite de traballo establecido.
+Para iniciar unha nova tarefa seleccionouse unha das actividades da columna \textit{Por facer}, atendendo en primeiro lugar á prioridade que tiña asignada. Cando varias tarefas compartían o mesmo nivel, tivéronse en conta as dependencias con outras actividades, a incerteza técnica e a existencia de posibles bloqueos. Antes de movela a \textit{En curso}, comprobouse tamén que non se superase o límite de traballo establecido.
 
-Unha vez iniciado o traballo, a tarefa permanecía na columna \textit{En curso} durante a súa realización e comprobación. Se para completala era necesario realizar modificacións adicionais, probas ou integracións con outros compoñentes, continuaba nesta columna ata que se resolvesen.
+Unha vez iniciado o traballo, a tarefa permaneceu na columna \textit{En curso} durante a súa realización e comprobación. Se para completala era necesario realizar modificacións adicionais, probas ou integracións con outros compoñentes, continuou nesta columna ata que se resolvesen.
 
-Unha tarefa só se trasladaba a \textit{Feito} despois de cumprir os criterios de aceptación, realizar as comprobacións necesarias e integrar o resultado no proxecto. Deste xeito, a existencia dunha implementación parcial non era suficiente para considerar unha tarefa rematada.
+Unha tarefa só se trasladou a \textit{Feito} despois de cumprir os criterios de aceptación, realizar as comprobacións necesarias e integrar o resultado no proxecto. Deste xeito, a existencia dunha implementación parcial non era suficiente para considerar unha tarefa rematada.
 
 O movemento seguido polas tarefas entre as distintas columnas represéntase na Figura~\ref{fig:diagrama-kanban}.
 \FloatBarrier
@@ -60,15 +60,15 @@ O movemento seguido polas tarefas entre as distintas columnas represéntase na F
 
 Estableceuse un límite de \gls{wip} de \textbf{catro tarefas}. O seu obxectivo foi favorecer a finalización das tarefas iniciadas antes de comezar outras novas.
 
-Escolleuse este valor porque permitía manter activas tarefas de distintas áreas do proxecto sen acumular un número excesivo de actividades abertas. No cómputo do límite incluíanse tamén as tarefas pendentes de revisión, validación ou
+Escolleuse este valor porque permitía manter activas tarefas de distintas áreas do proxecto sen acumular un número excesivo de actividades abertas. No cómputo do límite incluíronse tamén as tarefas pendentes de revisión, validación ou
 desbloqueo, polo que non implicaba que se desenvolvesen catro tarefas simultaneamente.
 
-Cando se alcanzaba o límite, priorizábase a finalización, integración ou desbloqueo das tarefas existentes antes de iniciar outras novas.
+Cando se alcanzou o límite, priorizouse a finalización, integración ou desbloqueo das tarefas existentes antes de iniciar outras novas.
 
 
 \subsection{Organización e priorización das tarefas}
 
-Cada tarefa do taboleiro representouse mediante unha \textit{issue} de GitHub. Nela recollíanse a descrición do traballo, os criterios de aceptación, a prioridade, as etiquetas e, cando correspondía, as relacións con outras tarefas ou \textit{pull requests}.
+Cada tarefa do taboleiro representouse mediante unha \textit{issue} de GitHub. Nela recolléronse a descrición do traballo, os criterios de aceptación, a prioridade, as etiquetas e, cando correspondía, as relacións con outras tarefas ou \textit{pull requests}.
 
 Na Figura~\ref{fig:exemplo-tarefa} preséntase unha das tarefas do proxecto, na que se poden observar algúns destes elementos.
 
@@ -94,7 +94,7 @@ Deste xeito, as funcionalidades necesarias para procesar unha folla de tratament
 
 O taboleiro revisouse periodicamente e ao finalizar cada incremento. Durante estas revisións actualizáronse os estados e as prioridades das tarefas, e identificáronse posibles bloqueos ou actividades que permanecían demasiado tempo en curso.
 
-Cando unha tarefa resultaba demasiado extensa ou combinaba cambios non relacionados, dividíase en tarefas máis pequenas para facilitar a súa estimación, desenvolvemento e comprobación.
+Cando unha tarefa resultaba demasiado extensa ou combinaba cambios non relacionados, dividiuse en tarefas máis pequenas para facilitar a súa estimación, desenvolvemento e comprobación.
 
 \section{Aplicación de GitFlow ao control de versións}
 \label{sec:gitflow}
@@ -119,9 +119,9 @@ No proxecto utilizáronse os seguintes tipos de ramas:
 Para ilustrar este fluxo de traballo, a Figura~\ref{fig:diagrama-gitflow} mostra unha representación visual dalgunhas das ramas empregadas no proxecto. No grafo pódese observar a rama principal (\textit{main}) e a base de desenvolvemento (\textit{develop}), así como exemplos reais do historial. As ramas resoltas, como \textit{fix/configuracion-local} ou \textit{feature/base-flutter}, parten de \textit{develop} e intégranse de novo a través das súas respectivas \textit{pull requests} (como as PR 45, PR 48 e PR 49). Pola contra, o traballo en curso, como a rama \textit{feature/gardar-datos}, mantense illado ata a súa finalización.
 
 
-As ramas de funcionalidades e correccións creábanse a partir de \textit{develop}.  O código nunca se modificou directamente sobre as ramas principais, garantindo así o illamento de cada tarefa. Durante o desenvolvemento, os cambios rexistráronse aplicando a convención de \textit{commits} semánticos (empregando prefixos como \textit{feat:}, \textit{fix:}, \textit{refactor:} ou \textit{chore:}). Isto permitiu manter un historial lexible e descritivo que indica claramente o propósito de cada modificación.
+As ramas de funcionalidades e correccións creáronse a partir de \textit{develop}. O código nunca se modificou directamente sobre as ramas principais, garantindo así o illamento de cada tarefa. Durante o desenvolvemento, os cambios rexistráronse aplicando a convención de \textit{commits} semánticos (empregando prefixos como \textit{feat:}, \textit{fix:}, \textit{refactor:} ou \textit{chore:}). Isto permitiu manter un historial lexible e descritivo que indica claramente o propósito de cada modificación.
 
-Unha vez rematada unha tarefa, a rama correspondente publicábase no repositorio remoto e abríase unha \textit{pull request} cara a rama \textit{develop}. Este mecanismo empregouse aínda que o proxecto fose desenvolvido por unha única persoa. Neste contexto non proporcionaban unha revisión independente, pero si ofrecían un punto de control antes de modificar \textit{develop}. Ademais, permitían consultar a descrición do cambio, os commits incluídos, os ficheiros modificados e a relación coa tarefa correspondente.
+Unha vez rematada unha tarefa, a rama correspondente publicouse no repositorio remoto e abriuse unha \textit{pull request} cara a rama \textit{develop}. Este mecanismo empregouse aínda que o proxecto fose desenvolvido por unha única persoa. Neste contexto non proporcionaron unha revisión independente, pero si ofreceron un punto de control antes de modificar \textit{develop}. Ademais, permitiron consultar a descrición do cambio, os commits incluídos, os ficheiros modificados e a relación coa tarefa correspondente.
 
 Na Figura~\ref{fig:exemplo-pull-request} móstrase un exemplo deste proceso, correspondente á integración mediante \textit{pull request} dunha das tarefas de desenvolvemento.
 
@@ -144,7 +144,7 @@ O enfoque incremental permitiu avanzar por etapas e reducir progresivamente esta
 
 O carácter iterativo permitiu revisar solucións xa desenvolvidas cando se obtiveron novos resultados. As decisións relacionadas coa extracción dos datos, a organización da \gls{api} e o funcionamento da aplicación fóronse modificando e refinando a medida que se coñecían mellor a estrutura das follas de tratamento e as necesidades do sistema.
 
-Non se aplicou Scrum de maneira estrita porque a organización do traballo en sprints de duración fixa non se considerou a opción máis axeitada para unhas tarefas cunha duración e uns resultados difíciles de prever. En cambio, Kanban permitiu manter un fluxo continuo, modificar as prioridades segundo os avances realizados e incorporar novas tarefas cando se detectaban necesidades ou problemas.
+Non se aplicou Scrum de maneira estrita porque a organización do traballo en sprints de duración fixa non se considerou a opción máis axeitada para unhas tarefas cunha duración e uns resultados difíciles de prever. En cambio, Kanban permitiu manter un fluxo continuo, modificar as prioridades segundo os avances realizados e incorporar novas tarefas cando se detectaron necesidades ou problemas.
 
 O taboleiro proporcionou unha representación visual do estado do proxecto, diferenciando as tarefas pendentes, as que se atopaban en desenvolvemento e as que xa foran comprobadas. O límite de traballo en curso favoreceu a finalización das tarefas iniciadas antes de abrir novas liñas de traballo e permitiu identificar aquelas que permanecían pendentes de revisión ou validación.
 

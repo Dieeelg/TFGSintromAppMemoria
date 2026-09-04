@@ -256,6 +256,124 @@ Para avaliar esta etapa empregáronse as \textbf{7 fotografías inclinadas} desc
     \label{fig:opencv-preprocesamento}
 \end{figure}
 
+\subsection{Resumo comparativo}
+\label{subsec:resumo-comparativo-procesamento}
+
+Co obxectivo de facilitar a lectura dos resultados, a
+Táboa~\ref{tab:comparacion-metodos-extraccion} resume o comportamento de
+cada aproximación nos elementos que debe recuperar a aplicación. As
+valoracións son cualitativas e sintetizan as probas descritas nas seguintes
+subseccións; non constitúen unha comparación directa de taxas de acerto, xa que
+as técnicas producen saídas diferentes e non todas foron avaliadas sobre o
+mesmo subconxunto de imaxes.
+
+\begin{table}[htbp]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2.5pt}
+    \renewcommand{\arraystretch}{1.25}
+    \caption{Resumo cualitativo dos resultados das técnicas de extracción.}
+    \label{tab:comparacion-metodos-extraccion}
+    \begin{tabularx}{\textwidth}{
+        >{\raggedright\arraybackslash}p{2.05cm}
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X}
+        \toprule
+        \textbf{Método} & \textbf{Texto} & \textbf{Datas} & \textbf{INR} &
+        \textbf{Doses} & \textbf{Relación data--dose} & \textbf{Fotos} \\
+        \midrule
+        ML Kit
+            & Parcial & Mal & Mal & Mal & Mal & Mal \\
+        Tesseract estándar
+            & Parcial & Mal & Mal & Mal & Mal & N/A \\
+        Tesseract \textit{sintromv2}
+            & Parcial & Mal & Parcial & Parcial & Mal & Mal \\
+        YOLO + Tesseract
+            & N/A & Mal & N/A & Parcial\textsuperscript{a} & Mal & Parcial \\
+        Azure \textit{Neural}
+            & Ben & Ben & Ben & Ben & Parcial & Parcial \\
+        \textbf{Azure \textit{Template}}
+            & \textbf{Ben} & \textbf{Ben} & \textbf{Ben} & \textbf{Ben} &
+              \textbf{Ben} & \textbf{Ben\textsuperscript{b}} \\
+        \bottomrule
+    \end{tabularx}
+
+    \vspace{1mm}
+    \begin{minipage}{0.98\textwidth}
+        \tiny
+        \textit{Lenda:} \textit{Ben}, resultado suficientemente estable nas
+        probas; \textit{Parcial}, recuperación posible pero non fiable en todos
+        os casos; \textit{Mal}, os erros impiden reconstruír a pauta;
+        \textit{N/A}, campo alleo ao obxectivo específico da técnica.
+        O método seleccionado destácase en negra.
+        \textsuperscript{a}YOLO detecta con elevada fiabilidade as
+        representacións gráficas das pastillas, pero non as doses expresadas
+        unicamente mediante texto.
+        \textsuperscript{b}Detectáronse erros puntuais nas condicións menos
+        favorables, polo que a aplicación permite revisar e corrixir a extracción.
+    \end{minipage}
+\end{table}
+
+O resumo mostra que recoñecer texto ou localizar unha pastilla non é
+suficiente: o criterio determinante é conservar a correspondencia entre cada
+data e a súa dose. O modelo \textit{Template} de Azure foi o único que mantivo
+esta estrutura coa estabilidade necesaria para empregalo como base da
+solución, aínda que a saída continúa sometida á revisión da persoa usuaria.
+
+Para evitar duplicar material, a Táboa~\ref{tab:guia-exemplos-procesamento}
+identifica os exemplos de entrada e resultado incluídos ao longo da sección.
+Estes casos permiten contrastar unha fotografía de uso real, follas non vistas
+durante os adestramentos e unha captura inclinada.
+
+\begin{table}[htbp]
+    \centering
+    \footnotesize
+    \renewcommand{\arraystretch}{1.2}
+    \caption{Guía dos exemplos empregados para presentar os resultados.}
+    \label{tab:guia-exemplos-procesamento}
+    \begin{tabularx}{\textwidth}{
+        >{\raggedright\arraybackslash}p{2.7cm}
+        >{\raggedright\arraybackslash}p{3.1cm}
+        >{\raggedright\arraybackslash}X}
+        \toprule
+        \textbf{Técnica} & \textbf{Folla e condición} &
+        \textbf{Resultado mostrado} \\
+        \midrule
+        OpenCV
+            & T1, fotografía inclinada
+            & Figura~\ref{fig:opencv-preprocesamento}: comparación antes e
+              despois da corrección de orientación e perspectiva. \\
+        ML Kit
+            & F01, iluminación normal
+            & Figura~\ref{fig:mlkit-f01n-entrada} e
+              Listado~\ref{lst:mlkit-f01n-saida}: perda da estrutura e erros en
+              datas e fraccións. \\
+        Tesseract estándar
+            & F01, imaxe de referencia
+            & Listado~\ref{lst:tesseract-estandar-f01}: caracteres incorrectos
+              e asociación data--dose non fiable. \\
+        Tesseract \textit{sintromv2}
+            & F11, non empregada no adestramento
+            & Figura~\ref{fig:tesseract-comparacion-f11}: comparación directa
+              co modelo estándar e mellora no recoñecemento das fraccións. \\
+        YOLO e YOLO + Tesseract
+            & F10, non empregada no adestramento
+            & Figuras~\ref{fig:yolo-f10n} e
+              \ref{fig:yolo-tesseract-recortes}: detección correcta das
+              pastillas, pero recortes insuficientes para reconstruír a cela. \\
+        Azure \textit{Neural}/\textit{Template}
+            & F10, iluminación normal
+            & Figuras~\ref{fig:azure-comparacion-f10n-1} e
+              \ref{fig:azure-comparacion-f10n}: o modelo \textit{Template}
+              conserva mellor a agrupación de datas e doses. \\
+        \bottomrule
+    \end{tabularx}
+\end{table}
+
 \subsection{Google ML Kit}
 
 A avaliación de Google ML Kit realizouse inicialmente sobre as \textbf{11 follas de tratamento escaneadas}, consideradas como o escenario de referencia e as condicións máis favorables de entrada. O obxectivo desta primeira proba foi comprobar se a ferramenta permitía recuperar non só o texto presente no documento, senón tamén a información necesaria para reconstruír de maneira fiable a pauta de tratamento.
@@ -553,7 +671,7 @@ correspondentes á detección.
     \label{fig:yolo-tesseract-recortes}
 \end{figure}
 
-A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0},  \textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
+A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0}, \textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
 
 Por estes motivos, aínda que \gls{yolo} mostrou un bo comportamento na localización das representacións das pastillas, a combinación con Tesseract non se considerou suficientemente robusta para reconstruír automaticamente a pauta completa e descartouse como solución principal.
 
@@ -563,7 +681,7 @@ Por estes motivos, aínda que \gls{yolo} mostrou un bo comportamento na localiza
 
 A avaliación de Azure AI Document Intelligence realizouse comparando os dous modelos personalizados adestrados, \textit{Template} e \textit{Neural}. Primeiro analizáronse as métricas proporcionadas ao finalizar o adestramento e, posteriormente, avaliáronse ambos modelos sobre as follas reservadas para as probas.
 
-No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template}, Azure proporciona unha estimación da precisión para cada un dos campos definidos.Os valores foron elevados na maior parte dos campos: 99,50\,\% para \textit{fecha visita}, \textit{inr}, \textit{farmaco oral} e \textit{prox visit}, 98,80\,\% para \textit{DOSE} e 94,70\,\% para \textit{RUV}. Os valores máis baixos corresponden a \textit{dosis semanal} e \textit{centro visita}, cun 87,50\,\%, e a \textit{turno}, cun 62,50\,\%. . Non obstante, estes campos teñen unha relevancia secundaria dentro da aplicación, xa que non afectan ao procesamento principal. En consecuencia, aínda que estes resultados son inferiores aos do resto dos campos, non representan un impacto significativo sobre o rendemento global do sistema.
+No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template}, Azure proporciona unha estimación da precisión para cada un dos campos definidos. Os valores foron elevados na maior parte dos campos: 99,50\,\% para \textit{fecha visita}, \textit{inr}, \textit{farmaco oral} e \textit{prox visit}, 98,80\,\% para \textit{DOSE} e 94,70\,\% para \textit{RUV}. Os valores máis baixos corresponden a \textit{dosis semanal} e \textit{centro visita}, cun 87,50\,\%, e a \textit{turno}, cun 62,50\,\%. Non obstante, estes campos teñen unha relevancia secundaria dentro da aplicación, xa que non afectan ao procesamento principal. En consecuencia, aínda que estes resultados son inferiores aos do resto dos campos, non representan un impacto significativo sobre o rendemento global do sistema.
 
 %Bibliografía de azure  e poñer unha nota ou algo
 No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuacións de precisión por campo durante o adestramento \cite{microsoft-document-intelligence-accuracy} , polo que estes valores aparecen sen informar no Studio. Isto responde ao propio funcionamento deste tipo de modelo e non indica un erro no proceso de adestramento.

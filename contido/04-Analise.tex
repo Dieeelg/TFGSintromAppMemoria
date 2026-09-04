@@ -154,83 +154,17 @@ Os requisitos non funcionais establecen os atributos de calidade, as restrición
 \section{Casos de uso}
 \label{sec:casos-uso}
 
-Os casos de uso recollen as principais accións que os usuarios realizan de maneira intencionada sobre o sistema. Os procesos internos ou automáticos, como o cifrado das mensaxes, a sincronización dos datos ou a programación dos recordatorios, non se consideran casos de uso independentes, senón mecanismos necesarios para completar estas interaccións.
+A Figura~\ref{fig:diagrama-casos-uso} presenta os casos de uso identificados e a súa relación cos actores principais e cos sistemas externos que interveñen nas operacións.
 
-Nos casos nos que un servizo externo participa directamente na realización dunha destas interaccións, este indícase como \textbf{actor secundario}. A súa participación non implica que inicie o caso de uso, senón que proporciona un servizo necesario para completalo.
-
-\begin{description}
-
-\item[CU-01 - Configurar a aplicación por primeira vez:] 
-\textit{Actor principal:} Paciente ou supervisor. 
-\textit{Actor secundario:} Firebase Authentication. \\
-Seleccionar se a aplicación se utilizará para xestionar o tratamento propio ou para supervisar outra persoa. Durante este proceso realizarase a identificación anónima da instalación. \textit{[Asociado a: RF-01, RF-02]}
-
-\item[CU-02 - Vincular paciente e supervisor:] 
-\textit{Actores principais:} Paciente e supervisor. \\
-O paciente mostra un código \gls{qr} desde a súa aplicación e o supervisor escanéao desde o seu dispositivo. Tras completar o intercambio créase unha relación segura que permitirá compartir as actualizacións do tratamento. O paciente tamén poderá continuar sen realizar esta vinculación durante a configuración inicial. \textit{[Asociado a: RF-03, RF-04, RF-05, RF-24]}
-
-\item[CU-03 - Configurar as preferencias do paciente:] 
-\textit{Actor principal:} Paciente. 
-\textit{Actor secundario:} Firebase Cloud Messaging. \\
-Configurar ou modificar o nome opcional, a hora habitual da toma e o modo sinxelo. A modificación da hora actualizará os recordatorios correspondentes e os cambios necesarios poderán comunicarse aos dispositivos vinculados. \textit{[Asociado a: RF-06, RF-18, RF-19]}
-
-\item[CU-04 - Dixitalizar unha folla de tratamento:] 
-\textit{Actor principal:} Paciente ou supervisor vinculado. 
-\textit{Actor secundario:} Servizo de procesado automático de follas de tratamento. \\
-Seleccionar unha fotografía realizada coa cámara, unha imaxe da galería ou un ficheiro \gls{pdf} e envialo á \gls{api} para obter automaticamente os datos estruturados da folla de tratamento. No caso do supervisor, a operación realizarase para o paciente seleccionado. \textit{[Asociado a: RF-08, RF-09, RF-10, RF-21]}
-
-\item[CU-05 - Revisar, corrixir e confirmar unha pauta:] 
-\textit{Actor principal:} Paciente ou supervisor vinculado. 
-\textit{Actor secundario:} Firebase Cloud Messaging. \\
-Revisar os datos extraídos antes de incorporalos ao sistema. Se existe algún erro, o usuario poderá modificar datas, doses, días de control e a seguinte visita, eliminar filas incorrectas, desfacer unha eliminación ou cancelar as correccións. A pauta só poderá confirmarse cando supere as validacións definidas. Se o actor é o paciente, gardarase no seu dispositivo e comunicarase a actualización ás persoas supervisoras vinculadas; se é un supervisor, enviarase ao paciente seleccionado. \textit{[Asociado a: RF-11, RF-12, RF-13, RF-19, RF-24]}
-
-\item[CU-06 - Consultar o tratamento actual:] 
-\textit{Actor principal:} Paciente. \\
-Consultar a dose correspondente ao día actual, a pauta completa almacenada e os datos da seguinte visita ou control. \textit{[Asociado a: RF-14]}
-
-\item[CU-07 - Confirmar a toma do día:] 
-\textit{Actor principal:} Paciente. 
-\textit{Actor secundario:} Firebase Cloud Messaging. \\
-Confirmar unha toma pendente correspondente á xornada actual. O sistema rexistra a hora exacta, calcula a desviación respecto da hora habitual e actualiza o estado da toma, enviando posteriormente a actualización ás persoas supervisoras vinculadas. \textit{[Asociado a: RF-15, RF-19]}
-
-\item[CU-08 - Consultar o calendario e o cumprimento:] 
-\textit{Actor principal:} Paciente. \\
-Consultar as doses planificadas, os días de control, o estado das tomas anteriores, a seguinte visita e o resumo de cumprimento da pauta. \textit{[Asociado a: RF-16]}
-
-\item[CU-09 - Consultar a evolución do tratamento:] 
-\textit{Actor principal:} Paciente. \\
-Consultar o \gls{inr} e a dose semanal actuais, a súa evolución histórica mediante gráficas e os datos relacionados coa puntualidade das tomas rexistradas. \textit{[Asociado a: RF-17]}
-
-\item[CU-10 - Supervisar os pacientes vinculados:] 
-\textit{Actor principal:} Supervisor. 
-\textit{Actor secundario:} Firebase Cloud Messaging. \\
-Consultar a lista de pacientes vinculados e visualizar para cada un deles un resumo do estado da toma, a dose actual, o cumprimento e a seguinte visita. O supervisor poderá solicitar unha actualización da información dispoñible á aplicación do paciente. \textit{[Asociado a: RF-05, RF-19, RF-20]}
-
-\item[CU-11 - Consultar o detalle dun paciente:] 
-\textit{Actor principal:} Supervisor. \\
-Seleccionar un paciente vinculado para consultar os seus valores actuais, a evolución do \gls{inr} e da dose semanal, a seguinte visita e o estado da toma. Desde esta vista tamén poderá iniciar a dixitalización dunha nova folla para ese paciente. \textit{[Asociado a: RF-21]}
-
-\item[CU-12 - Configurar os datos dun paciente supervisado:] 
-\textit{Actor principal:} Supervisor. 
-\textit{Actor secundario:} Firebase Cloud Messaging. \\
-Configurar o nome e a hora habitual da toma dun paciente vinculado e enviar estes cambios ao seu dispositivo para actualizar a configuración e os recordatorios. \textit{[Asociado a: RF-07, RF-19, RF-24]}
-
-\item[CU-13 - Consultar o centro sanitario:] 
-\textit{Actor principal:} Paciente. \\
-Buscar os datos de contacto do centro indicado na folla de tratamento e iniciar unha chamada telefónica cando exista un número dispoñible. \textit{[Asociado a: RF-22]}
-
-\item[CU-14 - Revogar unha vinculación:] 
-\textit{Actor principal:} Paciente ou supervisor. 
-\textit{Actor secundario:} Firebase Cloud Messaging. \\
-Seleccionar unha relación existente e eliminala. A revogación retira a información necesaria para continuar a comunicación mediante esa vinculación e impide que o supervisor continúe recibindo actualizacións ou enviando novas follas no nome do paciente. \textit{[Asociado a: RF-19, RF-24, RF-25]}
-
-\end{description}
-
-A Figura~\ref{fig:diagrama-casos-uso} representa graficamente os casos de uso identificados e a súa relación cos actores principais e cos sistemas externos que participan nas interaccións.
-
-\begin{figure}
-\centering
-\includegraphics[width=1\linewidth]{imaxes/04-Analise/diagrama_casos_uso_sintromapp_definitivo_letra_moi_grande.drawio.pdf}
-\caption{Diagrama dos casos de uso da aplicación}
-\label{fig:diagrama-casos-uso}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=\linewidth]{imaxes/04-Analise/diagrama_casos_uso_sintromapp_definitivo_letra_moi_grande.drawio.pdf}
+    \caption{Diagrama dos casos de uso de SintromApp.}
+    \label{fig:diagrama-casos-uso}
 \end{figure}
+
+O paciente pode realizar a configuración inicial da aplicación, xestionar as vinculacións con supervisores, incorporar e revisar novas pautas de tratamento, consultar a pauta e o calendario do tratamento e confirmar as tomas realizadas. Pola súa parte, o supervisor pode consultar a información dos pacientes vinculados, revisar o seguimento das súas tomas e incorporar novas follas de tratamento no seu nome.
+
+Ademais dos dous actores principais, interveñen varios servizos externos que dan soporte a determinadas funcionalidades da aplicación. Firebase Authentication encárgase das operacións relacionadas coa autenticación dos usuarios, Firebase Cloud Messaging participa no envío de notificacións e o servizo de procesamento documental intervén na extracción automática da información contida nas follas de tratamento.
+
+A especificación completa de cada caso de uso, incluídos os actores, o disparador, as precondicións, as postcondicións e os fluxos principal e alternativos, recóllese no Apéndice~\ref{app:casos-uso}.

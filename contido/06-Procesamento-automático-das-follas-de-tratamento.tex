@@ -19,17 +19,11 @@ Co obxectivo de determinar unha aproximación adecuada para este problema, estud
 \section{Materiais}
 \label{sec:materiais-procesamento}
 
-\subsection{Conxunto de documentos}
-
 Para realizar a experimentación recompilouse un conxunto formado por \textbf{11 follas de tratamento diferentes}. Antes de ser empregadas, eliminouse a información persoal que permitía identificar as persoas pacientes.
 
 As follas manteñen unha estrutura xeral común, aínda que presentan variacións nos datos das visitas, nas datas, nas doses e na distribución dalgúns elementos. En particular, a táboa de doses pode conter representacións gráficas de fraccións de pastilla, valores numéricos e indicacións textuais como \textit{NO TOMAR} ou \textit{CONTROL}.
 
 Cómpre diferenciar entre o número de documentos e o número de imaxes empregado durante as probas. O conxunto está formado por 11 follas diferentes, pero de cada unha delas obtivéronse varias imaxes en condicións distintas. Deste modo, foi posible estudar tanto o comportamento ante documentos diferentes como a influencia das condicións de captura sobre unha mesma folla.
-
-
-\subsection{Condicións de captura}
-\label{sub:cond-cap}
 
 De cada unha das 11 follas obtivéronse \textbf{catro imaxes} baixo condicións de captura diferentes. Esta parte do conxunto está formada, polo tanto, por un total de \textbf{44 imaxes}.
 
@@ -50,37 +44,9 @@ Dentro deste subconxunto incluíronse \textbf{dúas fotografías cun fondo claro
 
 En total, considerando as 44 imaxes correspondentes ás catro condicións de captura e as 7 fotografías inclinadas adicionais, o material preparado para a experimentación está formado por \textbf{51 imaxes obtidas a partir de 11 documentos base}.
 
-A Táboa~\ref{tab:resumo-conxunto-imaxes} resume a composición deste conxunto.
-
-\begin{table}[h!]
-    \centering
-    \caption{Resumo do conxunto de imaxes empregado na experimentación.}
-    \label{tab:resumo-conxunto-imaxes}
-    \begin{tabular}{lcc}
-        \hline
-        \textbf{Condición} &
-        \textbf{Documentos} &
-        \textbf{Imaxes} \\
-        \hline
-        Referencia & 11 & 11 \\
-        Iluminación adecuada & 11 & 11 \\
-        Baixa iluminación & 11 & 11 \\
-        Maior distancia & 11 & 11 \\
-        Inclinadas & 7 & 7 \\
-        \hline
-        \textbf{Total} & \textbf{11 diferentes} & \textbf{51} \\
-        \hline
-    \end{tabular}
-\end{table}
-
-
-\subsection{Distribución dos datos}
-
 A utilización das imaxes variou segundo as necesidades de cada método. Google ML Kit e o modelo estándar de Tesseract non requiriron ningún proceso de adestramento, polo que se aplicaron directamente sobre os documentos seleccionados para cada proba. O conxunto concreto empregado en cada caso indícase posteriormente xunto cos seus resultados.
 
 Nos métodos que si requiriron adestramento realizouse unha división a nivel de documento. As follas \textbf{F01--F08} destináronse ao adestramento, mentres que as follas \textbf{F09--F11} reserváronse exclusivamente para a avaliación. Esta mesma distribución empregouse no modelo personalizado de Tesseract, no detector baseado en \gls{yolo} e nos modelos personalizados de Azure Document Intelligence.
-
-Deste modo, ningún exemplo procedente das follas F09--F11 foi empregado durante o adestramento, permitindo avaliar posteriormente os modelos sobre documentos non vistos previamente.
 
 As fotografías inclinadas adicionais empregáronse especificamente para avaliar a etapa de preprocesamento mediante OpenCV.
 
@@ -111,19 +77,30 @@ As fotografías inclinadas adicionais empregáronse especificamente para avaliar
 
 Nesta sección descríbense as diferentes aproximacións exploradas. O obxectivo é explicar o procedemento seguido con cada unha delas e a preparación dos datos necesaria.
 
+\subsection{Preprocesamento das imaxes mediante OpenCV}
+\label{sec:preprocesamento-opencv}
+
+Ademais das aproximacións estudadas para a extracción da información, incorporouse unha etapa previa de preprocesamento mediante OpenCV destinada a corrixir as fotografías nas que a folla aparece inclinada ou deformada pola perspectiva. Esta etapa non realiza a extracción dos datos, senón que prepara a imaxe antes de enviala ao sistema encargado do seu procesamento.
+
+O procedemento deseñouse seguindo un criterio conservador: a imaxe só se modifica cando se detecta cun nivel suficiente de confianza que é necesaria unha corrección. En caso contrario, mantense a imaxe orixinal para evitar que unha transformación incorrecta poida eliminar ou deformar información relevante.
+
+O proceso comeza coa detección dos bordos e dos principais contornos da imaxe, tratando de identificar a folla como unha rexión cuadrangular. Tamén se contempla unha segunda estratexia baseada na detección de superficies claras, pensada para fotografías nas que os límites do papel resultan menos evidentes. Cando se localizan de maneira fiable os catro extremos da folla, aplícase unha transformación de perspectiva que permite obter unha vista frontal do documento e eliminar parte do fondo exterior.
+
+Se non é posible delimitar completamente a folla, emprégase unha alternativa baseada na orientación das liñas detectadas no documento. A partir delas estímase o ángulo de inclinación e, cando a desviación é significativa, rótase a fotografía para aliñala. Se non existe suficiente evidencia para aplicar ningunha das dúas correccións, a entrada continúa sen modificacións.
+
+Esta etapa integrouse antes do proceso de extracción da \gls{api}, de forma que o sistema encargado de interpretar o documento recibe a versión corrixida cando é necesario. Para avaliar especificamente este mecanismo preparouse un subconxunto de \textbf{7 fotografías inclinadas}, correspondentes a sete documentos diferentes. Dúas delas realizáronse sobre fondos claros similares á propia folla co obxectivo de comprobar o comportamento da detección en condicións de menor contraste.
+
 % ------------------------------------------------------------
 % ML KIT
 % ------------------------------------------------------------
 
 \subsection{Google ML Kit}
 
-Para avaliar Google ML Kit, descrito na Sección~\ref{sec:tec-mlkit}, empregouse o seu módulo de recoñecemento de texto co obxectivo de comprobar se a saída xerada podía servir como base para interpretar automaticamente a folla de tratamento.
+Para avaliar Google ML Kit, empregouse o seu módulo de recoñecemento de texto co obxectivo de comprobar se a saída xerada podía servir como base para interpretar automaticamente a folla de tratamento.
 
-Desenvolveuse unha pequena aplicación en Flutter que permitía seleccionar unha imaxe almacenada no dispositivo ou capturar unha fotografía da folla e enviala ao recoñecedor de texto de ML Kit.
+Desenvolveuse unha pequena aplicación en Flutter que permite seleccionar unha imaxe almacenada no dispositivo ou capturar unha fotografía da folla e enviala ao recoñecedor de texto de ML Kit (Figura~\ref{fig:secuencia-mlkit}).
 
-Como resultado, a ferramenta devolvía o texto detectado xunto coa súa organización en bloques, liñas e elementos. Esta información gardouse en formato \gls{json} para facilitar a análise posterior da orde na que se devolvían os diferentes elementos do documento.
-
-O proceso seguido pola aplicación represéntase na Figura~\ref{fig:secuencia-mlkit}.
+Como resultado, a ferramenta devolve o texto detectado xunto coa súa organización en bloques, liñas e elementos. Esta información gardouse en formato \gls{json} para facilitar a análise posterior da orde na que se devolven os diferentes elementos do documento.
 
 \begin{figure}[h!]
     \centering
@@ -142,7 +119,7 @@ O proceso seguido pola aplicación represéntase na Figura~\ref{fig:secuencia-ml
 
 Para avaliar Tesseract, estudáronse dúas variantes, o modelo estándar para lingua española e un modelo personalizado adaptado ao tipo de documento empregado no proxecto.
 
-A primeira proba realizouse empregando o modelo estándar de Tesseract para lingua española, sen introducir ningún proceso de adestramento adicional. As imaxes procesáronse como documentos completos e analizouse directamente a saída textual xerada polo motor de \gls{ocr}. O obxectivo desta proba foi comprobar se un sistema de recoñecemento de texto convencional era capaz de recuperar suficiente información da folla como para reconstruír posteriormente a súa estrutura.
+A primeira proba realizouse empregando o modelo estándar de Tesseract sen introducir ningún proceso de adestramento adicional. As imaxes procesáronse como documentos completos e analizouse directamente a saída textual xerada polo motor de \gls{ocr}. O obxectivo desta proba foi comprobar se un sistema de recoñecemento de texto convencional era capaz de recuperar suficiente información da folla como para reconstruír posteriormente a súa estrutura.
 
 Co obxectivo de adaptar Tesseract á tipografía, ao vocabulario e ao formato das follas de tratamento, construíuse un conxunto de adestramento específico.
 
@@ -189,10 +166,9 @@ Para a preparación do detector empregouse a ferramenta \gls{cvat}, mediante a c
 
 A partir deste conxunto de datos adestrouse un modelo denominado \textit{sintrom\_pastilla}, tomando como punto de partida o modelo preadestrado \textit{yolo11n.pt}. O comando empregado foi:
 
-\begin{verbatim}
-yolo detect train data=dataset_pastilla\data.yaml model=yolo11n.pt \
-imgsz=1024 epochs=100 batch=4 name=sintrom_pastilla
-\end{verbatim}
+\begin{Verbatim}[breaklines=true]
+yolo detect train data=dataset_pastilla\data.yaml model=yolo11n.pt imgsz=1024 epochs=100 batch=4 name=sintrom_pastilla
+\end{Verbatim}
 
 %Empregouse un tamaño de imaxe de 1024 píxeles debido ao reducido tamaño das representacións das pastillas dentro da folla de tratamento.
 
@@ -247,60 +223,6 @@ Dado o reducido número de documentos dispoñibles para o adestramento e a estru
 
 As \textbf{3 follas reservadas para a avaliación}, que non foran empregadas durante o adestramento, utilizáronse para comparar ambas arquitecturas. Deste modo, os dous modelos puideron ser avaliados sobre os mesmos documentos e sobre información non vista previamente.
 
-%METER ICUAL EN IMPLEMENTACION 
-\subsection{Preprocesamento das imaxes mediante OpenCV}
-\label{sec:preprocesamento-opencv}
-
-Ademais das aproximacións estudadas para a extracción da información, incorporouse unha etapa previa de preprocesamento mediante OpenCV destinada a corrixir as fotografías nas que a folla aparece inclinada ou deformada pola perspectiva. Esta etapa non realiza a extracción dos datos, senón que prepara a imaxe antes de enviala ao sistema encargado do seu procesamento.
-
-O procedemento deseñouse seguindo un criterio conservador: a imaxe só se modifica cando se detecta cun nivel suficiente de confianza que é necesaria unha corrección. En caso contrario, mantense a imaxe orixinal para evitar que unha transformación incorrecta poida eliminar ou deformar información relevante.
-
-O proceso comeza coa detección dos bordos e dos principais contornos da imaxe, tratando de identificar a folla como unha rexión cuadrangular. Tamén se contempla unha segunda estratexia baseada na detección de superficies claras, pensada para fotografías nas que os límites do papel resultan menos evidentes. Cando se localizan de maneira fiable os catro extremos da folla, aplícase unha transformación de perspectiva que permite obter unha vista frontal do documento e eliminar parte do fondo exterior.
-
-Se non é posible delimitar completamente a folla, emprégase unha alternativa baseada na orientación das liñas detectadas no documento. A partir delas estímase o ángulo de inclinación e, cando a desviación é significativa, rótase a fotografía para aliñala. Se non existe suficiente evidencia para aplicar ningunha das dúas correccións, a entrada continúa sen modificacións.
-
-Esta etapa integrouse antes do proceso de extracción da \gls{api}, de forma que o sistema encargado de interpretar o documento recibe a versión corrixida cando é necesario. Para avaliar especificamente este mecanismo preparouse un subconxunto de \textbf{7 fotografías inclinadas}, correspondentes a sete documentos diferentes. Dúas delas realizáronse sobre fondos claros similares á propia folla co obxectivo de comprobar o comportamento da detección en condicións de menor contraste.
-
-% FIGURA RECOMENDADA:
-% Nos resultados, mostrar:
-% (a) imaxe inclinada orixinal;
-% (b) resultado corrixido;
-% (c) imaxe sobre fondo claro;
-% (d) resultado correspondente.
-
-
-% ============================================================
-% CRITERIOS DE AVALIACIÓN
-% ============================================================
-
-\section{Criterios de avaliación}
-\label{sec:criterios-avaliacion-procesamento}
-
-Unha vez descritas as diferentes aproximacións, establecéronse os aspectos empregados para analizar os resultados obtidos e determinar a súa adecuación ao problema.
-
-A avaliación centrouse principalmente nos seguintes criterios:
-
-\begin{itemize}
-    \item a capacidade de recoñecer correctamente texto, datas e valores numéricos;
-    \item a conservación da estrutura das táboas;
-    \item a asociación entre cada data e a súa dose correspondente;
-    \item a estabilidade e facilidade de interpretación do formato de saída;
-    \item o esforzo necesario para preparar e etiquetar os datos;
-    \item o comportamento ante diferentes condicións de captura.
-\end{itemize}
-
-A táboa de doses considerouse o elemento máis importante da avaliación, xa que constitúe a base a partir da cal a aplicación representa a pauta diaria e programa os avisos correspondentes. Por este motivo, non se considerou suficiente que unha tecnoloxía recoñecese correctamente palabras ou números de maneira independente. Para resultar adecuada debía ser posible determinar de forma fiable que dose correspondía a cada data.
-
-No caso da aproximación baseada en \gls{yolo}, valorouse adicionalmente a capacidade de localizar as representacións gráficas das pastillas e a posibilidade de utilizar esas deteccións como punto de partida para delimitar a información da cela correspondente.
-
-No caso concreto da etapa de preprocesamento mediante OpenCV, a avaliación centrouse en comprobar se era posible detectar unha inclinación significativa, endereitar correctamente o documento e, cando se identificaban os seus catro bordos, corrixir tamén a deformación de perspectiva e recortar as zonas exteriores innecesarias.
-
-Ao mesmo tempo, considerouse especialmente importante comprobar que unha fotografía xa correctamente aliñada non fose modificada e que, ante unha detección dubidosa, se mantivese a imaxe orixinal en lugar de aplicar unha transformación potencialmente incorrecta.
-
-%REVISAR
-Finalmente, unha vez seleccionada unha aproximación para realizar a extracción, avaliouse de forma específica o seu comportamento ante diferentes condicións de iluminación e distancia, xa que estas situacións representan mellor o contexto real no que se utilizará a aplicación.
-
-
 % ============================================================
 % RESULTADOS
 % ============================================================
@@ -308,7 +230,33 @@ Finalmente, unha vez seleccionada unha aproximación para realizar a extracción
 \section{Resultados}
 \label{sec:resultados-procesamento}
 
-\subsection{Resultados de Google ML Kit}
+\subsection{Preprocesamento}
+
+Para avaliar esta etapa empregáronse as \textbf{7 fotografías inclinadas} descritas anteriormente, con diferentes graos de inclinación, perspectiva e contraste co fondo. O preprocesamento mediante OpenCV permitiu corrixir correctamente as sete imaxes, mellorando a orientación do documento e, cando foi posible delimitar a folla, reducindo tamén a presenza do fondo exterior. A Figura~\ref{fig:opencv-preprocesamento} mostra un exemplo do resultado obtido.
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]
+        {imaxes/06-Procesamento automático das follas de tratamento/T1.jpg}
+        \caption{Fotografía orixinal.}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]
+        {imaxes/06-Procesamento automático das follas de tratamento/RESULTADO-T1.jpg}
+        \caption{Resultado do preprocesamento.}
+    \end{subfigure}
+
+    \caption{Exemplo da corrección da orientación e perspectiva dunha folla
+    mediante OpenCV.}
+    \label{fig:opencv-preprocesamento}
+\end{figure}
+
+\subsection{Google ML Kit}
 
 A avaliación de Google ML Kit realizouse inicialmente sobre as \textbf{11 follas de tratamento escaneadas}, consideradas como o escenario de referencia e as condicións máis favorables de entrada. O obxectivo desta primeira proba foi comprobar se a ferramenta permitía recuperar non só o texto presente no documento, senón tamén a información necesaria para reconstruír de maneira fiable a pauta de tratamento.
 
@@ -353,9 +301,9 @@ Ademais, continuaron producíndose erros no propio contido recoñecido. Na pauta
 % F07-N.json:
 % - tamén aparecen doses 1/2 recoñecidas como /2
 
-A Figura~\ref{fig:mlkit-f01n-entrada} mostra un fragmento dunha das cinco fotografías tomadas con iluminación normal empregadas nestas probas, mentres que o Listing~\ref{lst:mlkit-f01n-saida} recolle a saída bruta xerada por ML Kit para esa mesma imaxe. Nel poden observarse de forma conxunta a perda da estrutura da táboa e os erros de recoñecemento descritos anteriormente.
+A Figura~\ref{fig:mlkit-f01n-entrada} mostra un fragmento dunha das cinco fotografías tomadas con iluminación normal empregadas nestas probas, mentres que o Listado~\ref{lst:mlkit-f01n-saida} recolle a saída bruta xerada por ML Kit para esa mesma imaxe. Nel poden observarse de forma conxunta a perda da estrutura da táboa e os erros de recoñecemento descritos anteriormente.
 
-\begin{figure}[hp!]
+\begin{figure}[h!]
     \centering
     % Empregar F01-N.
     % RECOMENDACIÓN: recortar desde
@@ -421,8 +369,7 @@ OCT
 12
 \end{lstlisting}
 
-As probas realizadas sobre as \textbf{11 follas escaneadas} e as \textbf{cinco fotografías tomadas con iluminación normal} permitiron avaliar o comportamento de ML Kit tanto en condicións favorables como nun escenario máis próximo ao uso real da aplicación. Os resultados obtidos en ambos os casos mostraron limitacións que afectaban directamente á información necesaria para reconstruír a pauta de tratamento. Por este motivo, non se considerou necesario ampliar a avaliación a outras condicións de captura, xa que a
-evidencia recollida resultaba suficiente para descartar a ferramenta como solución principal.
+%&As probas realizadas sobre as \textbf{11 follas escaneadas} e as \textbf{cinco fotografías tomadas con iluminación normal} permitiron avaliar o comportamento de ML Kit tanto en condicións favorables como nun escenario máis próximo ao uso real da aplicación. Os resultados obtidos en ambos os casos mostraron limitacións que afectaban directamente á información necesaria para reconstruír a pauta de tratamento. Por este motivo, non se considerou necesario ampliar a avaliación a outras condicións de captura, xa que a evidencia recollida resultaba suficiente para descartar a ferramenta como solución principal.
 
 En consecuencia, aínda que Google ML Kit mostrou unha boa capacidade para recoñecer unha parte importante do texto presente nas follas, non proporcionou unha saída suficientemente fiable para reconstruír de forma segura a pauta diaria. Por este motivo, a ferramenta foi descartada como solución principal para a extracción automática.
 
@@ -431,7 +378,7 @@ En consecuencia, aínda que Google ML Kit mostrou unha boa capacidade para reco�
 % RESULTADOS TESSERACT
 % ------------------------------------------------------------
 
-\subsection{Resultados de Tesseract}
+\subsection{Tesseract}
 
 \subsubsection{Modelo estándar}
 
@@ -442,7 +389,7 @@ Tesseract conseguiu recuperar correctamente unha parte do texto xeral dos docume
 
 A maior dificultade apareceu novamente na táboa de doses diarias. Aínda que nalgúns documentos se recoñeceron correctamente varias entradas, o comportamento foi moi irregular entre as distintas follas. Observáronse perdas ou modificacións dos separadores das fraccións, días incorrectos, caracteres sen relación co contido da táboa e agrupacións que dificultan establecer a correspondencia entre cada data e a súa dose.
 
-Un dos exemplos máis representativos obsérvase na folla F01. Como mostra o Listing~\ref{lst:tesseract-estandar-f01}, a saída conserva algúns elementos recoñecibles, pero introduce numerosos caracteres incorrectos e perde a estrutura necesaria para asociar de forma fiable cada data coa súa dose.
+Un dos exemplos máis representativos obsérvase na folla F01. Como mostra o Listado~\ref{lst:tesseract-estandar-f01}, a saída conserva algúns elementos recoñecibles, pero introduce numerosos caracteres incorrectos e perde a estrutura necesaria para asociar de forma fiable cada data coa súa dose.
 
 \begin{lstlisting}[
     frame=single,
@@ -482,7 +429,7 @@ Seguindo a distribución indicada anteriormente, a avaliación realizouse sobre 
 
 Nas imaxes escaneadas observouse unha mellora respecto ao modelo estándar, especialmente no recoñecemento das fraccións empregadas para representar as doses. Un exemplo pode verse na folla F11, mostrada na  Figura~\ref{fig:tesseract-comparacion-f11}.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
 \centering
 
 \begin{minipage}[t]{0.48\textwidth}
@@ -543,7 +490,7 @@ Ao empregar fotografías, o comportamento empeorou. Mesmo con iluminación norma
 
 En conxunto, o adestramento específico permitiu mellorar o recoñecemento de determinados elementos, especialmente das fraccións. Porén, seguiron producíndose erros nas datas, nas doses e na organización da táboa, que se fixeron máis acusados ao empeorar as condicións de captura. Estes resultados impedían garantir unha reconstrución suficientemente fiable da pauta, polo que Tesseract foi descartado como solución principal para a extracción automática.
 
-\subsection{Resultados da aproximación baseada en YOLO}
+\subsection{Aproximación baseada en YOLO}
 
 O detector mostrou un rendemento elevado no conxunto de validación. A curva Precision-Recall (Figura~\ref{fig:anexo-yolo-pr}) alcanzou un \gls{map05} de 0,989 e a puntuación F1 acadou un máximo de 0,98 cun limiar de confianza de 0,603. Na matriz de confusión (Figura~\ref{fig:anexo-yolo-confusion}) rexistráronse 130 deteccións correctas da clase \textit{pastilla} e 5 falsos positivos. 
 
@@ -551,7 +498,7 @@ Para comprobar a capacidade de xeneralización do detector, o modelo final aplic
 
 Nas fotografías tomadas con iluminación normal detectáronse correctamente as \textbf{74 representacións gráficas} presentes nas tres follas. O comportamento mantívose tamén ante cambios nas condicións de captura: con menor iluminación localizáronse \textbf{73 das 74 representacións}, mentres que nas fotografías tomadas a maior distancia se detectaron \textbf{66 das 74}.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.65\textwidth]{imaxes/06-Procesamento automático das follas de tratamento/F10-N.jpg}
     \caption{Exemplo de detección das representacións gráficas das pastillas
@@ -606,13 +553,13 @@ correspondentes á detección.
     \label{fig:yolo-tesseract-recortes}
 \end{figure}
 
-A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0},  textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
+A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0},  \textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
 
 Por estes motivos, aínda que \gls{yolo} mostrou un bo comportamento na localización das representacións das pastillas, a combinación con Tesseract non se considerou suficientemente robusta para reconstruír automaticamente a pauta completa e descartouse como solución principal.
 
 % AZURE DOCUMENT INTELLIGENCE
 
-\subsection{Resultados de Azure AI Document Intelligence}
+\subsection{Azure AI Document Intelligence}
 
 A avaliación de Azure AI Document Intelligence realizouse comparando os dous modelos personalizados adestrados, \textit{Template} e \textit{Neural}. Primeiro analizáronse as métricas proporcionadas ao finalizar o adestramento e, posteriormente, avaliáronse ambos modelos sobre as follas reservadas para as probas.
 
@@ -621,7 +568,7 @@ No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template
 %Bibliografía de azure  e poñer unha nota ou algo
 No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuacións de precisión por campo durante o adestramento \cite{microsoft-document-intelligence-accuracy} , polo que estes valores aparecen sen informar no Studio. Isto responde ao propio funcionamento deste tipo de modelo e non indica un erro no proceso de adestramento.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.4\textwidth]
     {imaxes/06-Procesamento automático das follas de tratamento/ResultM1.png}
@@ -630,15 +577,12 @@ No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuaci�
     \label{fig:azure-metricas-template}
 \end{figure}
 
-
-Nas probas sobre documentos non vistos, ambos modelos conseguiron recuperar correctamente numerosos campos individuais, como o \gls{inr}, fármaco oral ou a data da visita. A principal diferenza apareceu na extracción da pauta diaria. O modelo \textit{Template} conservou de forma moito máis estable a agrupación dos días e das doses dentro das filas da táboa, mentres que o modelo \textit{Neural} fragmentou con frecuencia estes elementos en rexistros separados.
-
-A plataforma de Azure devolve a información extraída nun documento con formato \gls{json} para que poida ser consumido. O problema subxacente desta mala lectura visual é que o \gls{json} resultante herda todo este caos. Ao non seguir un patrón predicible na súa resposta (nalgúns casos o \gls{json} devolve a data e a dose xuntas, noutros devólveas separadas en distintas filas do obxecto …), resulta practicamente imposible deseñar unha lóxica de extracción que sexa capaz de recoller a información correcta para o día adecuado de forma robusta e automática
+Nas probas sobre documentos non vistos, ambos modelos conseguiron recuperar correctamente numerosos campos individuais, como o \gls{inr}, fármaco oral ou a data da visita. A principal diferenza apareceu na extracción da pauta diaria. O modelo \textit{Template} conservou de forma moito máis estable a agrupación dos días e das doses dentro das filas da táboa, mentres que o modelo \textit{Neural} fragmentou con frecuencia estes elementos en rexistros separados. Como a saída da plataforma se devolve en formato \gls{json}, unha agrupación incorrecta dos días e das doses dificulta a definición dunha lóxica de extracción capaz de asociar de forma robusta a información correspondente a cada día.
 
 Un exemplo representativo desta diferenza pode observarse na folla F10 con iluminación normal. Como se mostra na Figura~\ref{fig:azure-comparacion-f10n}, o modelo \textit{Template} mantén nun mesmo rexistro os valores correspondentes aos sete días da semana. No modelo \textit{Neural}, pola contra, parte das datas e das doses son separadas en rexistros diferentes. Por exemplo, \textit{14 OCT} aparece separado da súa dose \textit{1/4}, dificultando a reconstrución directa da relación entre ambos elementos.
 
 % Primeiro bloque (Páxina 1)
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     
     % Primeira imaxe: Aumentamos o tamaño ao 90% do ancho do texto (\textwidth)
@@ -662,7 +606,7 @@ Un exemplo representativo desta diferenza pode observarse na folla F10 con ilumi
 \end{figure}
 
 % Segundo bloque (Páxina 2 ou a seguinte dispoñible)
-\begin{figure}[htbp]
+\begin{figure}[h]
     \ContinuedFloat % <--- ISTO É A CLAVE: Dille a LaTeX que é a mesma figura que a anterior
     \centering
     
@@ -689,37 +633,11 @@ Un exemplo representativo desta diferenza pode observarse na folla F10 con ilumi
 O modelo \textit{Template} non estivo exento de erros. Por exemplo, na folla F09 o campo \textit{turno} foi asociado incorrectamente co valor \textit{C.S. MONDOÑEDO}, mentres que o modelo \textit{Neural} recuperou correctamente \textit{Mañanas}.  Este resultado é coherente coa menor precisión obtida por este campo durante o adestramento do modelo \textit{Template}.
 
 
-Nas condicións con menor iluminación, a cela de control resultou máis difícil de extraer correctamente debido ao sombreado escuro da propia cela, sobre o que se representan caracteres tamén escuros. Por exemplo, a entrada \textit{CONTROL 05 ABR} foi devolta unicamente como \textit{CONTROL}, perdéndose a data asociada.Esta perda non supón unha limitación práctica para
+Nas condicións con menor iluminación, a cela de control resultou máis difícil de extraer correctamente debido ao sombreado escuro da propia cela, sobre o que se representan caracteres tamén escuros. Por exemplo, a entrada \textit{CONTROL 05 ABR} foi devolta unicamente como \textit{CONTROL}, perdéndose a data asociada. Esta perda non supón unha limitación práctica para
 a aplicación, xa que a data do seguinte control pode obterse tamén a partir do campo \textit{prox visit}. Este campo presentou unha precisión do 99,50\,\% no modelo \textit{Template} e foi extraído correctamente en todas as probas realizadas.
 
 En conxunto, ambos modelos permitiron recuperar unha parte importante da información das follas e mostraron un bo comportamento nos campos individuais. As principais diferenzas apareceron na estrutura da pauta diaria, onde o modelo \textit{Template} conservou de maneira máis consistente a asociación entre cada data e a súa dose. Aínda que se detectaron erros puntuais,
 especialmente nas condicións de captura menos favorables, os resultados obtidos favoreceron este modelo para o procesamento estruturado das follas.
-
-\subsection{Resultados do preprocesamento}
-
-Para avaliar esta etapa empregáronse as \textbf{7 fotografías inclinadas} descritas anteriormente, con diferentes graos de inclinación, perspectiva e contraste co fondo. O preprocesamento mediante OpenCV permitiu corrixir correctamente as sete imaxes, mellorando a orientación do documento e, cando foi posible delimitar a folla, reducindo tamén a presenza do fondo exterior. A Figura~\ref{fig:opencv-preprocesamento} mostra un exemplo do resultado obtido.
-
-\begin{figure}[htbp]
-    \centering
-
-    \begin{subfigure}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]
-        {imaxes/06-Procesamento automático das follas de tratamento/T1.jpg}
-        \caption{Fotografía orixinal.}
-    \end{subfigure}
-    \hfill
-    \begin{subfigure}[t]{0.48\textwidth}
-        \centering
-        \includegraphics[width=\linewidth]
-        {imaxes/06-Procesamento automático das follas de tratamento/RESULTADO-T1.jpg}
-        \caption{Resultado do preprocesamento.}
-    \end{subfigure}
-
-    \caption{Exemplo da corrección da orientación e perspectiva dunha folla
-    mediante OpenCV.}
-    \label{fig:opencv-preprocesamento}
-\end{figure}
 
 \section{Conclusións}
 

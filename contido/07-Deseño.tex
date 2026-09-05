@@ -157,7 +157,7 @@ Sobre esta análise actúa a \textbf{revisión da pauta}, encargada de permitir 
 
 Unha vez confirmada a pauta, cada dose pasa a formar parte do \textbf{seguimento das tomas}. Ademais da información prescrita, mantense o estado de cada toma, permitindo distinguir se está pendente, foi realizada, se realizou fóra da hora prevista ou non se realizou. Así, o modelo diferencia a información procedente da folla de tratamento do estado que vai adquirindo cada toma durante o uso da aplicación.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.8\textwidth]{imaxes/07-Deseño/modelo_dominio_uml_preview.png}
     \caption{Modelo de dominio principal da aplicación.}
@@ -198,7 +198,7 @@ habitual da toma e a activación do modo sinxelo. Neste mesmo mecanismo
 almacénanse as vinculacións entre dispositivos e as claves criptográficas
 empregadas para protexer a información intercambiada.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=\textwidth]{imaxes/07-Deseño/modelo_persistencia_local.drawio.png}
     \caption{Modelo de persistencia local da aplicación.}
@@ -214,7 +214,7 @@ A vinculación establécese mediante un código \gls{qr} xerado no dispositivo d
 
 O supervisor escanea o \gls{qr} e emprega estes datos para iniciar a asociación. Como resposta, envía ao paciente o seu identificador e token de mensaxería, xunto cunha nova clave compartida que se empregará nas comunicacións posteriores. Esta información transmítese cifrada mediante a clave temporal incluída no código \gls{qr}. Unha vez completado o intercambio, ambos dispositivos dispoñen da información necesaria para identificarse e comunicarse de forma segura.
 
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
     \includegraphics[width=0.9\textwidth]{imaxes/07-Deseño/secuencia_vinculacion_UML.drawio.png}
     \caption{Fluxo de vinculación entre paciente e supervisor.}
@@ -223,18 +223,24 @@ O supervisor escanea o \gls{qr} e emprega estes datos para iniciar a asociación
 
 
 \subsection{Procesamento dunha folla de tratamento}
- O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla de tratamento desde a aplicación móbil. O documento envíase á \gls{api}, que realiza o preprocesamento se é necesario e solicita a extracción da información ao servizo de procesamento documental.
+ O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla de tratamento desde a aplicación móbil(Figura~\ref{fig:fluxo-procesamento}). O documento envíase á \gls{api}, que realiza o preprocesamento se é necesario e solicita a extracción da información ao servizo de procesamento documental.
 
- A partir do resultado obtido, a \gls{api} interpreta os campos, normaliza os datos, reconstrúe a pauta diaria e realiza certas comprobacións antes de devolver unha resposta ao cliente. Na aplicación, os  datos recibidos móstranse para a súa revisión, e unha vez confirmados, pasan a formar parte da pauta activa almacenada no dispositivo.
+A partir do resultado obtido, a \gls{api} interpreta os campos recoñecidos, normaliza os datos, reconstrúe a pauta diaria e realiza comprobacións sobre a coherencia da información antes de devolver unha resposta ao cliente. Se o resultado non pode aceptarse, a aplicación informa do erro e ofrece a posibilidade de repetir o proceso. Pola contra, se a información é válida, os datos extraídos móstranse para a súa revisión e, unha vez confirmados pola persoa usuaria, a nova pauta gárdase localmente como tratamento activo.
 
- A Figura~\ref{fig:fluxo-procesamento} representa as principais etapas deste
-proceso.
-
-\begin{figure}[htbp]
+\begin{figure}[h]
     \centering
      \includegraphics[width=0.9\textwidth]{imaxes/07-Deseño/secuencia_procesamento_UML.drawio.png}
     \caption{Fluxo de procesamento dunha folla de tratamento.}
     \label{fig:fluxo-procesamento}
+\end{figure}
+
+O fluxo presenta unha variación cando a folla é incorporada desde o dispositivo dun supervisor (Figura~\ref{fig:procesamento-folla-supervisor}). As etapas de captura, extracción e revisión mantéñense, pero, tras a confirmación, a nova pauta non se almacena como tratamento activo no dispositivo do supervisor. A información confírmada cífrase e transmítese ao dispositivo do paciente vinculado, onde se descifra e se incorpora como nova pauta activa.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=\textwidth]{imaxes/07-Deseño/anexo/05_incorporacion_pauta_supervisor_secuencia_cores.drawio.png}
+    \caption{Fluxo de incorporación dunha nova pauta desde o dispositivo supervisor.}
+    \label{fig:procesamento-folla-supervisor}
 \end{figure}
 
 \subsection{Sincronización entre dispositivos}
@@ -252,10 +258,25 @@ Deste xeito,a \gls{api} participa no transporte das mensaxes sen necesitar almac
     \label{fig:fluxo-sincronizacion}
 \end{figure}
 
+\subsection{Seguimento dunha toma diaria}
+
+Cada dose da pauta activa permanece inicialmente en estado pendente e pode ser confirmada como realizada durante todo o día correspondente. Cando chega a hora configurada para realizar a toma, a aplicación envía unha notificación a modo de recordatorio. Se a persoa usuaria confirma a inxesta, o seu estado actualízase en función do momento no que se realizou. Se ao finalizar o día non se produciu ningunha confirmación, a toma pasa a considerarse non realizada. Deste xeito, o sistema distingue entre unha toma pendente, unha toma realizada, unha toma realizada fóra da hora prevista e unha toma non realizada.
+
+Cando existe unha vinculación activa, os cambios relevantes no estado dunha toma poden comunicarse ao dispositivo asociado. Desta forma, o seguimento local e a supervisión remota manteñen unha visión coherente da situación máis recente dispoñible.
+
+A Figura~\ref{fig:anexo-fluxo-toma} mostra as interaccións principais deste proceso.
+%EDITAR E ENGADIR O OPT
+\begin{figure}[htbp]
+    \centering
+   \includegraphics[width=1\textwidth]{imaxes/07-Deseño/anexo/06_fluxo_toma_diaria.drawio.png}
+    \caption{Fluxo de seguimento dunha toma diaria.}
+    \label{fig:anexo-fluxo-toma}
+\end{figure}
+
 \section{Deseño da navegación e da interface}
 
 \subsection{Fluxo de navegación}
-O primeiro acceso á aplicación comeza coa selección do rol, decisión que determina o percorrido posterior e as funcionalidades dispoñibles. A partir deste punto distínguense dous fluxos principais:
+O primeiro acceso á aplicación comeza coa selección do rol, decisión que determina o percorrido posterior e as funcionalidades dispoñibles (Figura~\ref{fig:navegacion-pantallas}). A partir deste punto distínguense dous fluxos principais:
 
 \begin{itemize}
     \item No caso do \textbf{paciente}, tras seleccionar o rol accédese á pantalla de vinculación, na que se xera un código \gls{qr} para establecer a relación cun supervisor. Unha vez completada esta fase, pásase a unha pantalla de configuración de permisos na que se decide quen será o encargado de dixitalizar os informes de tratamento. Aínda que o supervisor mantén sempre esta capacidade, pódese restrinxir esta función para o paciente co obxectivo de simplificar a súa interface. Despois, accédese á
@@ -268,9 +289,6 @@ O primeiro acceso á aplicación comeza coa selección do rol, decisión que det
     Ao seleccionar un paciente accédese á súa vista de detalle, desde a que se pode consultar a información do tratamento e realizar as funcionalidades de supervisión asociadas a esa persoa.
 \end{itemize}
 
-
-A Figura~\ref{fig:navegacion-pantallas} representa as principais pantallas e as transicións existentes entre elas.
-
 \begin{figure}[htbp]
     \centering
     \includegraphics[width=\textwidth]{imaxes/07-Deseño/diagrama fluxo.drawio.png}
@@ -282,7 +300,7 @@ A Figura~\ref{fig:navegacion-pantallas} representa as principais pantallas e as 
 
 Antes da implementación elaboráronse en Figma distintos wireframes co obxectivo de definir a distribución da información e comprobar os principais percorridos da aplicación. Estes deseños serviron como referencia inicial para a construción das pantallas, aínda que algúns elementos foron modificados durante o desenvolvemento.
 
-Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes máis representativos, correspondentes á selección do tipo de usuario, á pantalla principal do paciente, á incorporación dunha nova folla e á pantalla principal do supervisor.
+Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes máis representativos, correspondentes á selección do tipo de usuario, á pantalla principal do paciente, á incorporación dunha nova folla e á pantalla principal do supervisor. O conxunto completo de wireframes, incluíndo as pantallas de vinculación, revisión da pauta, confirmación das tomas, progreso, calendario e configuración, recóllese na Sección~\ref{app:wireframes}.
 
 \begin{figure}[htbp]
     \centering
@@ -291,5 +309,5 @@ Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes mái
     \label{fig:wireframes-principais}
 \end{figure}
 
-O conxunto completo de wireframes, incluíndo as pantallas de vinculación, revisión da pauta, confirmación das tomas, progreso, calendario e configuración, recóllese no Apéndice ~\ref{app:wireframes}.
+
 

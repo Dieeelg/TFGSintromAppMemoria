@@ -1,46 +1,117 @@
 \chapter{Deseño}
 \label{app:deseno-detallado}
-
-\subsection{Estados dunha toma}
-
-O seguimento diario dunha dose prescrita pódese representar mediante catro estados principais:
-
-\begin{itemize}
-    \item \textbf{Pendente:} Estado inicial no que se atopa calquera nova dose antes da súa confirmación. Cando chega a hora configurada, a aplicación emite un recordatorio e programa un segundo aviso aos trinta minutos se a dose continúa sen confirmar. Este horario serve de referencia para os avisos, pero non limita o momento en que a persoa usuaria pode rexistrar a toma durante o día.
-    \item \textbf{Tomada:} Estado que adquire a dose cando a persoa usuaria confirma a inxesta antes ou na hora habitual prevista.
-    \item \textbf{Tomada fóra de hora:} Estado asignado cando a confirmación se realiza unha vez superada a hora habitual da toma.
-    \item \textbf{Non tomada:} Estado definitivo que acada a dose se remata a xornada sen que se rexistrase ningunha confirmación.
-\end{itemize}
-
-Cómpre sinalar que este sistema de estados aplícase unicamente aos días nos que existe unha dose efectiva de medicación. Quedan fóra, polo tanto, aquelas xornadas nas que non se debe tomar o fármaco ou que están reservadas exclusivamente para un control médico. A Figura~\ref{fig:anexo-estados-toma} resume as transicións posibles entre estes estados.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.75\textwidth]{imaxes/07-Deseño/anexo/estados_dunha_toma.png}
-    \caption{Diagrama dos estados posibles dunha toma durante o seguimento.}
-    \label{fig:anexo-estados-toma}
-\end{figure}
-
-\begin{landscape}
-
 \section{Wireframes completos}
 \label{app:wireframes}
 A continuación amósanse todos os wireframes creados en Figma para o deseño da aplicación.
 
-\vspace{0.5cm} % Unha pequena marxe extra
-\begin{center}
-    % Inserimos só a páxina 1 debaixo do texto. 
-    % Se o wireframe queda moi pequeno podes usar width=\textwidth
-    % Se o necesitas rotar, podes engadir a opción angle=90 dentro dos corchetes
-    \includegraphics[page=1, width=1.4\textwidth]{imaxes/07-Deseño/wireframes.pdf}
-\end{center}
-\end{landscape}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Inicio supervisor.png}
+    \caption{Pantalla inicial do supervisor cando un paciente aínda non dispón dunha pauta gardada.}
+    \label{fig:wireframe-inicio-supervisor}
+\end{figure}
 
-\clearpage
-% 1. Inserimos dende a páxina 2 ata a penúltima (neste exemplo, a 9).
-% Mantemos o pagecommand={} para que sigan tendo o encabezado e pé do documento.
-\includepdf[pages=2-6, landscape=true, pagecommand={}, scale=0.85]{imaxes/07-Deseño/wireframes.pdf}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/O meu progreso.png}
+    \caption{Pantalla de consulta da evolución do tratamento.}
+    \label{fig:wireframe-progreso}
+\end{figure}
 
-% 2. Inserimos a última folla á parte (o paquete recoñece a palabra 'last').
-% Ao non poñer 'pagecommand={}', a páxina sairá completamente limpa por defecto.
-\includepdf[pages=last, landscape=true, scale=1]{imaxes/07-Deseño/wireframes.pdf}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Pantalla inicio 2.png}
+    \caption{Pantalla principal do paciente tras confirmar a toma diaria.}
+    \label{fig:wireframe-inicio-toma-confirmada}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Pantalla inicio Aviso.png}
+    \caption{Diálogo de confirmación dunha toma.}
+    \label{fig:wireframe-confirmacion-toma}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Pantalla inicio vacía.png}
+    \caption{Pantalla principal do paciente cando aínda non existe unha pauta gardada.}
+    \label{fig:wireframe-inicio-sen-pauta}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Pantalla inicio.png}
+    \caption{Pantalla principal do paciente cunha toma pendente.}
+    \label{fig:wireframe-inicio-paciente}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Pantalla setup 2.png}
+    \caption{Pantalla de vinculación do paciente mediante código QR.}
+    \label{fig:wireframe-vinculacion-paciente}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Pantalla setup 3.png}
+    \caption{Pantalla de selección da persoa encargada de incorporar as follas de tratamento.}
+    \label{fig:wireframe-seleccion-rexistro-pautas}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Pantalla setup.png}
+    \caption{Pantalla inicial de selección do rol da persoa usuaria.}
+    \label{fig:wireframe-seleccion-rol}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Revisar toma.png}
+    \caption{Pantalla de revisión e confirmación dunha nova pauta.}
+    \label{fig:wireframe-revision-pauta}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Saca foto.png}
+    \caption{Pantalla de captura dunha folla de tratamento.}
+    \label{fig:wireframe-captura-folla}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Axustes.png}
+    \caption{Pantalla de axustes da aplicación.}
+    \label{fig:wireframe-axustes}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Calendario.png}
+    \caption{Pantalla de calendario e seguimento das tomas.}
+    \label{fig:wireframe-calendario}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Config adicionais.png}
+    \caption{Pantalla de configuración adicional do paciente.}
+    \label{fig:wireframe-configuracion-adicional}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Escaneo QR.png}
+    \caption{Pantalla de escaneo do código QR para realizar a vinculación.}
+    \label{fig:wireframe-escaneo-qr}
+\end{figure}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.36\textwidth]{imaxes/07-Deseño/anexo/wireframes/Inicio supervisor toma realizada e varios apcientes.png}
+    \caption{Pantalla principal do supervisor con varios pacientes vinculados.}
+    \label{fig:wireframe-inicio-supervisor-varios-pacientes}
+\end{figure}

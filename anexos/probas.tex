@@ -9,59 +9,6 @@ Os fragmentos de código proceden das probas implementadas no proxecto. Co obxec
 
 As probas desenvolvéronse sobre diferentes niveis da solución. Na \gls{api} comprobáronse tanto funcións concretas da lóxica de procesamento como o comportamento dos endpoints e das dependencias externas. No cliente avaliáronse os modelos, os modelos de vista, os servizos, a persistencia, o cifrado, os widgets e distintos fluxos nos que interveñen varias capas da aplicación.
 
-A Táboa~\ref{tab:matriz-probas} resume os principais grupos de probas e os aspectos cubertos en cada un deles.
-
-\begin{table}[htbp]
-    \centering
-    \small
-    \caption{Relación entre os tipos de proba e os aspectos comprobados}
-    \label{tab:matriz-probas}
-
-    \setlength{\tabcolsep}{5pt}
-    \renewcommand{\arraystretch}{1.15}
-
-    \begin{tabularx}{\textwidth}{
-        >{\raggedright\arraybackslash}p{0.20\textwidth}
-        >{\raggedright\arraybackslash}p{0.26\textwidth}
-        >{\raggedright\arraybackslash}X
-    }
-        \hline
-        \textbf{Tipo} &
-        \textbf{Ferramentas} &
-        \textbf{Aspectos comprobados} \\
-        \hline
-
-        Unitarias da API &
-        unittest &
-        Procesamento de datas e doses, cálculo da confianza, validación do INR e funcións auxiliares. \\
-
-        Integración da API &
-        TestClient, MagicMock &
-        Endpoints, respostas HTTP, extracción, preprocesamento, notificacións e dependencias externas. \\
-
-        Unitarias do cliente &
-        flutter\_test &
-        Modelos, modelos de vista, métricas de cumprimento e planificación de recordatorios. \\
-
-        Servizos do cliente &
-        MockClient, AES-GCM &
-        Comunicación HTTP, tratamento de erros, cifrado e integridade das mensaxes. \\
-
-        Persistencia &
-        SQLite &
-        Gardado e recuperación de pautas, estados das tomas, reimportación e información das persoas supervisadas. \\
-
-        Interface &
-        testWidgets &
-        Navegación, formularios, estados de carga, calendario, progreso e mensaxes de erro. \\
-
-        Manuais &
-        Dispositivos Android &
-        Cámara, galería, PDF, permisos, QR, notificacións e sincronización entre dispositivos. \\
-        \hline
-    \end{tabularx}
-\end{table}
-
 
 \section{Probas da API}
 
@@ -364,27 +311,6 @@ A suite executou correctamente 114 probas. O ficheiro LCOV xerado contabilizou 2
     \caption{Resultado da execución das probas automatizadas de Flutter. As mensaxes de erro corresponden a casos probados de forma intencionada. En total, superáronse correctamente as 114 probas.}
     \label{fig:execucion-probas-flutter}
 \end{figure}
-
-
-\section{Cobertura obtida}
-
-A Figura~\ref{fig:cobertura-componentes} representa os valores de cobertura máis relevantes obtidos nas dúas partes da solución.
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[
-        width=\textwidth
-    ]{imaxes/09-Probas/cobertura-componentes.png}
-    \caption{Cobertura dos principais compoñentes da solución}
-    \label{fig:cobertura-componentes}
-\end{figure}
-
-A \gls{api} presenta unha cobertura elevada e uniforme. As liñas que permanecen sen executar concéntranse no módulo de preprocesamento, que contén numerosas ramas destinadas a tratar diferentes características e posibles problemas das imaxes de entrada.
-
-No cliente tamén se acadou unha cobertura elevada nos modelos, no acceso á \gls{api}, na persistencia e no cifrado. A cobertura global é menor debido principalmente ás partes relacionadas coa interface e ás funcionalidades que dependen directamente do dispositivo, como Firebase Messaging ou o sistema de notificacións locais.
-
-Estas funcionalidades complementáronse mediante as comprobacións manuais descritas na seguinte sección.
-
 
 \section{Comprobacións en dispositivos Android}
 

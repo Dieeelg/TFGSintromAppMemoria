@@ -265,12 +265,29 @@ Cada dose da pauta activa permanece inicialmente en estado pendente e pode ser c
 Cando existe unha vinculación activa, os cambios relevantes no estado dunha toma poden comunicarse ao dispositivo asociado. Desta forma, o seguimento local e a supervisión remota manteñen unha visión coherente da situación máis recente dispoñible.
 
 A Figura~\ref{fig:anexo-fluxo-toma} mostra as interaccións principais deste proceso.
-%EDITAR E ENGADIR O OPT
 \begin{figure}[htbp]
     \centering
    \includegraphics[width=1\textwidth]{imaxes/07-Deseño/anexo/06_fluxo_toma_diaria.drawio.png}
     \caption{Fluxo de seguimento dunha toma diaria.}
     \label{fig:anexo-fluxo-toma}
+\end{figure}
+
+\subsection{Estados dunha toma}
+
+O seguimento diario dunha dose prescrita pódese representar mediante catro estados principais:
+
+\begin{itemize}
+    \item \textbf{Pendente:} Estado inicial no que se atopa calquera nova dose antes da súa confirmación. Cando chega a hora configurada, a aplicación emite un recordatorio e programa un segundo aviso aos trinta minutos se a dose continúa sen confirmar. Este horario serve de referencia para os avisos, pero non limita o momento en que a persoa usuaria pode rexistrar a toma durante o día.
+    \item \textbf{Tomada:} Estado que adquire a dose cando a persoa usuaria confirma a inxesta antes ou na hora habitual prevista.
+    \item \textbf{Tomada fóra de hora:} Estado asignado cando a confirmación se realiza unha vez superada a hora habitual da toma.
+    \item \textbf{Non tomada:} Estado definitivo que acada a dose se remata a xornada sen que se rexistrase ningunha confirmación.
+\end{itemize}
+
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.75\textwidth]{imaxes/07-Deseño/anexo/estados_dunha_toma.png}
+    \caption{Diagrama dos estados posibles dunha toma durante o seguimento.}
+    \label{fig:anexo-estados-toma}
 \end{figure}
 
 \section{Deseño da navegación e da interface}

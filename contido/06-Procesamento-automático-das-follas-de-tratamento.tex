@@ -553,7 +553,7 @@ correspondentes á detección.
     \label{fig:yolo-tesseract-recortes}
 \end{figure}
 
-A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0},  \textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
+A combinación de ambas técnicas permitiu comprobar que a detección da representación gráfica pode empregarse para aproximar a posición da información de interese, pero non permite establecer de maneira suficientemente fiable os límites da cela nin garantir a asociación entre unha data e a súa dose. Ademais, as entradas como \textit{0}, \textit{NO TOMAR} ou \textit{CONTROL} non conteñen a representación gráfica empregada como punto de partida polo detector.
 
 Por estes motivos, aínda que \gls{yolo} mostrou un bo comportamento na localización das representacións das pastillas, a combinación con Tesseract non se considerou suficientemente robusta para reconstruír automaticamente a pauta completa e descartouse como solución principal.
 
@@ -563,7 +563,7 @@ Por estes motivos, aínda que \gls{yolo} mostrou un bo comportamento na localiza
 
 A avaliación de Azure AI Document Intelligence realizouse comparando os dous modelos personalizados adestrados, \textit{Template} e \textit{Neural}. Primeiro analizáronse as métricas proporcionadas ao finalizar o adestramento e, posteriormente, avaliáronse ambos modelos sobre as follas reservadas para as probas.
 
-No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template}, Azure proporciona unha estimación da precisión para cada un dos campos definidos.Os valores foron elevados na maior parte dos campos: 99,50\,\% para \textit{fecha visita}, \textit{inr}, \textit{farmaco oral} e \textit{prox visit}, 98,80\,\% para \textit{DOSE} e 94,70\,\% para \textit{RUV}. Os valores máis baixos corresponden a \textit{dosis semanal} e \textit{centro visita}, cun 87,50\,\%, e a \textit{turno}, cun 62,50\,\%. . Non obstante, estes campos teñen unha relevancia secundaria dentro da aplicación, xa que non afectan ao procesamento principal. En consecuencia, aínda que estes resultados son inferiores aos do resto dos campos, non representan un impacto significativo sobre o rendemento global do sistema.
+No modelo \textit{Template}, mostrado na Figura~\ref{fig:azure-metricas-template}, Azure proporciona unha estimación da precisión para cada un dos campos definidos.Os valores foron elevados na maior parte dos campos: 99,50\,\% para \textit{fecha visita}, \textit{inr}, \textit{farmaco oral} e \textit{prox visit}, 98,80\,\% para \textit{DOSE} e 94,70\,\% para \textit{RUV}. Os valores máis baixos corresponden a \textit{dosis semanal} e \textit{centro visita}, cun 87,50\,\%, e a \textit{turno}, cun 62,50\,\%. Non obstante, estes campos teñen unha relevancia secundaria dentro da aplicación, xa que non afectan ao procesamento principal. En consecuencia, aínda que estes resultados son inferiores aos do resto dos campos, non representan un impacto significativo sobre o rendemento global do sistema.
 
 %Bibliografía de azure  e poñer unha nota ou algo
 No modelo \textit{Neural}, Azure Document Intelligence non proporciona puntuacións de precisión por campo durante o adestramento \cite{microsoft-document-intelligence-accuracy} , polo que estes valores aparecen sen informar no Studio. Isto responde ao propio funcionamento deste tipo de modelo e non indica un erro no proceso de adestramento.
@@ -639,6 +639,361 @@ a aplicación, xa que a data do seguinte control pode obterse tamén a partir do
 En conxunto, ambos modelos permitiron recuperar unha parte importante da información das follas e mostraron un bo comportamento nos campos individuais. As principais diferenzas apareceron na estrutura da pauta diaria, onde o modelo \textit{Template} conservou de maneira máis consistente a asociación entre cada data e a súa dose. Aínda que se detectaron erros puntuais,
 especialmente nas condicións de captura menos favorables, os resultados obtidos favoreceron este modelo para o procesamento estruturado das follas.
 
+\subsection{Resumo comparativo}
+
+A Táboa~\ref{tab:comparacion-metodos-extraccion} sintetiza os resultados obtidos coas diferentes técnicas avaliadas e permite comparar de forma global
+o seu comportamento nos principais elementos necesarios para reconstruír a pauta de tratamento.
+\begin{table}[htbp]
+    \centering
+    \scriptsize
+    \setlength{\tabcolsep}{2pt}
+    \renewcommand{\arraystretch}{1.25}
+    \caption{Resumo cualitativo dos resultados das técnicas avaliadas.}
+    \label{tab:comparacion-metodos-extraccion}
+
+    \begin{tabularx}{\textwidth}{
+        >{\raggedright\arraybackslash}p{2.05cm}
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}X
+        >{\centering\arraybackslash}p{1.35cm}}
+        \toprule
+
+        \textbf{Método} &
+        \textbf{Texto} &
+        \textbf{Datas} &
+        \textbf{INR} &
+        \textbf{Doses} &
+        \textbf{Relación data--dose} &
+        % Refírese ao comportamento cando a entrada é unha fotografía
+        % en lugar dun documento escaneado.
+        \textbf{Robustez en fotografías} &
+        \textbf{Decisión} \\
+        \midrule
+
+
+        % =========================================================
+        % GOOGLE ML KIT
+        % =========================================================
+        ML Kit
+
+            & Parcial
+            % Recoñece unha parte importante do texto xeral da folla,
+            % pero introduce erros de caracteres e valores.
+
+            & Mal
+            % Aparecen erros directos nas datas:
+            % 11/12/2024 -> 1/12/2024,
+            % 25/05/2018 -> 2.5/05/2018,
+            % 05 ENE -> 0 ENE, etc.
+
+            & Mal
+            % Hai erros explícitos no INR:
+            % 1,9 -> 19 e 2,2 -> 22.
+            % A perda da coma modifica completamente o valor.
+
+            & Mal
+            % Doses como 1/2 aparecen como /2 ou 12,
+            % polo que non se poden recuperar de forma fiable.
+
+            & Mal
+            % É unha das principais limitacións de ML Kit:
+            % pode recoñecer datas e doses, pero perde a estrutura
+            % da táboa e non mantén estable a asociación entre ambas.
+
+            & Mal
+            % Nas cinco fotografías con iluminación normal
+            % continuaron os erros de texto, datas, doses e estrutura.
+            % Os problemas apareceron xa nun escenario fotográfico favorable.
+
+            & Descartado
+            % Os erros impiden reconstruír de maneira suficientemente
+            % fiable a pauta diaria.
+            \\
+
+
+        % =========================================================
+        % TESSERACT ESTÁNDAR
+        % =========================================================
+        Tesseract estándar
+
+            & Parcial
+            % Recupera parte do texto xeral, especialmente cabeceiras,
+            % etiquetas e algúns campos, pero introduce numerosos
+            % erros tipográficos e confusións de caracteres.
+
+            & Mal
+            % Aparecen días incorrectos e modificacións na información
+            % temporal da táboa.
+
+            & Mal
+            % Nas saídas reais aparecen erros en valores numéricos
+            % da columna INR, especialmente pola perda dos separadores
+            % decimais. Por exemplo, valores como 2,9, 5,4 ou 4,4
+            % aparecen recoñecidos como 29, 54 ou 44.
+
+            & Mal
+            % Perde ou modifica fraccións e, nalgunhas follas,
+            % chega a non recuperar a táboa de doses.
+
+            & Mal
+            % A saída perde a estrutura necesaria para asociar
+            % de forma fiable cada data coa súa dose.
+            % En F02 nin sequera se recupera a pauta.
+
+            & Non avaliado
+            % Non se realizaron probas sistemáticas con fotografías
+            % dentro da avaliación final do modelo estándar porque os erros
+            % xa eran suficientemente importantes nas follas escaneadas.
+            % Non é N/A: Tesseract si podería procesar fotografías,
+            % simplemente non se continuou esa avaliación.
+
+            & Descartado
+            % Os resultados nas condicións ideais xa eran insuficientes
+            % para empregalo directamente como solución.
+            \\
+
+
+        % =========================================================
+        % TESSERACT PERSONALIZADO
+        % =========================================================
+        Tesseract \textit{sintromv2}
+
+            & Parcial
+            % O adestramento específico mellora o recoñecemento
+            % dalgúns elementos, especialmente das fraccións,
+            % pero continúan existindo erros no texto.
+
+            & Mal
+            % Persisten erros claros:
+            % 08/09/2025 -> 068/09/2025,
+            % 13/10/2025 -> 13/10/2023, etc.
+
+            & Mal
+            % As saídas reais permiten confirmar erros tamén no INR.
+            % Por exemplo, nunha proba de F10 aparece 2,3 cando
+            % o valor correcto da visita é 2,1.
+            % En F11 aparece 2 cando o valor correcto é 2,8.
+
+            & Parcial
+            % Hai unha mellora clara no recoñecemento das fraccións.
+            % Por exemplo, valores 1/2 que o modelo estándar
+            % recoñecía como 12 pasan a recoñecerse correctamente.
+            % Aínda así, seguen existindo erros noutras doses.
+
+            & Mal
+            % O adestramento non resolve a perda da estrutura da táboa:
+            % datas e doses seguen aparecendo parcialmente desordenadas.
+
+            & Mal
+            % O comportamento empeora nas fotografías.
+            % Mesmo con iluminación normal poden perderse grandes partes
+            % da pauta e con pouca luz ou maior distancia a degradación aumenta.
+
+            & Descartado
+            % A mellora respecto ao modelo estándar non é suficiente
+            % para reconstruír a pauta de maneira robusta.
+            \\
+
+
+        % =========================================================
+        % YOLO
+        % =========================================================
+        YOLO
+
+            & N/A
+            % YOLO é un detector de obxectos, non un sistema OCR.
+            % Non intenta extraer o texto xeral da folla.
+
+            & N/A
+            % Non foi adestrado para recoñecer datas.
+
+            & N/A
+            % Non foi adestrado para recoñecer o INR.
+
+            & Parcial\textsuperscript{a}
+            % Detecta con moita fiabilidade as representacións gráficas
+            % das pastillas, que forman parte da información da dose.
+            % Porén, non interpreta todas as posibles doses:
+            % 0, NO TOMAR e CONTROL non teñen representación gráfica.
+
+            & N/A
+            % YOLO por si só localiza unha representación gráfica,
+            % pero non establece a relación entre unha data e unha dose.
+
+            & Ben\textsuperscript{b}
+            % O detector mantivo un rendemento elevado nas fotografías:
+            % 74/74 con iluminación normal,
+            % 73/74 con menor iluminación
+            % e 66/74 a maior distancia.
+
+            & Auxiliar
+            % Funciona moi ben como detector, pero non resolve por si só
+            % a extracción completa da pauta.
+            \\
+
+
+        % =========================================================
+        % YOLO + TESSERACT
+        % =========================================================
+        YOLO + Tesseract
+
+            & N/A
+            % A aproximación non pretende recuperar todo o texto da folla,
+            % senón aplicar OCR arredor das deteccións realizadas por YOLO.
+
+            & Parcial
+            % Ao ampliar a caixa detectada por YOLO,
+            % nalgúns recortes conséguese incluír a data,
+            % pero non existe un tamaño fixo que o garanta.
+
+            & N/A
+            % O INR non forma parte do obxectivo desta aproximación.
+
+            & Parcial
+            % Nalgúns recortes recupérase a dose,
+            % pero noutras ocasións queda fóra ou aparece mesturada
+            % con información das celas veciñas.
+            % Ademais, non se parte dunha detección para 0,
+            % NO TOMAR ou CONTROL.
+
+            & Mal
+            % Esta é precisamente a limitación principal:
+            % non existe unha ampliación fixa da caixa de YOLO
+            % que permita garantir que a data e a dose recuperadas
+            % pertencen á mesma cela.
+
+            & Non concluínte
+            % Sabemos que YOLO por separado funciona ben nas distintas
+            % condicións fotográficas, pero non hai unha avaliación
+            % equivalente e completa do sistema YOLO + Tesseract
+            % baixo todas esas condicións.
+
+            & Descartado
+            % A combinación non permite reconstruír de maneira
+            % suficientemente robusta a pauta completa.
+            \\
+
+
+        % =========================================================
+        % AZURE NEURAL
+        % =========================================================
+        Azure \textit{Neural}
+
+            & Ben
+            % Nas follas non vistas consegue recuperar correctamente
+            % numerosos campos individuais.
+
+            & Ben
+            % As datas son recoñecidas.
+            % O problema principal non está tanto en ler a data,
+            % senón en conservar a súa agrupación coa dose.
+
+            & Ben
+            % O INR aparece explicitamente entre os campos individuais
+            % que ambos modelos de Azure recuperan correctamente
+            % nas probas sobre documentos non vistos.
+
+            & Ben
+            % As doses son recuperadas en numerosos casos.
+            % Por exemplo, pode recuperar 14 OCT e 1/4,
+            % aínda que os coloque en rexistros diferentes.
+
+            & Parcial
+            % É a principal diferenza respecto ao Template.
+            % Neural fragmenta con frecuencia as datas e as doses
+            % en rexistros separados, o que dificulta reconstruír
+            % automaticamente a pauta.
+
+            & Parcial
+            % Foi probado sobre fotografías e recupera unha parte
+            % importante da información, pero a estrutura da pauta
+            % non se mantén de forma suficientemente estable.
+            % Tamén aparecen erros en condicións menos favorables.
+
+            & Non seleccionado
+            % O funcionamento xeral é bo, pero Template conserva
+            % mellor a relación estrutural entre datas e doses.
+            \\
+
+
+        % =========================================================
+        % AZURE TEMPLATE
+        % =========================================================
+        \textbf{Azure \textit{Template}}
+
+            & \textbf{Ben}
+            % Recupera correctamente numerosos campos individuais
+            % nos documentos non vistos.
+
+            & \textbf{Ben}
+            % Recupera correctamente as datas e conserva mellor
+            % a súa organización dentro da pauta diaria.
+
+            & \textbf{Ben}
+            % O INR presenta unha precisión do 99,50 % segundo
+            % as métricas mostradas por Azure para o modelo Template
+            % e foi correctamente recuperado nas probas descritas.
+
+            & \textbf{Ben}
+            % O campo DOSE presenta unha precisión do 98,80 %
+            % e o modelo recupera de forma estable as doses da pauta.
+
+            & \textbf{Ben}
+            % É o principal punto forte do modelo:
+            % conserva de forma moito máis estable as datas e as doses
+            % agrupadas dentro do mesmo rexistro/fila.
+
+            & \textbf{Ben\textsuperscript{c}}
+            % Mantén un bo comportamento nas fotografías.
+            % Existen erros puntuais en condicións menos favorables,
+            % por exemplo na cela CONTROL con menor iluminación,
+            % pero o comportamento global é suficientemente estable.
+
+            & \textbf{Seleccionado}
+            % Foi o modelo elixido porque ofrece a extracción máis estable
+            % da información estruturada e, especialmente,
+            % da relación entre cada data e a súa dose.
+            \\
+
+        \bottomrule
+    \end{tabularx}
+
+    \vspace{1mm}
+
+    \begin{minipage}{0.98\textwidth}
+        \tiny
+
+        \textit{Lenda:}
+        \textit{Ben}, resultado suficientemente estable nas probas;
+        \textit{Parcial}, o elemento recupérase, pero non de maneira
+        suficientemente fiable en todos os casos;
+        \textit{Mal}, os erros observados impiden empregar o resultado
+        de forma fiable;
+        \textit{Non concluínte}, existen resultados relacionados co criterio,
+        pero as probas descritas non permiten asignar unha valoración
+        suficientemente fundamentada;
+        \textit{Non avaliado}, o criterio é aplicable á técnica,
+        pero non se realizaron esas probas;
+        \textit{N/A}, o elemento non forma parte do obxectivo da técnica.
+
+        \textsuperscript{a}YOLO detecta as representacións gráficas das
+        pastillas, pero non permite interpretar entradas como
+        \textit{0}, \textit{NO TOMAR} ou \textit{CONTROL}.
+
+        \textsuperscript{b}O detector localizou 74 de 74 representacións con
+        iluminación normal, 73 de 74 con menor iluminación e 66 de 74 nas
+        fotografías tomadas a maior distancia.
+
+        \textsuperscript{c}Detectáronse erros puntuais en condicións menos
+        favorables, pero o modelo mantivo un comportamento máis estable,
+        especialmente na asociación entre datas e doses.
+    \end{minipage}
+\end{table}
+
 \section{Conclusións}
 
 As probas realizadas permitiron comprobar que o principal reto non consiste unicamente en recoñecer o texto presente nas follas, senón en conservar de forma fiable a relación entre os diferentes elementos da pauta de tratamento, especialmente entre cada data e a dose correspondente.
@@ -654,5 +1009,4 @@ A combinación de \gls{yolo} co modelo personalizado de Tesseract tampouco resol
 Finalmente, a comparación dos modelos personalizados de Azure AI Document Intelligence mostrou un comportamento máis estable da arquitectura \textit{Template}, especialmente na extracción da táboa de doses. A súa capacidade para manter agrupadas a data e a dose facilita o posterior procesamento da resposta e permite evitar gran parte da lóxica adicional que sería necesaria co resto das alternativas avaliadas. Por este motivo, seleccionouse este modelo como base da extracción automática empregada na aplicación.
 
 Como complemento, incorporouse un preprocesamento mediante OpenCV para corrixir determinadas desviacións de perspectiva e rotación nas fotografías antes da súa análise. Deste modo, a solución final combina a preparación da imaxe coa extracción estruturada mediante o modelo \textit{Template} de Azure AI Document Intelligence.
-
 

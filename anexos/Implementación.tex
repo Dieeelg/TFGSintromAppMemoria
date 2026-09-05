@@ -4,22 +4,7 @@
 \section{Implementación da API}
 A \gls{api} está organizada en rutas independentes, a táboa~\ref{tab:anexo-endpoints} resume as operacións dispoñibles.
 
-\begin{table}[htbp]
-    \centering
-    \caption{Endpoints implementados na API.}
-    \label{tab:anexo-endpoints}
-    \begin{tabularx}{\textwidth}{l l X}
-        \toprule
-        \textbf{Método} & \textbf{Ruta} & \textbf{Finalidade} \\
-        \midrule
-        POST & \texttt{/extraccion/} & Extraer e estruturar os datos dunha folla. \\
-        POST & \texttt{/preprocesamento/} & Corrixir a imaxe sen executar o recoñecemento. \\
-        GET & \texttt{/centros/buscar} & Localizar un centro sanitario polo seu nome. \\
-        GET & \texttt{/estado/} & Consultar a dispoñibilidade e a versión da API. \\
-        POST & \texttt{/notificar/enviar} & Reenviar unha mensaxe cifrada mediante FCM. \\
-        \bottomrule
-    \end{tabularx}
-\end{table}
+%TODO: borrada tánboa e metida en desñeo ARREGLAR
 
 A Figura~\ref{fig:swagger-api} mostra os endpoints publicados pola \gls{api} e a súa agrupación na interface de Swagger.
 

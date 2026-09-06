@@ -67,7 +67,7 @@ A estrutura descrita anteriormente represéntase a nivel de clases nas Figuras~\
 
 \subsection{Arquitectura da API}
 
-A \gls{api} deseñouse como un servizo sen estado , polo que cada petición contén a información necesaria para ser procesada e non depende dunha sesión almacenada no servidor.
+A \gls{api} deseñouse como un servizo sen estado, polo que cada petición contén a información necesaria para ser procesada e non depende dunha sesión almacenada no servidor.
 
 A súa estrutura, representada na Figura~\ref{fig:modulos-api}, separa os puntos de entrada \gls{http}, a lóxica de procesamento, os contratos de datos e as integracións externas do seguinte xeito:
 
@@ -148,7 +148,7 @@ A comunicación co cliente realízase mediante un conxunto de contratos \gls{res
 \section{Modelo de datos e persistencia}
 
 \subsection{Modelo de dominio} %Quitar que é modelo de dominio
-O modelo de dominio mostrado na Figura~\ref{fig:modelo-dominio} representa a información obtida dunha folla de tratamento así como os datos necesarios para para revisala e posteriormente realizar o seguimento das tomas.  
+O modelo de dominio mostrado na Figura~\ref{fig:modelo-dominio} representa a información obtida dunha folla de tratamento así como os datos necesarios para revisala e posteriormente realizar o seguimento das tomas.  
 
 A entidade principal é a \textbf{análise}, que agrupa os distintos bloques de información presentes no documento. Está formada por tres partes: a cabeceira, a pauta diaria e
 o histórico de visitas. A cabeceira reúne os datos xerais do tratamento actual, como a data do informe, o \gls{inr}, o fármaco, a dose semanal, a seguinte visita e o centro sanitario. A pauta diaria está formada polos días de tratamento, indicando para cada un deles a data, a dose ou acción correspondente e se se trata dun día de control. O histórico conserva a información das visitas anteriores incluídas no documento.
@@ -223,7 +223,7 @@ O supervisor escanea o \gls{qr} e emprega estes datos para iniciar a asociación
 
 
 \subsection{Procesamento dunha folla de tratamento}
- O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla de tratamento desde a aplicación móbil(Figura~\ref{fig:fluxo-procesamento}). O documento envíase á \gls{api}, que realiza o preprocesamento se é necesario e solicita a extracción da información ao servizo de procesamento documental.
+ O fluxo comeza cando a persoa usuaria selecciona ou captura unha folla de tratamento desde a aplicación móbil (Figura~\ref{fig:fluxo-procesamento}). O documento envíase á \gls{api}, que realiza o preprocesamento se é necesario e solicita a extracción da información ao servizo de procesamento documental.
 
 A partir do resultado obtido, a \gls{api} interpreta os campos recoñecidos, normaliza os datos, reconstrúe a pauta diaria e realiza comprobacións sobre a coherencia da información antes de devolver unha resposta ao cliente. Se o resultado non pode aceptarse, a aplicación informa do erro e ofrece a posibilidade de repetir o proceso. Pola contra, se a información é válida, os datos extraídos móstranse para a súa revisión e, unha vez confirmados pola persoa usuaria, a nova pauta gárdase localmente como tratamento activo.
 
@@ -325,6 +325,5 @@ Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes mái
     \caption{Wireframes representativos da interface da aplicación.}
     \label{fig:wireframes-principais}
 \end{figure}
-
 
 

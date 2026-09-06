@@ -2,11 +2,7 @@
 \label{app:detalles-implementacion}
 
 \section{Implementación da API}
-A \gls{api} está organizada en rutas independentes, a táboa~\ref{tab:anexo-endpoints} resume as operacións dispoñibles.
-
-%TODO: borrada tánboa e metida en desñeo ARREGLAR
-
-A Figura~\ref{fig:swagger-api} mostra os endpoints publicados pola \gls{api} e a súa agrupación na interface de Swagger.
+A \gls{api} está organizada en rutas independentes, a Figura~\ref{fig:swagger-api} mostra os endpoints publicados pola \gls{api} e a súa agrupación na interface de Swagger.
 
 \begin{figure}
     \centering
@@ -18,7 +14,7 @@ A Figura~\ref{fig:swagger-api} mostra os endpoints publicados pola \gls{api} e a
 \subsection{Inicialización dos servizos externos}
 
 O ciclo de vida de FastAPI crea unha soa instancia de cada cliente compartido. As credenciais obtéñense primeiro da contorna local e, cando non están
-dispoñibles, recupéranse de Azure Key Vault. O cliente de Document Intelligence gárdase en \texttt{app.state}. Firebase Admin só se inicializa cando aínda non existe unha instancia activa.
+dispoñibles, recupéranse de Azure Key Vault. O cliente de Document Intelligence gárdase en \texttt{app.state}. Firebase Admin só se inicializa cando aínda non existe unha instancia activa. A creación e inicialización destes clientes móstrase no Listado~\ref{lst:servizos-externos}.
 
 \begin{lstlisting}[language=Python,
     caption={Creación dos clientes compartidos durante o arranque.},
@@ -51,8 +47,7 @@ if firebase_json and not firebase_admin._apps:
 
 \subsection{\textit{POST /extraccion/}}
 
-Tras comprobar o tipo do ficheiro, a imaxe preprocesada envíase ao modelo configurado. A operación de Azure é asíncrona e o resultado só continúa cando
-contén polo menos un documento recoñecido.
+Tras comprobar o tipo do ficheiro, a imaxe preprocesada envíase ao modelo configurado. A operación de Azure é asíncrona e o resultado só continúa cando contén polo menos un documento recoñecido. Este proceso móstrase no Listado~\ref{lst:extraccion-azure}.
 
 \begin{lstlisting}[language=Python,
     caption={Preprocesamento e chamada a Azure Document Intelligence.},
@@ -79,9 +74,12 @@ if not result.documents:
 document = result.documents[0]
 \end{lstlisting}
 
-Os campos devoltos por Azure non se incorporan directamente á resposta. En primeiro lugar, a táboa procésase cela a cela mediante \textit{parsear\_cela\_dose}, que transforma o texto recoñecido na data, na dose e na acción empregadas polo cliente.
+Os campos devoltos por Azure non se incorporan directamente á resposta. En primeiro lugar, a táboa procésase cela a cela mediante \textit{parsear\_cela\_dose}, que transforma o texto recoñecido na data, na dose e na acción empregadas polo cliente (Listado~\ref{lst:procesamento-taboa-doses}).
 
-\begin{lstlisting}[language=Python, caption={}, label={lst: }]
+\begin{lstlisting}[
+    language=Python,
+    caption={Procesamento da táboa de doses devolta por Azure.},
+    label={lst:procesamento-taboa-doses}]
 if campo_dose and campo_dose.value_array:
     # Percorremos cada fila da táboa
     for fila in campo_dose.value_array:
@@ -160,7 +158,7 @@ if datos and datos["control"] and dt_prox:
 \end{lstlisting}
 
 Unha vez transformados os campos, a API aplica varias validacións antes de construír a resposta. En primeiro lugar, a confianza media dos campos
-recoñecidos debe ser igual ou superior ao 60\,\%. Ademais, cando se recuperan as dúas datas, a próxima visita non pode ser anterior á data do informe.
+recoñecidos debe ser igual ou superior ao 60\,\%. Ademais, cando se recuperan as dúas datas, a próxima visita non pode ser anterior á data do informe. Estas comprobacións recóllense no Listado~\ref{lst:validacion-confianza-datas}.
 
 \begin{lstlisting}[language=Python,
     caption={Validación da confianza global e da orde das datas.},
@@ -179,7 +177,7 @@ if dt_prox and dt_prox.date() < dt_informe.date():
     )
 \end{lstlisting}
 
-O INR normalízase substituíndo a coma decimal por un punto e convértese nun valor numérico. A extracción só se acepta se o valor está entre 0,5 e 10 e se a confianza específica deste campo alcanza o 80\,\%. Estes límites actúan como unha medida técnica para detectar posibles erros de lectura, non como un rango terapéutico. Tamén se comproba que a interpretación da táboa producise polo menos unha entrada válida.
+O INR normalízase substituíndo a coma decimal por un punto e convértese nun valor numérico. A extracción só se acepta se o valor está entre 0,5 e 10 e se a confianza específica deste campo alcanza o 80\,\%. Estes límites actúan como unha medida técnica para detectar posibles erros de lectura, non como un rango terapéutico. Tamén se comproba que a interpretación da táboa producise polo menos unha entrada válida. Estas comprobacións recóllense no Listado~\ref{lst:validacion-inr-calendario}.
 
 \begin{lstlisting}[language=Python,
     caption={Validación do INR e do calendario extraído.},
@@ -205,7 +203,7 @@ if not lista_doses:
     )
 \end{lstlisting}
 
-Só despois de superar estas comprobacións se constrúe a resposta que recibirá o cliente móbil.
+Só despois de superar estas comprobacións constrúese a resposta que recibirá o cliente móbil, como se mostra no Listado~\ref{lst:resposta}.
 
 \begin{lstlisting}[language=Python,
         caption={Creación da resposta.},
@@ -321,7 +319,7 @@ O endpoint de preprocesamento permite observar este proceso de forma illada. Nas
 
 \subsection{\textit{ /centros/buscar}}
 
-A procura normaliza os nomes, calcula a súa similitude e só acepta coincidencias cunha puntuación igual ou superior a 0,45. A carga do ficheiro emprégase cunha caché dunha única entrada para non analizar de novo o KML en cada petición.
+A procura normaliza os nomes, calcula a súa similitude e só acepta coincidencias cunha puntuación igual ou superior a 0,45. A carga do ficheiro emprégase cunha caché dunha única entrada para non analizar de novo o KML en cada petición. A implementación desta procura recóllese no Listado~\ref{lst:busqueda-centros}.
 
 
 \begin{lstlisting}[language=Python,
@@ -379,7 +377,7 @@ if puntuacion < 0.45:
 \end{lstlisting}
 
 \subsection{\textit{POST /notificar/enviar}}
-Esta ruta recibe o token, o tipo de aviso e o contido xa cifrado. A API engade un texto visible para os tipos que deben producir un aviso e reenvía a mensaxe mediante Firebase Cloud Messaging sen descifrar a información clínica.
+Esta ruta recibe o token, o tipo de aviso e o contido xa cifrado. A API engade un texto visible para os tipos que deben producir un aviso e reenvía a mensaxe mediante Firebase Cloud Messaging sen descifrar a información clínica. O Listado~\ref{lst:endpoint-notificacions} mostra a creación e o reenvío destas mensaxes.
 
 \begin{lstlisting}[language=Python,
     caption={Reenvío dunha mensaxe mediante Firebase.},
@@ -432,7 +430,7 @@ async def enviar_notif(data: NotificacionP2P):
 \end{lstlisting}
 
 \subsection{\textit{GET /estado/}}
-O endpoint de estado ofrece unha comprobación básica de que o proceso da API responde. Non verifica a dispoñibilidade de Azure, Firebase nin do  catálogo de centros.
+O endpoint de estado ofrece unha comprobación básica de que o proceso da API responde. Non verifica a dispoñibilidade de Azure, Firebase nin do  catálogo de centros. A resposta proporcionada por este endpoint móstrase no Listado~\ref{lst:endpoint-estado}.
 \begin{lstlisting}[language=Python,
     caption={Comprobación básica do estado da API.},
     label={lst:endpoint-estado}]
@@ -449,7 +447,6 @@ def comprobar_estado():
     }
 \end{lstlisting}
 
-\clearpage
 \section{Implementación do cliente móbil}
 
 \subsection{Inicialización da aplicación}
@@ -485,7 +482,7 @@ SQLite separa a pauta activa, a cabeceira, o histórico e os datos das persoas s
 mantense na táboa \texttt{pautas}.
 
 Para distinguir unha reimportación dunha pauta nova calcúlase un identificador determinista. Os textos normalízanse, o calendario ordénase por data e
-concaténanse os datos clínicos que definen o tratamento. Non se inclúen o estado, a hora de confirmación nin a desviación, xa que son datos de seguimento que deben conservarse. O identificador non é un valor aleatorio nin un resumo criptográfico.
+concaténanse os datos clínicos que definen o tratamento. Non se inclúen o estado, a hora de confirmación nin a desviación, xa que son datos de seguimento que deben conservarse. O identificador non é un valor aleatorio nin un resumo criptográfico. O seu cálculo móstrase no Listado~\ref{lst:identificador-documento}.
 
 \begin{lstlisting}[
     caption={Cálculo do identificador dunha folla.},
@@ -509,6 +506,7 @@ String _identificadorDocumento(AnaliseModel analise) {
   ].join('::');
 }
 \end{lstlisting}
+A Táboa~\ref{tab:persistencia-cliente} resume a información almacenada en cada unha das táboas empregadas polo cliente.
 
 \begin{table}[htbp]
     \centering
@@ -530,7 +528,8 @@ String _identificadorDocumento(AnaliseModel analise) {
 
 O gardado execútase nunha transacción. Se o identificador coincide co gardado,
 recupéranse por data os datos de seguimento. Se cambia, as doses da nova pauta
-comezan co estado \texttt{PENDENTE}.
+comezan co estado \texttt{PENDENTE}. O Listado~\ref{lst:conservar-seguimento}
+mostra como se conservan estes datos cando se importa novamente a mesma folla.
 
 \begin{lstlisting}[
     caption={Conservación do seguimento ao importar a mesma folla.},
@@ -656,7 +655,8 @@ return jsonEncode({
 Despois da vinculación, cada envío emprega a clave permanente e un
 \gls{nonce} novo. O identificador e o tipo de aviso incorpóranse como datos
 autenticados, polo que unha modificación do contido ou do contexto provoca o
-rexeitamento da mensaxe.
+rexeitamento da mensaxe. Este proceso de cifrado e autenticación móstrase no
+Listado~\ref{lst:cifrado-p2p}.
 
 \begin{lstlisting}[
     caption={Cifrado e creación dunha mensaxe P2P.},
@@ -709,7 +709,8 @@ A Figura~\ref{fig:anexo-vinculacion} mostra o código \gls{qr} xerado polo pacie
 
 As follas completas divídense en fragmentos de ata 2200 caracteres para non
 superar o tamaño adecuado dunha mensaxe de FCM. Cada parte leva un identificador
-común, a súa posición e o número total de fragmentos.
+común, a súa posición e o número total de fragmentos. A división e o envío destes
+fragmentos recóllense no Listado~\ref{lst:fragmentacion}.
 
 \begin{lstlisting}[
     caption={División e envío dunha folla en fragmentos cifrados.},
@@ -740,7 +741,7 @@ for (var i = 0; i < total; i++) {
 O receptor garda cada parte temporalmente e só reconstrúe o \gls{json} cando
 dispón de todos os índices. Despois crea o modelo, garda a pauta, recalcula os
 recordatorios e elimina os fragmentos. Así non se incorpora unha folla
-incompleta cando falta algunha mensaxe.
+incompleta cando falta algunha mensaxe. A Figura~\ref{fig:anexo-fluxo-incorporacion} mostra o fluxo seguido no cliente desde a selección da folla ata a súa revisión e incorporación.
 
 % Captura opcional: crear imaxes/anexos/implementacion/fluxo-incorporacion.png
 % Mostrar selección da imaxe, revisión dos datos e pauta finalmente gardada.
@@ -751,19 +752,334 @@ incompleta cando falta algunha mensaxe.
     \label{fig:anexo-fluxo-incorporacion}
 \end{figure}
 
-\begin{landscape}
 \section{Interface final}
-\label{sec:galeria-interface-final}
-\vspace{0.5cm} % Unha pequena marxe extra
-\begin{center}
-    % Inserimos só a páxina 1 debaixo do texto. 
-    % Se o wireframe queda moi pequeno podes usar width=\textwidth
-    % Se o necesitas rotar, podes engadir a opción angle=90 dentro dos corchetes
-    \includegraphics[page=1, width=1.4\textwidth]{imaxes/08-Implementacion/anexo/Pantalla Inicio.pdf}
-\end{center}
-\end{landscape}
+A continuación recóllense as principais interfaces da aplicación resultante, agrupadas segundo os fluxos aos que pertencen. A Figura~\ref{fig:interface-configuracion-inicial} mostra o proceso de configuración inicial, a Figura~\ref{fig:interface-vinculacion} recolle a vinculación entre paciente e supervisor e as Figuras~\ref{fig:interface-incorporacion-folla}, \ref{fig:interface-procesamento-revision} e~\ref{fig:interface-edicion-pauta} presentan o proceso de incorporación, procesamento, revisión e edición dunha folla de tratamento. Pola súa parte, as Figuras~\ref{fig:interface-confirmacion-toma}, \ref{fig:interface-seguimento} e~\ref{fig:interface-modo-sinxelo} mostran as interfaces empregadas polo paciente durante o seguimento do tratamento. Finalmente, as Figuras~\ref{fig:interface-supervisor-estados} e~\ref{fig:interface-supervisor-detalles} recollen as principais pantallas dispoñibles no perfil supervisor.
 
-\clearpage
-% 1. Inserimos dende a páxina 2 ata a penúltima (neste exemplo, a 9).
-% Mantemos o pagecommand={} para que sigan tendo o encabezado e pé do documento.
-\includepdf[page=2-11,landscape=true, pagecommand={}, scale=0.85]{imaxes/08-Implementacion/anexo/Pantalla Inicio.pdf}
+% ============================================================
+% CONFIGURACIÓN INICIAL
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_ESCOLLER_ROL.png}
+        \caption{Selección inicial do rol.}
+        \label{fig:interface-escolle-rol}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/PERMISO_NOTIF.jpg}
+        \caption{Solicitude do permiso de notificacións.}
+        \label{fig:interface-permiso-notificacions}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/CONFIG_ADICIONAIS.jpg}
+        \caption{Configuración adicional do paciente.}
+        \label{fig:interface-config-adicionais}
+    \end{subfigure}
+
+    \caption{Interfaces correspondentes á configuración inicial da aplicación.}
+    \label{fig:interface-configuracion-inicial}
+\end{figure}
+
+
+% ============================================================
+% VINCULACIÓN
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/QR_PACIENTE_VINC.jpg}
+        \caption{Código QR xerado polo paciente.}
+        \label{fig:interface-qr-paciente}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/ESCANEO_QR_SUPERVISOR.jpg}
+        \caption{Escaneo do código polo supervisor.}
+        \label{fig:interface-escaneo-qr-supervisor}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/PANTALLA_CORRECTA_VINCULACIÓN.jpg}
+        \caption{Confirmación da vinculación.}
+        \label{fig:interface-vinculacion-correcta}
+    \end{subfigure}
+
+    \caption{Interfaces do proceso de vinculación entre paciente e supervisor.}
+    \label{fig:interface-vinculacion}
+\end{figure}
+
+
+% ============================================================
+% INCORPORACIÓN DUNHA FOLLA
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_PACIENTE_SEN_FOLLA.jpg}
+        \caption{Inicio do paciente sen folla gardada.}
+        \label{fig:interface-paciente-sen-folla}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/SUBIR_FOLLA1.jpg}
+        \caption{Selección da incorporación dunha folla.}
+        \label{fig:interface-subir-folla-1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/SUBIR_FOLLA2.jpg}
+        \caption{Selección do documento que se vai procesar.}
+        \label{fig:interface-subir-folla-2}
+    \end{subfigure}
+
+    \caption{Interfaces iniciais do proceso de incorporación dunha folla de tratamento.}
+    \label{fig:interface-incorporacion-folla}
+\end{figure}
+
+
+% ============================================================
+% PROCESAMENTO E REVISIÓN
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/CARGANDO_FOLLA(PROCESAMENTO).jpg}
+        \caption{Procesamento da folla seleccionada.}
+        \label{fig:interface-procesamento-folla}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/CORRECCIÓN_PAUTA1.jpg}
+        \caption{Revisión dos datos extraídos.}
+        \label{fig:interface-correccion-pauta-1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/CORRECCIÓN_PAUTA3.jpg}
+        \caption{Revisión da pauta obtida.}
+        \label{fig:interface-correccion-pauta-3}
+    \end{subfigure}
+
+    \caption{Interfaces de procesamento e revisión da información extraída da folla.}
+    \label{fig:interface-procesamento-revision}
+\end{figure}
+
+
+% ============================================================
+% EDICIÓN DA PAUTA
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/EDICIÓN_PAUTA1.jpg}
+        \caption{Edición dunha entrada da pauta.}
+        \label{fig:interface-edicion-pauta-1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/EDICIÓN_PAUTA2.jpg}
+        \caption{Modificación dos datos da pauta.}
+        \label{fig:interface-edicion-pauta-2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_PACIENTE_PENDENTE_TOMA.jpg}
+        \caption{Inicio coa nova pauta activa.}
+        \label{fig:interface-paciente-toma-pendente}
+    \end{subfigure}
+
+    \caption{Interfaces de edición e incorporación da pauta ao seguimento do paciente.}
+    \label{fig:interface-edicion-pauta}
+\end{figure}
+
+
+% ============================================================
+% CONFIRMACIÓN DA TOMA
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/AVISO_CONFIRMACIÓN_TOMA_PACIENTE.jpg}
+        \caption{Confirmación dunha toma pendente.}
+        \label{fig:interface-aviso-confirmacion-toma}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_PACIENTE_TOMA_CONFIRMADA.jpg}
+        \caption{Inicio despois de confirmar a toma.}
+        \label{fig:interface-toma-confirmada}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/TOMA_FORA_DE_HORA_CONFIRMADA.jpg}
+        \caption{Confirmación dunha toma fóra da hora habitual.}
+        \label{fig:interface-toma-fora-hora}
+    \end{subfigure}
+
+    \caption{Interfaces relacionadas coa confirmación das tomas.}
+    \label{fig:interface-confirmacion-toma}
+\end{figure}
+
+
+% ============================================================
+% SEGUIMENTO DO TRATAMENTO
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/PANTALLA_CALENDARIO.jpg}
+        \caption{Calendario do tratamento.}
+        \label{fig:interface-calendario}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/O_MEU_PROGRESO.jpg}
+        \caption{Consulta do progreso do tratamento.}
+        \label{fig:interface-progreso}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/AXUSTES_PACIENTE.jpg}
+        \caption{Axustes do perfil paciente.}
+        \label{fig:interface-axustes-paciente}
+    \end{subfigure}
+
+    \caption{Principais interfaces de seguimento e configuración do tratamento.}
+    \label{fig:interface-seguimento}
+\end{figure}
+
+
+% ============================================================
+% MODO SINXELO
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_MOD_SINXELO.jpg}
+        \caption{Pantalla principal no modo sinxelo.}
+        \label{fig:interface-modo-sinxelo}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/MODO_SINXELO_CON_TOMA_REALIZADA.jpg}
+        \caption{Modo sinxelo tras confirmar a toma.}
+        \label{fig:interface-modo-sinxelo-toma}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/DESACTIVAR_MODO_SINXELO_CONFIRMACIÓN.jpg}
+        \caption{Confirmación para desactivar o modo sinxelo.}
+        \label{fig:interface-desactivar-modo-sinxelo}
+    \end{subfigure}
+
+    \caption{Interfaces asociadas ao modo sinxelo da aplicación.}
+    \label{fig:interface-modo-sinxelo}
+\end{figure}
+
+
+% ============================================================
+% SUPERVISOR: ESTADO DOS PACIENTES
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_SUPERVISOR_SEN_FOLLA.jpg}
+        \caption{Paciente sen folla de tratamento.}
+        \label{fig:interface-supervisor-sen-folla}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_SUPERVISOR_PACIENTE_PENDENTE_TOMA.jpg}
+        \caption{Paciente cunha toma pendente.}
+        \label{fig:interface-supervisor-toma-pendente}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_SUPERVISOR_PACIENTE_TOMA_FEITA.jpg}
+        \caption{Paciente coa toma confirmada.}
+        \label{fig:interface-supervisor-toma-feita}
+    \end{subfigure}
+
+    \caption{Estados do tratamento mostrados na pantalla principal do supervisor.}
+    \label{fig:interface-supervisor-estados}
+\end{figure}
+
+
+% ============================================================
+% SUPERVISOR: DETALLES E AXUSTES
+% ============================================================
+
+\begin{figure}[htbp]
+    \centering
+
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/DETALLES_DUN_PACIENTE1.jpg}
+        \caption{Consulta dos detalles dun paciente.}
+        \label{fig:interface-detalles-paciente-1}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/DETALLES_DUN_PACIENTE2.jpg}
+        \caption{Información adicional do paciente.}
+        \label{fig:interface-detalles-paciente-2}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[t]{0.30\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/AXUSTES_SUPERVISOR.jpg}
+        \caption{Axustes do perfil supervisor.}
+        \label{fig:interface-axustes-supervisor}
+    \end{subfigure}
+
+    \caption{Interfaces de consulta detallada e configuración do perfil supervisor.}
+    \label{fig:interface-supervisor-detalles}
+\end{figure}

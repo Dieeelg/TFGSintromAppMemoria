@@ -5,22 +5,27 @@ Este apéndice amplía a información presentada no Capítulo~\ref{chap:probas} 
 
 Os fragmentos de código proceden das probas implementadas no proxecto. Co obxectivo de facilitar a súa lectura, nalgúns casos omítense partes de preparación que non resultan relevantes para comprender o comportamento que se está verificando.
 
+
+%===================================================================================================================================================
 \section{Organización e alcance}
+%===================================================================================================================================================
 
 As probas desenvolvéronse sobre diferentes niveis da solución. Na \gls{api} comprobáronse tanto funcións concretas da lóxica de procesamento como o comportamento dos endpoints e das dependencias externas. No cliente avaliáronse os modelos, os modelos de vista, os servizos, a persistencia, o cifrado, os widgets e distintos fluxos nos que interveñen varias capas da aplicación.
 
 
+%===================================================================================================================================================
 \section{Probas da API}
+%===================================================================================================================================================
 
 \subsection{Preparación das probas dos endpoints}
 
 Para comprobar os endpoints empregouse TestClient, que permite realizar peticións \gls{http} directamente sobre a aplicación FastAPI durante a execución das probas. As dependencias que requiren comunicación con servizos externos substituíronse por obxectos simulados cando era necesario, permitindo preparar respostas coñecidas e reproducir situacións de éxito e de erro sen depender dunha conexión externa.
 
-No caso de Azure Document Intelligence, o cliente utilizado pola aplicación substitúese por un MagicMock. Desta maneira pódense construír respostas coa mesma estrutura que as devoltas polo servizo e comprobar posteriormente como son procesadas pola \gls{api}.
+No caso de Azure Document Intelligence, o cliente utilizado pola aplicación substitúese por un \textit{MagicMock}. Desta maneira pódense construír respostas coa mesma estrutura que as devoltas polo servizo e comprobar posteriormente como son procesadas pola \gls{api}. A preparación deste cliente simulado móstrase no Listado~\ref{lst:mock-azure}.
 
 \begin{lstlisting}[
     language=Python,
-    caption={Preparación do cliente de FastAPI e simulación do cliente de Azure},
+    caption={Preparación do cliente de FastAPI e simulación do cliente de Azure.},
     label={lst:mock-azure}
 ]
 def setUp(self):
@@ -50,11 +55,11 @@ As probas da lóxica interna verifican o tratamento dos datos extraídos antes d
 
 Tamén se incluíron entradas incorrectas ou incompletas co obxectivo de comprobar que a aplicación non produce resultados incoherentes cando a información recibida non é válida.
 
-Como exemplo, o seguinte caso comproba a corrección da data correspondente a un control cando a data detectada non coincide coa próxima visita indicada na folla.
+Como exemplo, o Listado~\ref{lst:api-control-data} comproba a corrección da data correspondente a un control cando a data detectada non coincide coa próxima visita indicada na folla.
 
 \begin{lstlisting}[
     language=Python,
-    caption={Comprobación da data correspondente a un control},
+    caption={Comprobación da data correspondente a un control.},
     label={lst:api-control-data}
 ]
 for data_control, data_esperada in (
@@ -91,11 +96,11 @@ Estas probas resultan especialmente relevantes porque o preprocesamento inclúe 
 
 \subsection{Notificacións e dependencias externas}
 
-As chamadas ao \gls{sdk} de Firebase simuláronse durante as probas automatizadas. Isto permite comprobar a información empregada para construír a notificación, o token de destino e o tratamento dos posibles erros sen enviar mensaxes reais.
+As chamadas ao \gls{sdk} de Firebase simuláronse durante as probas automatizadas. Isto permite comprobar a información empregada para construír a notificación, o token de destino e o tratamento dos posibles erros sen enviar mensaxes reais. O Listado~\ref{lst:mock-firebase} mostra un dos casos empregados para verificar este comportamento.
 
 \begin{lstlisting}[
     language=Python,
-    caption={Simulación do envío dunha notificación mediante Firebase},
+    caption={Simulación do envío dunha notificación mediante Firebase.},
     label={lst:mock-firebase}
 ]
 @patch("app.routers.notificar.messaging.send",
@@ -120,14 +125,16 @@ Ademais dos casos correctos, provocáronse erros durante o envío para comprobar
 O arranque da aplicación tamén foi probado baixo diferentes configuracións de Azure, Firebase e Key Vault, comprobando tanto a carga das credenciais desde as variables de contorna como a recuperación dos segredos externos.
 
 
+%===================================================================================================================================================
 \section{Probas do cliente Flutter}
+%===================================================================================================================================================
 
 \subsection{Comunicación coa API}
 
-A comunicación \gls{http} probouse substituíndo o cliente real por un MockClient. Deste modo é posible interceptar as peticións xeradas pola aplicación e comprobar o método \gls{http} empregado, a ruta, as cabeceiras e os datos enviados.
+A comunicación \gls{http} probouse substituíndo o cliente real por un \textit{MockClient}. Deste modo é posible interceptar as peticións xeradas pola aplicación e comprobar o método \gls{http} empregado, a ruta, as cabeceiras e os datos enviados. O Listado~\ref{lst:flutter-mock-http} mostra unha destas comprobacións.
 
 \begin{lstlisting}[
-    caption={Comprobación dunha petición realizada polo cliente},
+    caption={Comprobación dunha petición realizada polo cliente.},
     label={lst:flutter-mock-http}
 ]
 final api = ApiService(
@@ -156,10 +163,10 @@ As probas de persistencia executan unha base SQLite destinada exclusivamente á 
 
 Entre os escenarios comprobados encóntranse o gardado e recuperación dunha análise, o rexistro dunha toma, a conservación dos estados cando se importa novamente a mesma folla e a substitución da pauta cando se incorpora unha folla diferente.
 
-O seguinte exemplo comproba que unha toma rexistrada fóra da hora prevista se conserva despois de importar novamente a mesma pauta.
+O Listado~\ref{lst:flutter-reimportacion} comproba que unha toma rexistrada fóra da hora prevista se conserva despois de importar novamente a mesma pauta.
 
 \begin{lstlisting}[
-    caption={Conservación dunha toma ao reimportar a mesma pauta},
+    caption={Conservación dunha toma ao reimportar a mesma pauta.},
     label={lst:flutter-reimportacion}
 ]
 final analise = crearAnaliseProba();
@@ -189,10 +196,10 @@ expect(
 
 As operacións criptográficas empregadas durante as probas son operacións \gls{aesgcm} reais. Só se substitúe o almacenamento empregado para conservar as claves, permitindo executar a suite sen depender do almacenamento seguro do dispositivo.
 
-Comprobouse que os datos poden descifrarse coa clave correspondente e que unha mensaxe modificada, un tipo de aviso diferente ou unha clave incorrecta provoca o rexeitamento da mensaxe.
+Comprobouse que os datos poden descifrarse coa clave correspondente e que unha mensaxe modificada, un tipo de aviso diferente ou unha clave incorrecta provoca o rexeitamento da mensaxe. Unha destas comprobacións recóllese no Listado~\ref{lst:flutter-cifrado}.
 
 \begin{lstlisting}[
-    caption={Comprobación do cifrado e descifrado mediante AES-GCM},
+    caption={Comprobación do cifrado e descifrado mediante AES-GCM.},
     label={lst:flutter-cifrado}
 ]
 const payload = '{"dose":"1/2","inr":"2.4"}';
@@ -220,10 +227,10 @@ expect(resultado.contido, payload);
 
 A lóxica encargada de decidir que recordatorios deben programarse probouse independentemente do complemento nativo de Android. As datas e horas utilizadas nos casos de proba son fixas, o que permite obter sempre o mesmo resultado independentemente do momento no que se execute a suite.
 
-Comprobáronse diferentes estados das tomas e verificouse que unha toma xa confirmada non xere novos avisos.
+Comprobáronse diferentes estados das tomas e verificouse que unha toma xa confirmada non xere novos avisos. O Listado~\ref{lst:flutter-planificador} mostra un dos casos empregados para comprobar esta planificación.
 
 \begin{lstlisting}[
-    caption={Comprobación da planificación dos recordatorios},
+    caption={Comprobación da planificación dos recordatorios.},
     label={lst:flutter-planificador}
 ]
 final avisos = PlanificadorRecordatorios.crear(
@@ -254,17 +261,20 @@ As probas de widgets permitiron comprobar o comportamento das principais pantall
 Entre os elementos comprobados atópanse os formularios de configuración, a pantalla de revisión dos datos extraídos, o calendario, o progreso do tratamento, os estados de carga e as diferentes mensaxes de erro.
 
 
+%===================================================================================================================================================
 \section{Execución das probas automatizadas}
+%===================================================================================================================================================
 
 Ademais de comprobar casos individuais, executáronse as suites completas para verificar que o conxunto das probas finalizaba correctamente e obter a cobertura acadada.
 
 
 \subsection{Execución da API}
 
-As probas da \gls{api} executáronse desde a raíz do repositorio empregando Coverage.py:
+As probas da \gls{api} executáronse desde a raíz do repositorio empregando Coverage.py, mediante os comandos recollidos no Listado~\ref{lst:execucion-probas-api}.
 
 \begin{lstlisting}[
-    caption={Execución das probas e cálculo da cobertura da API}
+    caption={Execución das probas e cálculo da cobertura da API.},
+    label={lst:execucion-probas-api}
 ]
 $env:PYTHONPATH="$PWD;$PWD\server"
 
@@ -277,14 +287,14 @@ python -m coverage run \
 python -m coverage report -m
 \end{lstlisting}
 
-A execución completouse correctamente e o informe mostrou unha cobertura global do 96,1 \%. Todos os módulos alcanzaron unha cobertura completa agás o módulo de preprocesamento, no que quedaron algunhas ramas sen executar.
+A execución completouse correctamente e o informe mostrou unha cobertura global do 96,1\,\%. Todos os módulos alcanzaron unha cobertura completa agás o módulo de preprocesamento, no que quedaron algunhas ramas sen executar.
 
 \begin{figure}[htbp]
     \centering
     \includegraphics[
         width=0.92\textwidth
     ]{imaxes/09-Probas/execucion-api.png}
-    \caption{Resultado da execución das probas e da cobertura da API}
+    \caption{Resultado da execución das probas e da cobertura da API.}
     \label{fig:execucion-probas-api}
 \end{figure}
 
@@ -293,15 +303,16 @@ Na Figura~\ref{fig:execucion-probas-api} pode observarse tanto a finalización c
 
 \subsection{Execución do cliente Flutter}
 
-No cliente empregouse o comando de probas de Flutter coa xeración simultánea do ficheiro LCOV:
+No cliente empregouse o comando de probas de Flutter coa xeración simultánea do ficheiro LCOV, como se mostra no Listado~\ref{lst:execucion-probas-flutter}.
 
 \begin{lstlisting}[
-    caption={Execución das probas automatizadas de Flutter}
+    caption={Execución das probas automatizadas de Flutter.},
+    label={lst:execucion-probas-flutter}
 ]
 flutter test --no-pub --coverage
 \end{lstlisting}
 
-A suite executou correctamente 114 probas. O ficheiro LCOV xerado contabilizou 2447 liñas instrumentadas, das cales 1781 foron executadas, o que representa unha cobertura global do 72,8 \%.
+A suite executou correctamente 114 probas. O ficheiro LCOV xerado contabilizou 2447 liñas instrumentadas, das cales 1781 foron executadas, o que representa unha cobertura global do 72,8\,\%. A Figura~\ref{fig:execucion-probas-flutter} mostra o resultado desta execución.
 
 \begin{figure}[htbp]
     \centering
@@ -312,7 +323,10 @@ A suite executou correctamente 114 probas. O ficheiro LCOV xerado contabilizou 2
     \label{fig:execucion-probas-flutter}
 \end{figure}
 
+
+%===================================================================================================================================================
 \section{Comprobacións en dispositivos Android}
+%===================================================================================================================================================
 
 As probas automatizadas non permiten reproducir completamente determinadas funcionalidades que dependen do sistema operativo ou da interacción entre dispositivos. Por este motivo realizáronse tamén probas manuais sobre os principais fluxos da aplicación.
 
@@ -336,16 +350,15 @@ Estas probas complementan a cobertura automatizada, especialmente nas funcionali
 
 A Figura~\ref{fig:proba-vinculacion} mostra unha das comprobacións realizadas durante o proceso de vinculación entre paciente e supervisor mediante código \gls{qr}.
 
- \begin{figure}[htbp]
-     \centering
-     \includegraphics[width=0.5\textwidth]{imaxes/09-Probas/anexo/vinculación-correcta.jpg}
-     \caption{Proba da vinculación entre paciente e supervisor}
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\textwidth]{imaxes/09-Probas/anexo/vinculación-correcta.jpg}
+    \caption{Proba da vinculación entre paciente e supervisor.}
     \label{fig:proba-vinculacion}
- \end{figure}
+\end{figure}
 
 
-Tamén se comprobou a recepción real dos avisos xerados pola aplicación no sistema de notificacións de Android.
-
+Tamén se comprobou a recepción real dos avisos xerados pola aplicación no sistema de notificacións de Android, como se mostra na Figura~\ref{fig:proba-notificacion}.
 
 \begin{figure}[htbp]
     \centering
@@ -361,7 +374,7 @@ Tamén se comprobou a recepción real dos avisos xerados pola aplicación no sis
 \end{figure}
 
 
-Finalmente, a sincronización entre os dous roles comprobouse realizando a toma dunha dose no dispositivo do paciente e verificando posteriormente a actualización da información no dispositivo da persoa supervisora. 
+Finalmente, a sincronización entre os dous roles comprobouse realizando a toma dunha dose no dispositivo do paciente e verificando posteriormente a actualización da información no dispositivo da persoa supervisora. O resultado desta comprobación móstrase na Figura~\ref{fig:proba-sincronizacion}.
 
 \begin{figure}[htbp]
     \centering
@@ -385,6 +398,4 @@ Finalmente, a sincronización entre os dous roles comprobouse realizando a toma 
 \end{figure}
 
 
-
 En conxunto, estas evidencias permiten complementar os resultados das probas automatizadas e verificar os fluxos que dependen directamente das funcionalidades proporcionadas polos dispositivos Android.
-

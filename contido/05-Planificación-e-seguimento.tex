@@ -8,58 +8,40 @@ Neste capítulo preséntase a organización temporal e económica do proxecto. E
 De acordo co enfoque incremental descrito no Capítulo \ref{chap:metodoloxia}, o proxecto organizouse en sete incrementos. Cada un deles produciu un resultado concreto sobre o que se puido continuar traballando:
 
 \begin{enumerate}
-    \item \textbf{Estudo da viabilidade e investigación de tecnoloxías de extracción automática:} Analizáronse as características das follas de tratamento, identificáronse os campos que debían ser extraídos e estudáronse  diferentes técnicas de visión artificial, recoñecemento óptico de caracteres e procesamento documental.
+    \item \textbf{Estudo da viabilidade e investigación de tecnoloxías de extracción automática (15 h):}
+    Analizáronse as características das follas de tratamento, identificáronse os campos que debían ser extraídos e estudáronse diferentes técnicas de visión artificial, recoñecemento óptico de caracteres e procesamento documental.
     Este incremento permitiu comprender o problema, identificar as principais dificultades e determinar os requisitos básicos da solución.
 
-    \item \textbf{Experimentación e selección da tecnoloxía de extracción :}  Recompiláronse follas de tratamento que se empregaron para probar as distintas tecnoloxías. As probas permitiron comparar a calidade da extracción, o esforzo necesario para preparar os datos, a facilidade de integración e as limitacións de cada alternativa. A partir destes resultados seleccionouse a tecnoloxía máis adecuada para continuar o proxecto.
+    \item \textbf{Experimentación e selección da tecnoloxía de extracción (45 h):}
+    Recompiláronse follas de tratamento que se empregaron para probar as distintas tecnoloxías. As probas permitiron comparar a calidade da extracción, o esforzo necesario para preparar os datos, a facilidade de integración e as limitacións de cada alternativa. A partir destes resultados seleccionouse a tecnoloxía máis adecuada para continuar o proxecto.
 
-    \item \textbf{Primeira versión da API :} Desenvolveuse unha \gls{api} sinxela capaz de recibir informes, invocar ao servizo de extracción, procesar o resultado e devolver os datos estruturados en formato \gls{json}.
+    \item \textbf{Primeira versión da API (35 h):}
+    Desenvolveuse unha \gls{api} sinxela capaz de recibir informes, invocar ao servizo de extracción, procesar o resultado e devolver os datos estruturados en formato \gls{json}.
 
     O obxectivo deste incremento foi obter unha proba de concepto funcional que permitise comprobar a comunicación co servizo de extracción e a transformación dos datos devoltos.
 
-    \item \textbf{Reorganización da API por capas :} Unha vez comprobado o funcionamento da primeira versión, a \gls{api} reorganizouse para separar os puntos de entrada, a lóxica de negocio, os modelos de datos e as dependencias externas.
+    \item \textbf{Reorganización da API por capas (20 h):}
+    Unha vez comprobado o funcionamento da primeira versión, a \gls{api} reorganizouse para separar os puntos de entrada, a lóxica de negocio, os modelos de datos e as dependencias externas.
 
-    %TODO: permitiu comprobar os seus compoñentes por separado
     Esta reorganización facilitou o mantemento, a realización de probas e a posible substitución dalgún dos servizos externos no futuro. Neste incremento incorporáronse tamén probas unitarias e probas de integración dos \textit{endpoints}.
 
-    \item \textbf{Primeira versión da aplicación Flutter :} Creouse a estrutura do proxecto Flutter e implementáronse progresivamente a configuración inicial, as modalidades de paciente e supervisor, a persistencia local, a captura de informes, a visualización da pauta, o calendario e a confirmación das tomas.
+    \item \textbf{Primeira versión da aplicación Flutter (100 h):}
+    Creouse a estrutura do proxecto Flutter e implementáronse progresivamente a configuración inicial, as modalidades de paciente e supervisor, a persistencia local, a captura de informes, a visualización da pauta, o calendario e a confirmación das tomas.
 
     As funcionalidades da aplicación dividíronse en tarefas independentes para facilitar a súa implementación e revisión.
 
-    \item \textbf{Integración e estabilización :} Levouse a cabo a conexión completa da aplicación coa \gls{api} e cos servizos de Firebase, unificando os distintos fluxos de navegación. Durante esta fase completouse a vinculación entre paciente e supervisor, a sincronización da información e o sistema de recordatorios. Unha vez conectados os compoñentes de forma progresiva, o sistema estabilizouse mediante a análise estática do código e a execución de probas unitarias, de \textit{widgets} e de uso en dispositivos reais. Por último, corrixíronse os erros detectados nos casos de uso principais e realizáronse os axustes necesarios para garantir un correcto funcionamento.
+    \item \textbf{Integración e estabilización (35 h):}
+    Levouse a cabo a conexión completa da aplicación coa \gls{api} e cos servizos de Firebase, unificando os distintos fluxos de navegación. Durante esta fase completouse a vinculación entre paciente e supervisor, a sincronización da información e o sistema de recordatorios. Unha vez conectados os compoñentes de forma progresiva, o sistema estabilizouse mediante a análise estática do código e a execución de probas unitarias, de \textit{widgets} e de uso en dispositivos reais. Por último, corrixíronse os erros detectados nos casos de uso principais e realizáronse os axustes necesarios para garantir un correcto funcionamento.
 
-    \item  \textbf{Documentación e entrega:} O último incremento abrangueu a revisión final da memoria, a elaboración dos diagramas definitivos e a preparación da presentación e dos materiais necesarios para a entrega.
+    \item \textbf{Documentación e entrega (50 h):}
+    O último incremento abrangueu a revisión final da memoria, a elaboración dos diagramas definitivos e a preparación da presentación e dos materiais necesarios para a entrega.
 \end{enumerate}
 
-% Resumo da planificación inicial
-A planificación inicial comezou o 15 de outubro de 2025 e distribuíu as 300 horas do proxecto entre sete incrementos. A Táboa~\ref{tab:horas-planificacion-inicial} resume a dedicación prevista para cada un. Como data interna de finalización do proxecto fixouse o 31 de xullo de 2026, co obxectivo de ter rematados tanto o desenvolvemento como a memoria. A data oficial de entrega mantívose no 11 de setembro de 2026. A planificación inicial completa represéntase no diagrama de Gantt da Figura~\ref{fig:gantt-planificacion-inicial}.
+A planificación inicial comezou o 15 de outubro de 2025 e distribuíu un total de 300 horas entre os sete incrementos descritos anteriormente. Como data interna de finalización do proxecto fixouse o 31 de xullo de 2026, co obxectivo de ter rematados tanto o desenvolvemento como a memoria. A data oficial de entrega mantívose no 11 de setembro de 2026. A planificación temporal completa represéntase no diagrama de Gantt da Figura~\ref{fig:gantt-planificacion-inicial}.
 
-\begin{table}[htbp]
+\begin{figure}[h]
     \centering
-    \renewcommand{\arraystretch}{1.2}
-    \caption{Distribución inicial da dedicación estimada por incremento.}
-    \label{tab:horas-planificacion-inicial}
-    \small 
-    \begin{tabular}{lr}
-        \toprule
-        \textbf{Incremento} & \textbf{Horas previstas} \\
-        \midrule
-        Viabilidade e investigación & 15 \\
-        Experimentación e selección & 45 \\
-        API inicial & 35 \\
-        API por capas & 20 \\
-        Aplicación Flutter & 100 \\
-        Integración e estabilización & 35 \\
-        Documentación e entrega & 50 \\
-        \midrule
-        \textbf{Total} & \textbf{300} \\
-        \bottomrule
-    \end{tabular}
-\end{table}
-
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{imaxes/05-Planificacion/gantt-inicial-compacto.drawio.png}
+    \includegraphics[width=0.75\textwidth]{imaxes/05-Planificacion/gantt-inicial-compacto.drawio.png}
     \caption{Diagrama de Gantt da planificación inicial do proxecto.}
     \label{fig:gantt-planificacion-inicial}
 \end{figure}
@@ -73,7 +55,7 @@ Tal e como se indicou no Capítulo~\ref{chap:metodoloxia}, o control do avance d
 
 Á par desta actualización do calendario, tamén se reavaliou o esforzo necesario. A medida que se avanzaba nas tarefas e se resolvían os primeiros imprevistos, fíxose evidente que a estimación inicial de 300 horas non sería suficiente. Tras revisar a carga de traballo realizada, o historial de confirmacións (\textit{commits}) no repositorio e as métricas do taboleiro Kanban, a dedicación final fixouse nun total de 390 horas (Táboa~\ref{tab:comparacion-horas}). 
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \renewcommand{\arraystretch}{1.2}
     \caption{Comparación entre a dedicación inicial e a dedicación final por incremento.}
@@ -116,7 +98,7 @@ Como consecuencia, non se acadou o obxectivo interno de ter o proxecto practicam
 
 \begin{figure}[p]
   \centering
-   \includegraphics[width=\linewidth]{imaxes/05-Planificacion/gantt-revisado-compacto.drawio.png}
+   \includegraphics[width=0.75\linewidth]{imaxes/05-Planificacion/gantt-revisado-compacto.drawio.png}
    \caption{Diagrama de Gantt da planificación final do proxecto.}
    \label{fig:gantt-final}
 \end{figure}
@@ -136,7 +118,7 @@ Para valorar o esforzo económico do proxecto, tomouse como base o salario dun p
 
 A Táboa~\ref{tab:custos-perfis} distribúe o custo entre os perfís funcionais asumidos, todos eles desempeñados pola mesma persoa.
 
-\begin{table}[htbp]
+\begin{table}[h]
     \centering
     \small
     \renewcommand{\arraystretch}{1.2}

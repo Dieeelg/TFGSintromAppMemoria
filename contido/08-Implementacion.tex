@@ -4,6 +4,8 @@
 Neste capítulo descríbese a implementación da solución, diferenciando a \gls{api} e o cliente móbil. Os detalles técnicos máis específicos recóllense no Apéndice \ref{app:detalles-implementacion}.
 
 \section{Implementación da API}
+
+A \gls{api} implementouse con FastAPI e dividiuse en módulos con responsabilidades ben diferenciadas (Figura~\ref{fig:estrutura-api}). O directorio \textit{routers} contén os endpoints, \textit{internal} agrupa a lóxica de procesamento e preprocesamento, \textit{schemas} define os modelos de Pydantic e \textit{dependencies} xestiona a inicialización dos servizos externos. Finalmente, \textit{main.py} crea a aplicación e rexistra os distintos grupos de rutas mediante \textit{include\_router}.
 A \gls{api} implementouse con FastAPI e dividiuse en módulos con responsabilidades ben diferenciadas. O directorio \textit{routers} contén os endpoints, \textit{internal} agrupa a lóxica de procesamento e preprocesamento, \textit{schemas} define os modelos de Pydantic e \textit{dependencies} xestiona a inicialización dos servizos externos. Finalmente, \textit{main.py} crea a aplicación e rexistra os distintos grupos de rutas mediante \textit{include\_router}.
 
 \begin{figure}[htbp]

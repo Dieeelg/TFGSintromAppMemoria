@@ -29,11 +29,11 @@ A estas capas engádese un conxunto de \textbf{servizos} encargados de encapsula
 A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes principais, cuxa organización se mostra na Figura~\ref{fig:paquetes-cliente}:
 
 \begin{itemize}
-    \item \textbf{\textit{views}} e \textbf{\textit{modelos\_vista}} conteñen, respectivamente, as pantallas e os modelos de vista asociados ás distintas funcionalidades.
+    \item \textbf{\textit{views}} e \textbf{\textit{modelos\_vista}} conteñen, respectivamente, as pantallas e os modelos de vista asociados ás distintas funcionalidades, cuxa estrutura se representa nas Figuras~\ref{fig:clases-presentacion-paciente} e~\ref{fig:clases-presentacion-supervisor}.
 
     \item \textbf{\textit{modelos}} agrupa as entidades e estruturas de datos empregadas pola aplicación.
 
-    \item \textbf{\textit{servizos}} reúne as operacións de acceso á \gls{api}, a persistencia, as notificacións, o almacenamento seguro e a sincronización.
+    \item \textbf{\textit{servizos}} reúne as operacións de acceso á \gls{api}, a persistencia, as notificacións, o almacenamento seguro e a sincronización, cuxa organización se mostra na Figura~\ref{fig:clases-servizos-cliente}.
 
     \item \textbf{\textit{compoñentes}} contén elementos visuais reutilizables por distintas pantallas.
 
@@ -59,6 +59,13 @@ A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes
     \includegraphics[width=\textwidth]{imaxes/07-Deseño/diagrama_clases_servizos.drawio.png}
     \caption{Modelo de clases dos servizos do cliente móbil.}
     \label{fig:clases-servizos-cliente}
+\end{figure}
+
+\begin{figure}[h]
+    \centering
+        \includegraphics[width=0.40\textwidth]{imaxes/07-Deseño/anexo/01_estrutura_paquetes_cliente (2).drawio.png}
+        \caption{Estrutura de paquetes do cliente móbil.}
+        \label{fig:paquetes-cliente}
 \end{figure}
 
 \subsection{Arquitectura da API}
@@ -118,27 +125,11 @@ A comunicación co cliente realízase mediante un conxunto de contratos \gls{res
     \end{tabularx}
 \end{table}
 
-
 \begin{figure}[h]
-    \centering
-    % Subfigura A (esquerda)
-    \begin{subfigure}[b]{0.40\textwidth}
         \centering
-        \includegraphics[width=\textwidth]{imaxes/07-Deseño/anexo/01_estrutura_paquetes_cliente (2).drawio.png}
-        \caption{Estrutura de paquetes do cliente móbil.}
-        \label{fig:paquetes-cliente}
-    \end{subfigure}
-    \hfill % Isto empurra a segunda imaxe cara á dereita para poñela na mesma liña
-    % Subfigura B (dereita)
-    \begin{subfigure}[b]{0.40\textwidth}
-        \centering
-        \includegraphics[width=\textwidth]{imaxes/07-Deseño/anexo/02_estrutura_modulos_api.drawio.png}
+        \includegraphics[width=0.40\textwidth]{imaxes/07-Deseño/anexo/02_estrutura_modulos_api.drawio.png}
         \caption{Organización interna dos módulos da API.}
         \label{fig:modulos-api}
-    \end{subfigure}
-    
-    \caption{Organización interna dos compoñentes da solución.}
-    \label{fig:componentes}
 \end{figure}
 
 \section{Modelo de datos e persistencia}
@@ -256,7 +247,7 @@ Deste xeito,a \gls{api} participa no transporte das mensaxes sen necesitar almac
 
 \subsection{Seguimento dunha toma diaria}
 
-Cada dose da pauta activa permanece inicialmente en estado pendente e pode ser confirmada como realizada durante todo o día correspondente. Cando chega a hora configurada para realizar a toma, a aplicación envía unha notificación a modo de recordatorio. Se a persoa usuaria confirma a inxesta, o seu estado actualízase en función do momento no que se realizou. Se ao finalizar o día non se produciu ningunha confirmación, a toma pasa a considerarse non realizada. Deste xeito, o sistema distingue entre unha toma pendente, unha toma realizada, unha toma realizada fóra da hora prevista e unha toma non realizada.
+Cada dose da pauta activa permanece inicialmente en estado pendente e pode ser confirmada como realizada durante todo o día correspondente. Cando chega a hora configurada para realizar a toma, a aplicación envía unha notificación a modo de recordatorio. Se a persoa usuaria confirma a inxesta, o seu estado actualízase en función do momento no que se realizou. Se ao finalizar o día non se produciu ningunha confirmación, a toma pasa a considerarse non realizada. Deste xeito, o sistema distingue entre unha toma pendente, unha toma realizada, unha toma realizada fóra da hora prevista e unha toma non realizada, tal e como se representa na Figura~\ref{fig:anexo-estados-toma}.
 
 Cando existe unha vinculación activa, os cambios relevantes no estado dunha toma poden comunicarse ao dispositivo asociado. Desta forma, o seguimento local e a supervisión remota manteñen unha visión coherente da situación máis recente dispoñible.
 
@@ -267,17 +258,6 @@ A Figura~\ref{fig:anexo-fluxo-toma} mostra as interaccións principais deste pro
     \caption{Fluxo de seguimento dunha toma diaria.}
     \label{fig:anexo-fluxo-toma}
 \end{figure}
-
-\subsection{Estados dunha toma}
-
-O seguimento diario dunha dose prescrita pódese representar mediante catro estados principais:
-
-\begin{itemize}
-    \item \textbf{Pendente:} Estado inicial no que se atopa calquera nova dose antes da súa confirmación. Cando chega a hora configurada, a aplicación emite un recordatorio e programa un segundo aviso aos trinta minutos se a dose continúa sen confirmar. Este horario serve de referencia para os avisos, pero non limita o momento en que a persoa usuaria pode rexistrar a toma durante o día.
-    \item \textbf{Tomada:} Estado que adquire a dose cando a persoa usuaria confirma a inxesta antes ou na hora habitual prevista.
-    \item \textbf{Tomada fóra de hora:} Estado asignado cando a confirmación se realiza unha vez superada a hora habitual da toma.
-    \item \textbf{Non tomada:} Estado definitivo que acada a dose se remata a xornada sen que se rexistrase ningunha confirmación.
-\end{itemize}
 
 \begin{figure}[htbp]
     \centering
@@ -313,7 +293,7 @@ O primeiro acceso á aplicación comeza coa selección do rol, decisión que det
 
 Antes da implementación elaboráronse en Figma distintos wireframes co obxectivo de definir a distribución da información e comprobar os principais percorridos da aplicación. Estes deseños serviron como referencia inicial para a construción das pantallas, aínda que algúns elementos foron modificados durante o desenvolvemento.
 
-Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes máis representativos, correspondentes á selección do tipo de usuario, á pantalla principal do paciente, á incorporación dunha nova folla e á pantalla principal do supervisor. O conxunto completo de wireframes, incluíndo as pantallas de vinculación, revisión da pauta, confirmación das tomas, progreso, calendario e configuración, recóllese na Sección~\ref{app:wireframes}.
+Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes máis representativos, correspondentes á selección do tipo de usuario, á pantalla principal do paciente, á incorporación dunha nova folla e á pantalla principal do supervisor. Ademais, a Figura~\ref{fig:wireframes-modo-sinxelo} recolle os wireframes asociados ao modo sinxelo, deseñado para reducir a cantidade de información e facilitar o acceso ás funcións principais. O conxunto completo de wireframes, incluíndo as pantallas de vinculación, revisión da pauta, confirmación das tomas, progreso, calendario e configuración, recóllese na Sección~\ref{app:wireframes}.
 
 \begin{figure}[htbp]
     \centering
@@ -322,4 +302,19 @@ Na Figura~\ref{fig:wireframes-principais} móstranse algúns dos wireframes mái
     \label{fig:wireframes-principais}
 \end{figure}
 
+\begin{figure}[htbp]
+    \centering
 
+    \begin{subfigure}[t]{0.23\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/07-Deseño/anexo/wireframes/mock_sinxelo.png}
+    \end{subfigure}
+    \hspace{0.04\textwidth}
+    \begin{subfigure}[t]{0.23\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{imaxes/07-Deseño/anexo/wireframes/mock_sinxelo2.png}
+    \end{subfigure}
+
+    \caption{Wireframes representativos do modo sinxelo da aplicación.}
+    \label{fig:wireframes-modo-sinxelo}
+\end{figure}

@@ -1,238 +1,361 @@
 \chapter{Casos de uso detallados}
 \label{app:casos-uso}
 
-Este apéndice recolle a especificación detallada dos casos de uso representados na Figura~\ref{fig:diagrama-casos-uso} do Capítulo~\ref{chap:Analise}. Para cada caso indícanse o obxectivo, os actores participantes, o disparador, as precondicións, as postcondicións e os fluxos que pode seguir a interacción.
+Este apéndice recolle a especificación detallada dos casos de uso
+representados na Figura~\ref{fig:diagrama-casos-uso} do
+Capítulo~\ref{chap:Analise}. Para cada caso indícanse o obxectivo,
+os actores participantes, o disparador, as precondicións,
+as postcondicións e os fluxos que pode seguir a interacción.
+
 
 % ============================================================
 % CU-01
 % ============================================================
 
-\section{CU-01: Configurar o perfil inicial}
+\section{CU-01: Configurar a aplicación por primeira vez}
 \label{cu:configuracion-inicial}
 
 \begin{description}
-\item[Obxectivo:] Preparar unha instalación nova para empregala como paciente ou como supervisor.
+
+\item[Obxectivo:] Preparar unha instalación nova da aplicación para que poida
+empregarse como paciente ou como supervisor.
+
 \item[Actor principal:] Paciente ou supervisor.
-\item[Actores secundarios:] Firebase Authentication e o sistema de notificacións do dispositivo.
-\item[Disparador:] A persoa usuaria abre a aplicación nunha instalación na que a configuración aínda non foi finalizada.
-\item[Precondicións:] A aplicación está instalada. É necesaria conexión á rede para a autenticación anónima.
+
+\item[Actor secundario:] Firebase Authentication.
+
+\item[Disparador:] A persoa usuaria abre a aplicación por primeira vez ou nunha
+instalación na que a configuración aínda non foi finalizada.
+
+\item[Precondicións:] A aplicación está instalada e existe conexión á rede para
+realizar a autenticación anónima.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación inicializa Firebase, configura a recepción de mensaxes e
-    solicita os permisos das notificacións locais.
-    \item Comproba que non existe o indicador de configuración finalizada e
-    mostra a pantalla de benvida.
-    \item A persoa escolle entre xestionar o seu tratamento (paciente) ou axudar
-    a outra persoa (supervisor).
-    \item A aplicación inicia unha sesión anónima en Firebase Authentication e
-    garda localmente o rol.
-    \item Se se escolle paciente, mostra a vinculación. O paciente pode completar
-    o CU-02 ou saltar ese paso.
-    \item O paciente indica opcionalmente o nome e selecciona a hora habitual.
-    A aplicación garda os datos, programa os recordatorios aplicables e marca a
-    configuración como finalizada.
-    \item Se se escolle supervisor, abre o lector de QR. A configuración só se
-    marca como finalizada tras completar unha primeira vinculación no CU-02.
-    \item Ábrese a pantalla principal correspondente ao rol.
+    \item A aplicación comproba que a configuración inicial aínda non foi
+    finalizada e mostra a pantalla de benvida.
+
+    \item A persoa usuaria escolle se vai xestionar o seu propio tratamento,
+    actuando como paciente, ou o tratamento doutra persoa, actuando como
+    supervisor.
+
+    \item A aplicación realiza unha autenticación anónima mediante Firebase
+    Authentication.
+
+    \item Se a autenticación se completa correctamente, garda localmente o rol
+    seleccionado.
+
+    \item Se se escolle o rol de paciente, a aplicación mostra o proceso de
+    vinculación cun supervisor. O paciente pode completar o CU-02 ou saltar
+    este paso.
+
+    \item O paciente introduce, se o desexa, un nome e establece a hora habitual
+    da toma. A hora dispón inicialmente dun valor predefinido e pode ser
+    modificada.
+
+    \item A aplicación garda estes datos e marca a configuración do paciente
+    como finalizada.
+
+    \item Se se escolle o rol de supervisor, a aplicación abre directamente
+    o fluxo de vinculación do CU-02. Neste caso debe completarse unha primeira
+    vinculación antes de finalizar a configuración.
+
+    \item Unha vez finalizada a configuración, ábrese a pantalla principal
+    correspondente ao rol seleccionado.
 \end{enumerate}
-\item[Fluxos alternativos:] Se falla a autenticación anónima, móstrase un erro e
-non se avanza. O paciente pode empregar \emph{Saltar vinculación}; o supervisor
-non pode omitir a primeira vinculación. Se falla o gardado dos datos adicionais
-do paciente, a configuración non queda finalizada.
-\item[Postcondicións:] Quedan gardados o rol e o estado de configuración. No
-paciente tamén se gardan a hora e, se se indicou, o nome; no supervisor queda
-gardada a primeira vinculación. As seguintes aperturas van directamente á
-pantalla principal do rol.
-\item[Requisitos relacionados:] RF-01 e RF-02.
+
+\item[Fluxos alternativos:] Se falla a autenticación anónima, móstrase unha
+mensaxe de erro e non se continúa coa configuración. O paciente pode saltar a
+vinculación inicial e utilizar a aplicación de maneira autónoma. O supervisor
+non pode completar a súa configuración inicial sen vincular polo menos un
+paciente.
+
+\item[Postcondicións:] O rol queda almacenado no dispositivo e a instalación
+queda preparada para acceder á pantalla principal correspondente. No caso do
+paciente tamén quedan gardados a hora habitual da toma e, se se indicou, o nome.
+
+\item[Requisitos relacionados:] RF-01, RF-02 e RF-03.
+
 \end{description}
+
 
 % ============================================================
 % CU-02
 % ============================================================
 
-\section{CU-02: Vincular un paciente e un supervisor}
+\section{CU-02: Vincular paciente e supervisor}
 \label{cu:vincular-paciente-supervisor}
 
 \begin{description}
-\item[Obxectivo:] Crear unha relación entre dous dispositivos para compartir de
-forma protexida o estado do tratamento e permitir que o supervisor envíe follas
-ao paciente.
+
+\item[Obxectivo:] Establecer unha relación segura entre o dispositivo dun
+paciente e o dunha persoa supervisora para permitir o intercambio de información
+relacionada co seguimento do tratamento.
+
 \item[Actores principais:] Paciente e supervisor.
-\item[Actores secundarios:] API de SintromApp, Firebase Cloud Messaging e
-cámara do dispositivo do supervisor.
-\item[Disparador:] O paciente mostra un QR e o supervisor escolle vincular un
-paciente.
-\item[Precondicións:] Ambos iniciaron sesión anónima e teñen o rol correcto.
-Dispoñen de conexión, o supervisor pode usar a cámara e a API está dispoñible.
+
+\item[Actor secundario:] Firebase Cloud Messaging.
+
+\item[Disparador:] O paciente decide mostrar o seu código QR e o supervisor
+inicia a vinculación dun paciente.
+
+\item[Precondicións:] Ambos dispositivos dispoñen dunha sesión anónima e dos
+roles correspondentes. É necesaria conexión á rede e o supervisor debe poder
+utilizar a cámara do dispositivo.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item O paciente obtén o seu identificador e o token de mensaxería.
-    \item Xera un identificador de vinculación e unha clave provisional,
-    gárdaa no almacenamento seguro e crea o QR.
-    \item O supervisor abre o lector e escanea o código.
-    \item A súa aplicación comproba a dispoñibilidade da API e valida a versión,
-    os campos e a clave do QR.
-    \item O supervisor xera unha clave permanente e obtén o seu identificador e
-    o seu token.
-    \item Cifra coa clave provisional unha mensaxe que contén eses datos e a
-    clave permanente, e a API remítea por Firebase ao paciente.
-    \item Se Firebase acepta o envío, o supervisor garda a vinculación e crea o
-    rexistro local do paciente.
-    \item O paciente descifra a mensaxe, valida os datos e substitúe a relación
-    pendente pola vinculación permanente.
-    \item O paciente envía ao novo supervisor o seu estado completo. A pantalla
-    detecta a vinculación e habilita a continuación.
+    \item O dispositivo do paciente obtén o seu identificador e o token necesario
+    para recibir mensaxes.
+
+    \item A aplicación xera os datos de vinculación e crea un código QR que os
+    representa.
+
+    \item O paciente mostra o código QR ao supervisor.
+
+    \item O supervisor abre o lector da aplicación e escanea o código QR.
+
+    \item A aplicación comproba que o servizo necesario para realizar a
+    comunicación está dispoñible e valida os datos recibidos.
+
+    \item O dispositivo do supervisor obtén os seus datos de identificación e
+    xera a información criptográfica necesaria para establecer a vinculación
+    definitiva.
+
+    \item O supervisor envía ao dispositivo do paciente unha mensaxe de
+    vinculación protexida mediante a información contida no QR.
+
+    \item O paciente recibe a mensaxe, comproba a súa validez e completa a
+    vinculación segura.
+
+    \item Ambos dispositivos gardan localmente a información necesaria para
+    identificar a relación establecida.
+
+    \item O paciente envía ao novo supervisor un resumo actualizado do seu estado
+    para inicializar o seguimento.
 \end{enumerate}
-\item[Fluxos alternativos:] Se a API non responde, o QR é incompatible,
-incompleto, foi substituído por outro, non pode descifrarse ou falta algún token,
-a vinculación non se completa. Tampouco se garda no supervisor se Firebase non
-acepta o envío inicial. Se non pode utilizarse a cámara, non se le o QR. O
-paciente pode continuar sen supervisor.
-\item[Postcondicións:] Ambos dispositivos conservan unha vinculación co mesmo
-identificador e clave permanente. O supervisor ten un rexistro local do paciente
-e o QR usado deixa de ter unha clave pendente válida no paciente.
-\item[Requisitos relacionados:] RF-03, RF-04 e RF-05.
+
+\item[Fluxos alternativos:] Se non se pode obter algún dos identificadores ou
+tokens necesarios, o código QR non é válido, a conexión non está dispoñible ou
+non se pode entregar a mensaxe inicial, a vinculación non se completa. O
+paciente pode xerar novamente o código e o supervisor pode repetir o escaneo.
+Durante a configuración inicial, o paciente tamén pode continuar sen establecer
+unha vinculación.
+
+\item[Postcondicións:] Os dous dispositivos conservan unha relación segura que
+permite intercambiar información. Un paciente pode manter varias persoas
+supervisoras vinculadas e un supervisor pode manter varios pacientes.
+
+\item[Requisitos relacionados:] RF-04, RF-05, RF-19 e RF-24.
+
 \end{description}
+
 
 % ============================================================
 % CU-03
 % ============================================================
 
-\section{CU-03: Configurar as preferencias do paciente}
+\section{CU-03: Configurar preferencias}
 \label{cu:configurar-preferencias}
 
 \begin{description}
-\item[Obxectivo:] Gardar o nome opcional, a hora habitual da toma e o modo de
-visualización.
+
+\item[Obxectivo:] Permitir ao paciente modificar as preferencias empregadas
+durante o seguimento do tratamento.
+
 \item[Actor principal:] Paciente.
-\item[Actores secundarios:] Sistema de notificacións locais. Firebase Cloud
-Messaging intervén cando existen vinculacións.
-\item[Disparador:] O paciente completa a configuración inicial ou abre os
-axustes.
-\item[Precondicións:] A aplicación está configurada como paciente. Para
-compartir os cambios debe haber un supervisor vinculado e conexión.
+
+\item[Actor secundario:] Firebase Cloud Messaging, cando existen supervisores
+vinculados.
+
+\item[Disparador:] O paciente accede á pantalla de axustes da aplicación.
+
+\item[Precondicións:] A aplicación está configurada co rol de paciente.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación mostra o nome, a hora e, nos axustes, o modo sinxelo.
-    \item O paciente pode cambiar ou eliminar o nome, seleccionar unha hora e
-    activar ou desactivar o modo sinxelo.
-    \item Para desactivar o modo sinxelo, a aplicación pide confirmación.
-    \item O paciente preme \emph{Gardar cambios}.
-    \item A aplicación garda a hora e o modo. Se o nome está baleiro, elimina a
-    clave correspondente; noutro caso, gárdao sen espazos nos extremos.
-    \item Cancela e volve programar os recordatorios segundo a nova hora.
-    \item Envía aos supervisores vinculados un estado completo actualizado.
-    \item A pantalla principal recarga as preferencias.
+    \item A aplicación carga o nome gardado, a hora habitual da toma e o estado
+    do modo sinxelo.
+
+    \item O paciente pode modificar o nome, que é opcional.
+
+    \item O paciente pode seleccionar unha nova hora habitual para a toma.
+
+    \item O paciente pode activar ou desactivar o modo sinxelo.
+
+    \item Se solicita desactivar o modo sinxelo, a aplicación pide confirmación
+    antes de volver mostrar todas as opcións da interface.
+
+    \item O paciente confirma o gardado dos cambios.
+
+    \item A aplicación garda o nome, a hora e o estado do modo sinxelo. Se o nome
+    queda baleiro, non se conserva ningún nome asociado.
+
+    \item Os recordatorios locais das tomas son reprogramados segundo a nova
+    configuración.
+
+    \item Se existen supervisores vinculados, envíaselles o estado actualizado
+    do paciente.
+
+    \item Ao regresar á pantalla principal, a aplicación aplica as novas
+    preferencias.
 \end{enumerate}
-\item[Fluxos alternativos:] Se se cancela o selector de hora ou a desactivación
-do modo sinxelo, mantense o valor anterior. Saír sen gardar non aplica os
-cambios. Unha excepción no gardado ou na programación mostra un erro. Se unha
-mensaxe remota non se entrega, os cambios locais non se desfán nin se crea unha
-cola de reintentos.
-\item[Postcondicións:] As preferencias quedan no almacenamento seguro e os
-recordatorios reconstrúense. Os supervisores que reciban a mensaxe actualizan o
-nome e a hora.
-\item[Requisitos relacionados:] RF-06, RF-16 e RF-17.
+
+\item[Fluxos alternativos:] Se o paciente cancela a selección dunha nova hora,
+mantense a anterior. Se cancela a desactivación do modo sinxelo, este permanece
+activo. Se sae da pantalla sen gardar, os cambios non se aplican. Se non se pode
+comunicar a actualización aos supervisores, as preferencias gardadas localmente
+continúan sendo válidas.
+
+\item[Postcondicións:] As preferencias seleccionadas quedan almacenadas no
+dispositivo e os recordatorios quedan adaptados á hora configurada.
+
+\item[Requisitos relacionados:] RF-06, RF-18 e RF-19.
+
 \end{description}
+
 
 % ============================================================
 % CU-04
 % ============================================================
 
-\section{CU-04: Procesar unha folla de tratamento}
-\label{cu:procesar-folla}
+\section{CU-04: Dixitalizar unha folla de tratamento}
+\label{cu:dixitalizar-folla}
 
 \begin{description}
-\item[Obxectivo:] Extraer os datos estruturados dunha folla a partir dunha foto,
-dunha imaxe da galería ou dun PDF.
+
+\item[Obxectivo:] Obter automaticamente os datos estruturados dunha folla de
+tratamento a partir dun documento proporcionado pola persoa usuaria.
+
 \item[Actor principal:] Paciente ou supervisor.
-\item[Actores secundarios:] API de SintromApp, Azure AI Document Intelligence,
-cámara, galería e selector de ficheiros.
-\item[Disparador:] O paciente escolle engadir un informe ou o supervisor preme
-\emph{Escanear un novo informe} no detalle dun paciente.
-\item[Precondicións:] Hai conexión e a API está configurada. O actor dispón da
-folla. Se actúa un supervisor, abriu previamente un paciente vinculado.
+
+\item[Actor secundario:] Servizo de procesado automático de follas de
+tratamento.
+
+\item[Disparador:] O paciente escolle engadir unha nova folla ou o supervisor
+inicia o procesamento dunha folla para un paciente vinculado.
+
+\item[Precondicións:] Existe conexión á rede e o documento está dispoñible para
+ser fotografado ou seleccionado. Se o actor é un supervisor, debe existir un
+paciente vinculado seleccionado.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación ofrece sacar unha foto, escoller unha imaxe ou seleccionar
-    un PDF.
-    \item O actor captura ou escolle un ficheiro. As imaxes da cámara ou galería
-    solicítanse cunha calidade do 92\,\%.
-    \item O cliente envía o ficheiro á API mediante unha petición multipart.
-    \item A API comproba que o tipo sexa JPEG, PNG, HEIC, HEIF, PDF ou un fluxo
-    binario admitido.
-    \item Se é unha imaxe, intenta corrixir a perspectiva ou a inclinación cando
-    a detección é suficientemente fiable.
-    \item Envía o documento preparado ao modelo de Azure AI Document
-    Intelligence.
-    \item Comproba que haxa un documento, unha confianza global suficiente e
-    unha táboa de doses. Tamén valida o INR cando aparece e que a seguinte visita
-    non sexa anterior á data do informe.
-    \item A API transforma a cabeceira, a pauta e o historial nun JSON.
-    \item A aplicación crea o modelo interno e abre o CU-05. A nova pauta aínda
-    non se garda nin se envía.
+    \item A aplicación ofrece tres posibilidades: realizar unha fotografía,
+    seleccionar unha imaxe da galería ou escoller un ficheiro PDF.
+
+    \item A persoa usuaria selecciona unha das opcións e proporciona o documento.
+
+    \item A aplicación envía o ficheiro ao servidor para o seu procesamento.
+
+    \item O servidor comproba que o documento pode ser tratado e realiza, cando
+    corresponde, o preprocesamento necesario.
+
+    \item O documento é enviado ao servizo de procesado automático de follas de
+    tratamento.
+
+    \item O sistema comproba que o resultado obtido é suficientemente fiable e
+    que contén a información necesaria para reconstruír a pauta.
+
+    \item Os datos extraídos transfórmanse á estrutura empregada pola aplicación.
+
+    \item O cliente recibe a cabeceira da folla, a pauta de doses e o histórico
+    dispoñible.
+
+    \item A aplicación abre o CU-05 para que a persoa usuaria revise o resultado
+    antes de incorporalo ao tratamento.
 \end{enumerate}
-\item[Fluxos alternativos:] Cancelar o selector remata sen cambios. Un tipo non
-admitido, unha folla non detectada, pouca confianza, unha táboa ausente, datos
-incoherentes ou un fallo de rede producen unha mensaxe de erro. O actor pode
-repetir a captura ou seleccionar outro ficheiro e a pauta anterior non cambia.
-\item[Postcondicións:] O resultado queda en memoria para revisalo. A API non
-garda permanentemente a folla nin a resposta, e a pauta activa segue intacta.
-\item[Requisitos relacionados:] RF-07, RF-08, RF-09, RF-10, RF-19 e RF-21.
+
+\item[Fluxos alternativos:] Se a persoa usuaria cancela a captura ou selección,
+non se realiza ningún cambio. Se o formato non é admitido, o documento non pode
+ser procesado, non se detecta correctamente a información necesaria ou se
+produce un erro de conexión, móstrase unha mensaxe de erro e pode repetirse a
+operación con outro documento.
+
+\item[Postcondicións:] Os datos extraídos quedan dispoñibles temporalmente para
+a súa revisión. A pauta previamente gardada non se modifica.
+
+\item[Requisitos relacionados:] RF-08, RF-09, RF-10 e RF-21.
+
 \end{description}
+
 
 % ============================================================
 % CU-05
 % ============================================================
 
-\section{CU-05: Revisar e confirmar a pauta extraída}
+\section{CU-05: Revisar, corrixir e confirmar unha pauta}
 \label{cu:revisar-confirmar-pauta}
 
 \begin{description}
-\item[Obxectivo:] Comprobar o resultado e corrixir os campos editables antes de
-gardar a pauta ou enviala ao paciente.
+
+\item[Obxectivo:] Permitir comprobar e corrixir os datos extraídos antes de
+incorporar unha nova pauta ao dispositivo do paciente.
+
 \item[Actor principal:] Paciente ou supervisor.
-\item[Actor secundario:] Firebase Cloud Messaging cando hai dispositivos
-vinculados.
-\item[Disparador:] O CU-04 devolve unha folla estruturada.
-\item[Precondicións:] Existe un resultado en memoria. Se actúa o supervisor,
-está asociado ao token do paciente seleccionado.
+
+\item[Actor secundario:] Firebase Cloud Messaging, cando existen dispositivos
+vinculados implicados na operación.
+
+\item[Disparador:] Finaliza correctamente o procesamento dunha folla no CU-04.
+
+\item[Precondicións:] Existe un resultado da extracción pendente de revisión.
+Se o actor é un supervisor, a folla está asociada a un paciente vinculado.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación ordena e mostra os datos xerais, as doses ou controis e a
+    \item A aplicación ordena e mostra a información extraída da folla de
+    tratamento.
+
+    \item A persoa usuaria revisa as datas, as doses, os días de control e a
     seguinte visita.
-    \item O actor comproba a información. A cabeceira e o historial móstranse,
-    pero non se poden editar nesta pantalla.
-    \item Se detecta un erro, preme \emph{Non, corrixir datos}.
-    \item Pode cambiar a data dunha fila, indicar a dose, convertela en control,
-    eliminar ou engadir unha fila, desfacer a última eliminación e corrixir a
-    seguinte visita.
-    \item Ao premer \emph{Revisar correccións}, compróbase que exista algunha
-    fila; que as datas sexan válidas e únicas; que cada día non marcado como
-    control teña unha dose numérica, decimal ou fraccionaria válida; e que a
-    visita, se existe, sexa unha data válida.
-    \item O actor volve á revisión e confirma gardar ou enviar. A aplicación
-    repite a validación e ordena a pauta.
-    \item Se é paciente, substitúe nunha transacción a cabeceira, a pauta e o
-    historial locais. Se é exactamente a mesma folla, conserva os estados e
-    horas xa rexistrados nas datas coincidentes.
-    \item O paciente reconstrúe os recordatorios e notifica un
-    \texttt{NOVO\_INFORME} aos supervisores.
-    \item Se é supervisor, divide o informe en fragmentos cifrados e envíaos ao
-    paciente. Este só recompón e garda a folla ao recibir todos os fragmentos;
-    despois programa os recordatorios e informa os seus supervisores.
+
+    \item Se detecta algún erro, accede ao modo de corrección.
+
+    \item A persoa usuaria pode modificar a data ou a dose dunha fila, indicar
+    se corresponde a un control, engadir ou eliminar filas e modificar a data
+    da seguinte visita.
+
+    \item Se elimina unha fila por erro, pode desfacer a eliminación.
+
+    \item A persoa usuaria finaliza as correccións.
+
+    \item A aplicación comproba que exista polo menos unha fila, que as datas
+    sexan válidas e non estean repetidas, que os días que non sexan de control
+    conteñan unha dose válida e que a seguinte visita teña unha data válida.
+
+    \item A persoa usuaria confirma definitivamente a pauta.
+
+    \item Se o actor é o paciente, a nova información substitúe a pauta local. Se se trata da mesma folla
+    xa existente, consérvanse os estados das tomas previamente rexistrados.
+
+    \item A aplicación reprograma os recordatorios aplicables e informa aos
+    supervisores vinculados da existencia da nova folla.
+
+    \item Se o actor é un supervisor, a pauta revisada non se garda como
+    tratamento propio do seu dispositivo. A información envíase cifrada ao
+    paciente vinculado.
+
+    \item O dispositivo do paciente recompón a información recibida e só a
+    incorpora cando dispón de todos os datos necesarios.
 \end{enumerate}
-\item[Fluxos alternativos:] Un erro de validación impide confirmar. Cancelar a
-edición restaura a última versión revisada; volver atrás non garda nin envía o
-resultado. Se falla o gardado local, móstrase un erro. Se actúa un supervisor e
-non hai clave segura ou falla un fragmento, non se mostra a operación como
-completada e o paciente non incorpora unha pauta incompleta.
-\item[Postcondicións:] Se confirma o paciente, a pauta queda activa localmente.
-Se confirma o supervisor, só queda activa cando o paciente recibe todos os
-fragmentos; non se garda como pauta propia do supervisor. Un fluxo cancelado non
-substitúe a pauta válida anterior.
-\item[Requisitos relacionados:] RF-10, RF-11, RF-17 e RF-19.
+
+\item[Fluxos alternativos:] Se a validación detecta algún erro, non se permite
+confirmar ata corrixilo. O actor pode cancelar as correccións e recuperar a
+última versión revisada. Se abandona a revisión sen confirmar, a pauta anterior
+permanece intacta. Se un supervisor non pode completar o envío ao paciente, a
+operación non se considera finalizada e non se incorpora unha pauta incompleta.
+
+\item[Postcondicións:] Se confirma o paciente, a pauta revisada queda gardada
+localmente. Se confirma un supervisor, a pauta queda gardada no dispositivo do
+paciente unha vez recibida completamente. Unha revisión cancelada non modifica
+a pauta existente.
+
+\item[Requisitos relacionados:] RF-11, RF-12, RF-13, RF-18, RF-19, RF-21 e
+RF-24.
+
 \end{description}
+
 
 % ============================================================
 % CU-06
@@ -242,276 +365,416 @@ substitúe a pauta válida anterior.
 \label{cu:consultar-tratamento}
 
 \begin{description}
-\item[Obxectivo:] Mostrar ao paciente a dose relevante e os datos principais da
-pauta local.
+
+\item[Obxectivo:] Permitir ao paciente consultar desde a pantalla principal a
+indicación correspondente ao tratamento, así como a pauta gardada e os datos
+do próximo control cando corresponda.
+
 \item[Actor principal:] Paciente.
-\item[Disparador:] O paciente abre ou recupera a pantalla principal.
-\item[Precondicións:] A aplicación está configurada como paciente. A consulta
-non require conexión.
+
+\item[Actor secundario:] Firebase Cloud Messaging, cando se comunica aos
+supervisores a existencia dunha nova toma esquecida.
+
+\item[Disparador:] O paciente accede á pantalla principal ou volve á aplicación.
+
+\item[Precondicións:] A aplicación está configurada co rol de paciente. A
+consulta da información xa almacenada localmente non require conexión á rede.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación marca como \texttt{NON\_TOMADA} as doses tomables de días
-    anteriores que continúan pendentes.
-    \item Carga a pauta, os estados e a cabeceira da base local.
-    \item Selecciona a fila de hoxe ou, se non existe, a primeira fila futura.
-    \item Mostra a dose; representa unha dose cero como \emph{NON} e un día de
-    control como \emph{CTRL}, xunto co seu estado.
-    \item No modo completo mostra tamén a secuencia da pauta, a seguinte visita
-    ou control e o centro, cando estes datos existen.
-    \item Se se pechou algunha toma vencida, envía aos supervisores un estado de
-    tipo \texttt{TOMA\_ESQUECIDA}.
+
+    \item Cárganse a pauta, os estados das tomas e os datos xerais da folla
+    almacenados localmente.
+
+    \item A aplicación busca a entrada correspondente ao día actual. Se non
+    existe, selecciona a primeira entrada futura dispoñible.
+
+    \item Se a entrada corresponde a unha toma, móstranse a dose, a data, a hora
+    habitual e o seu estado.
+
+    \item Se a entrada corresponde a un día de control, móstrase a información
+    do control no lugar dunha toma.
+
+    \item No modo normal móstranse ademais a pauta completa e os datos do próximo
+    control ou visita.
 \end{enumerate}
-\item[Fluxos alternativos:] Sen pauta móstranse valores baleiros e unha opción
-para escanear un informe. Se non hai fila de hoxe nin futura, non existe unha
-toma relevante. O modo sinxelo mostra só a toma e o acceso aos axustes. Un fallo
-remoto non impide consultar os datos locais.
-\item[Postcondicións:] A pauta médica non cambia. As tomas vencidas pendentes
-poden quedar marcadas como non tomadas.
-\item[Requisitos relacionados:] RF-12 e RF-17.
+
+\item[Fluxos alternativos:] Se non existe ningunha pauta gardada, móstrase unha
+mensaxe indicando que é necesario incorporar unha folla de tratamento e
+ofrécese acceso ao fluxo de dixitalización. Se non existe unha entrada para hoxe
+pero si existen entradas futuras, móstrase a primeira delas. Se non quedan
+entradas actuais nin futuras, indícase que non hai tomas pendentes. Se está
+activado o modo sinxelo, móstrase unicamente a información esencial da toma ou
+do control e ocúltanse a pauta, a información complementaria e a navegación
+inferior.
+
+\item[Postcondicións:] Ningunha.
+
+\item[Requisitos relacionados:] RF-14 e RF-19.
+
 \end{description}
+
 
 % ============================================================
 % CU-07
 % ============================================================
 
-\section{CU-07: Confirmar unha toma}
+\section{CU-07: Confirmar a toma do día}
 \label{cu:confirmar-toma}
 
 \begin{description}
-\item[Obxectivo:] Rexistrar a confirmación da dose de hoxe e a desviación
-respecto da hora habitual.
+
+\item[Obxectivo:] Rexistrar que o paciente realizou a toma correspondente ao día
+actual e conservar información sobre o momento no que foi confirmada.
+
 \item[Actor principal:] Paciente.
-\item[Actor secundario:] Firebase Cloud Messaging cando existen supervisores.
-\item[Disparador:] O paciente preme \emph{Confirmar toma}.
-\item[Precondicións:] Existe unha fila coa data de hoxe, é unha dose tomable
-distinta de cero, non é control e está en estado \texttt{PENDENTE}.
+
+\item[Actor secundario:] Firebase Cloud Messaging, cando existen supervisores
+vinculados.
+
+\item[Disparador:] O paciente preme a opción de confirmar a toma.
+
+\item[Precondicións:] Existe unha entrada correspondente ao día actual, contén
+unha dose que debe tomarse, non é un día de control e a toma continúa pendente.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación mostra un diálogo coa dose e pide confirmación.
-    \item O paciente confirma.
-    \item A aplicación obtén a hora do dispositivo e calcula os minutos de
-    diferenza respecto da hora habitual.
-    \item Se é posterior, asigna \texttt{TOMADA\_FORA\_HORA}; se é igual ou
-    anterior, asigna \texttt{TOMADA}.
-    \item Garda localmente o estado, o instante e a desviación.
-    \item Recarga a pantalla e as métricas derivadas.
-    \item Envía aos supervisores un estado completo que comunica a confirmación
-    da toma.
-    \item Cancela o aviso de toma sen confirmar desa xornada.
+    \item A aplicación mostra un diálogo coa dose que se vai rexistrar e solicita
+    confirmación.
+
+    \item O paciente confirma a operación.
+
+    \item A aplicación obtén a hora actual do dispositivo.
+
+    \item Calcúlase a diferenza en minutos respecto da hora habitual configurada.
+
+    \item Se a confirmación se realiza despois da hora habitual, a toma queda
+    identificada como realizada fóra de hora. En caso contrario queda
+    identificada como realizada.
+
+    \item Gárdanse localmente o estado da toma, o instante exacto da confirmación
+    e a desviación respecto da hora habitual.
+
+    \item A pantalla principal actualízase para mostrar o novo estado.
+
+    \item Se existen supervisores vinculados, envíaselles a actualización da
+    toma.
+
+    \item Cancélase o recordatorio posterior asociado a unha posible toma non
+    confirmada durante esa xornada.
 \end{enumerate}
-\item[Fluxos alternativos:] Cancelar o diálogo non escribe nada. O botón está
-desactivado cando a fila non é de hoxe, é control, ten dose cero ou xa non está
-pendente. A confirmación local non require conexión. Se o aviso remoto falla, a
-toma continúa confirmada; non hai unha cola local de reintentos, aínda que unha
-sincronización posterior pode actualizar o supervisor.
-\item[Postcondicións:] A fila queda como \texttt{TOMADA} ou
-\texttt{TOMADA\_FORA\_HORA}, coa hora e a desviación, e non pode confirmarse de
-novo desde a pantalla principal.
-\item[Requisitos relacionados:] RF-13 e RF-17.
+
+\item[Fluxos alternativos:] Se o paciente cancela o diálogo, non se realiza
+ningún cambio. A opción de confirmación non está dispoñible para días futuros,
+días de control, días nos que non corresponde tomar medicación ou tomas que xa
+non estean pendentes. Un fallo na comunicación cos supervisores non desfai a
+confirmación gardada localmente.
+
+\item[Postcondicións:] A toma queda rexistrada como realizada ou realizada fóra
+de hora, xunto coa hora exacta e a desviación correspondente.
+
+\item[Requisitos relacionados:] RF-15, RF-18 e RF-19.
+
 \end{description}
+
 
 % ============================================================
 % CU-08
 % ============================================================
 
-\section{CU-08: Consultar o calendario}
-\label{cu:consultar-calendario}
+\section{CU-08: Consultar calendario e cumprimento}
+\label{cu:consultar-calendario-cumprimento}
 
 \begin{description}
-\item[Obxectivo:] Presentar a pauta por meses, os estados e un resumo do
-cumprimento.
+
+\item[Obxectivo:] Permitir ao paciente visualizar a distribución temporal da
+pauta e consultar un resumo do seu cumprimento.
+
 \item[Actor principal:] Paciente.
-\item[Disparador:] O paciente abre \emph{O meu calendario}.
-\item[Precondicións:] A aplicación está configurada como paciente. Non require
-conexión.
+
+\item[Disparador:] O paciente accede á pantalla do calendario.
+
+\item[Precondicións:] A aplicación está configurada co rol de paciente. A
+consulta dos datos gardados non require conexión.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación pecha como \texttt{NON\_TOMADA} as doses tomables
-    anteriores que seguen pendentes.
-    \item Carga a pauta, os estados e a seguinte visita.
-    \item Agrupa as datas por mes e crea unha cuadrícula semanal por cada mes
-    presente na pauta.
-    \item Emprega cores diferentes para doses tomadas á hora, tomadas fóra de
-    hora, doses cero, tomas vencidas e demais entradas; os controis aparecen no
-    texto de axuda da data.
-    \item Mostra a seguinte visita e, se pode interpretar a data, os días que
-    faltan ou que pasaron.
-    \item Exclúe controis e doses non tomables. Conta os estados tomada e tomada
-    fóra de hora, as doses pasadas non confirmadas e calcula a porcentaxe sobre
-    esas tomas xa decididas.
+
+    \item Carga a pauta, os estados das tomas e a data da seguinte visita.
+
+    \item Agrupa as entradas da pauta polos meses aos que pertencen.
+
+    \item Mostra un calendario no que se diferencian as doses programadas, os
+    días sen toma, os días de control e os diferentes estados das tomas.
+
+    \item Móstrase a data da próxima cita.Indícase tamén cantos días faltan,
+    se a cita é hoxe ou se xa pasou.
+
+    \item A aplicación calcula o número de tomas realizadas.
+
+    \item Calcula o número de tomas correspondentes a días anteriores que non
+    foron confirmadas.
+
+    \item A partir destes valores calcula a porcentaxe de cumprimento e mostra
+    un resumo xunto cun indicador gráfico.
 \end{enumerate}
-\item[Fluxos alternativos:] Sen pauta indícase que non hai ningunha gardada. Sen
-visita válida non se calcula a distancia. Sen tomas decididas, a porcentaxe é
-cero. A vista non permite abrir o detalle dunha data nin modificar a pauta.
-\item[Postcondicións:] A pauta non cambia; as doses pasadas pendentes poden
-quedar marcadas como non tomadas.
-\item[Requisitos relacionados:] RF-14.
+
+\item[Fluxos alternativos:] Se non existe ningunha pauta gardada, indícase que
+non hai datos dispoñibles. Se non existe unha seguinte visita ou a súa data non
+pode ser interpretada, non se mostra o número de días restante. Se aínda non
+existen tomas realizadas nin esquecidas, a porcentaxe de cumprimento é cero.
+
+\item[Postcondicións:] Ningunha
+
+\item[Requisitos relacionados:] RF-16.
+
 \end{description}
+
 
 % ============================================================
 % CU-09
 % ============================================================
 
-\section{CU-09: Consultar a evolución}
+\section{CU-09: Consultar evolución do tratamento}
 \label{cu:consultar-evolucion}
 
 \begin{description}
-\item[Obxectivo:] Consultar a evolución do INR e da dose semanal e, para o
-paciente, as estatísticas horarias das tomas.
-\item[Actor principal:] Paciente ou supervisor.
-\item[Disparador:] O paciente abre \emph{O meu progreso} ou o supervisor entra
-no detalle dun paciente.
-\item[Precondicións:] O paciente dispón dos seus datos locais. O supervisor debe
-ter recibido previamente un resumo do paciente.
-\item[Fluxo principal do paciente:] \hfill
+
+\item[Obxectivo:] Permitir ao paciente consultar a evolución dos principais
+valores asociados ao tratamento e información sobre a puntualidade das tomas.
+
+\item[Actor principal:] Paciente.
+
+\item[Disparador:] O paciente accede á pantalla de progreso.
+
+\item[Precondicións:] A aplicación está configurada co rol de paciente. A
+consulta utiliza os datos almacenados localmente e non require conexión.
+
+\item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item Recupera o historial, a cabeceira e os rexistros de cumprimento.
+    \item A aplicación carga o histórico asociado ás follas de tratamento.
+
+    \item Recupera o INR actual e a dose semanal actual.
+
+    \item Recupera os rexistros das tomas que permiten analizar o seu
+    cumprimento horario.
+
     \item Mostra o INR e a dose semanal actuais.
-    \item Debuxa a evolución histórica e actual do INR e da dose semanal.
-    \item Calcula a media do valor absoluto das desviacións, conta as tomas fóra
-    de hora e mostra ata os cinco últimos rexistros coa hora e desviación.
+
+    \item Representa graficamente a evolución do INR utilizando os datos
+    históricos e o valor actual.
+
+    \item Representa graficamente a evolución da dose semanal.
+
+    \item Calcula a desviación media respecto da hora habitual das tomas para as
+    que existe esta información.
+
+    \item Conta o número de tomas confirmadas despois da hora habitual.
+
+    \item Mostra os rexistros recentes de confirmación xunto coa hora e a
+    desviación correspondente.
 \end{enumerate}
-\item[Fluxo principal do supervisor:] \hfill
-\begin{enumerate}
-    \item O supervisor abre un paciente da lista.
-    \item A aplicación le o último resumo local recibido.
-    \item Mostra o INR e a dose semanal actuais e as súas dúas gráficas.
-\end{enumerate}
-\item[Fluxos alternativos:] Sen valores numéricos, a gráfica indica que non hai
-datos. Sen confirmacións, a desviación media queda baleira. O supervisor non ve
-o detalle horario das tomas e esta consulta non solicita por si soa unha nova
-sincronización.
-\item[Postcondicións:] Non se modifica o tratamento.
-\item[Requisitos relacionados:] RF-15 e RF-18.
+
+\item[Fluxos alternativos:] Se non existen valores suficientes para construír
+algunha das gráficas, indícase que non hai datos suficientes. Se non existen
+rexistros con información horaria, a desviación media non se mostra.
+
+\item[Postcondicións:] A consulta non modifica a pauta nin os estados das tomas.
+
+\item[Requisitos relacionados:] RF-17.
+
 \end{description}
+
 
 % ============================================================
 % CU-10
 % ============================================================
 
-\section{CU-10: Xestionar os recordatorios}
-\label{cu:xestionar-recordatorios}
+\section{CU-10: Supervisar os pacientes vinculados}
+\label{cu:supervisar-pacientes}
 
 \begin{description}
-\item[Obxectivo:] Manter programados os avisos das doses futuras e retirar os
-que xa non proceden.
-\item[Actor principal:] Paciente.
-\item[Actor secundario:] Sistema de notificacións locais. O dispositivo do
-supervisor tamén crea avisos para pacientes a partir do estado sincronizado.
-\item[Disparador:] Finaliza a configuración, cambia a hora, incorpórase unha
-pauta, chega unha configuración remota ou se reinicia a aplicación.
-\item[Precondicións:] Existe unha hora válida. Cada aviso require unha dose
-tomable futura non pechada e permisos do sistema operativo.
+
+\item[Obxectivo:] Permitir ao supervisor consultar a relación dos seus pacientes
+vinculados e obter unha visión resumida do estado de cada un.
+
+\item[Actor principal:] Supervisor.
+
+\item[Actor secundario:] Firebase Cloud Messaging.
+
+\item[Disparador:] O supervisor accede á súa pantalla principal.
+
+\item[Precondicións:] A aplicación está configurada co rol de supervisor. Para
+actualizar os datos dos pacientes é necesaria conexión cos dispositivos
+vinculados.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación obtén as datas tomables e os seus estados.
-    \item Cancela os avisos anteriores do paciente para evitar duplicados.
-    \item Para cada data futura non pechada programa un aviso na hora habitual e
-    outro trinta minutos despois por toma sen confirmar.
-    \item Cando o paciente confirma a toma, cancela o segundo aviso do día.
-    \item Ao iniciar a aplicación, reconstrúe os avisos e cancela o de
-    esquecemento de hoxe se a toma xa estaba confirmada.
-    \item Cando un supervisor recibe un estado completo, programa no seu
-    dispositivo os avisos futuros dese paciente.
+    \item A aplicación carga os pacientes vinculados almacenados localmente.
+
+    \item Solicita aos dispositivos dos pacientes unha actualización do seu
+    estado.
+
+    \item Os pacientes que reciben a solicitude responden coa información
+    actualizada do tratamento.
+
+    \item A aplicación actualiza os rexistros locais a medida que recibe as
+    respostas.
+
+    \item Para cada paciente móstrase o seu nome ou, se non está dispoñible, un
+    identificador xenérico.
+
+    \item Se existe unha folla de tratamento, móstranse a dose e o estado do día
+    actual, o número de días tomados e non tomados, a porcentaxe de cumprimento
+    e a seguinte cita.
+
+    \item O supervisor pode solicitar manualmente unha nova actualización.
+
+    \item A aplicación realiza tamén novas solicitudes de sincronización ao
+    volver ao primeiro plano e periodicamente mentres permanece activa.
+
+    \item Ao seleccionar un paciente cos datos básicos configurados, accédese
+    ao CU-11.
+
+    \item Se ao paciente lle falta o nome ou a hora habitual, accédese previamente
+    ao CU-12.
 \end{enumerate}
-\item[Fluxos alternativos:] Non se crean avisos para controis, doses cero,
-datas pasadas nin estados pechados. As horas ou datas inválidas ignóranse. Se o
-sistema denega permisos, os avisos poden non aparecer, pero a pauta segue
-dispoñible. Non existe un interruptor propio para desactivar recordatorios: estes
-dependen da pauta, da hora e dos permisos do dispositivo.
-\item[Postcondicións:] O sistema operativo conserva os avisos futuros aplicables
-e elimina os obsoletos ou atendidos.
-\item[Requisitos relacionados:] RF-16 e RF-18.
+
+\item[Fluxos alternativos:] Se non existen pacientes vinculados, indícase esta
+situación e ofrécese a posibilidade de realizar unha nova vinculación mediante
+o CU-02. Se un paciente aínda non dispón dunha folla, móstrase unha indicación
+para incorporala. Se falla a sincronización, consérvase e móstrase a última
+información dispoñible localmente.
+
+\item[Postcondicións:] O supervisor conserva a información máis recente que
+recibiu de cada paciente. A consulta non modifica a pauta dos pacientes.
+
+\item[Requisitos relacionados:] RF-05, RF-19 e RF-20.
+
 \end{description}
+
 
 % ============================================================
 % CU-11
 % ============================================================
 
-\section{CU-11: Supervisar un paciente}
-\label{cu:supervisar-paciente}
+\section{CU-11: Consultar o detalle dun paciente}
+\label{cu:consultar-detalle-paciente}
 
 \begin{description}
-\item[Obxectivo:] Consultar o último estado recibido dos pacientes e iniciar as
-accións dispoñibles sobre un deles.
+
+\item[Obxectivo:] Permitir ao supervisor consultar información detallada do
+tratamento dun paciente vinculado.
+
 \item[Actor principal:] Supervisor.
-\item[Actor secundario:] Firebase Cloud Messaging.
-\item[Disparador:] O supervisor abre a pantalla principal, volve á aplicación,
-actualiza a lista ou selecciona un paciente.
-\item[Precondicións:] A aplicación está configurada como supervisor. Debe existir
-un rexistro local do paciente; para actualizar, ambos dispositivos necesitan
-conexión.
+
+\item[Actor secundario:] Firebase Cloud Messaging, cando se recibe unha
+actualización do paciente durante a consulta.
+
+\item[Disparador:] O supervisor selecciona un paciente na súa lista.
+
+\item[Precondicións:] O paciente está vinculado ao supervisor e dispón dos datos
+básicos necesarios para acceder á súa vista de detalle.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación carga os pacientes e solicita sincronización. Repite a
-    solicitude cada hora e ao volver ao primeiro plano.
-    \item Para cada paciente con informe mostra nome, dose e estado de hoxe,
-    días tomados e non tomados, porcentaxe e seguinte cita.
-    \item O supervisor pode refrescar mediante o botón ou arrastrando a lista.
-    \item Selecciona un paciente con nome e hora xa recibidos.
-    \item O detalle mostra INR e dose semanal actuais, dose e estado de hoxe,
-    hora habitual, gráficas e seguinte cita.
-    \item Desde aí pode executar CU-04 e CU-05 para enviarlle outra folla.
+    \item A aplicación abre a información local correspondente ao paciente
+    seleccionado.
+
+    \item Mostra a dose semanal actual e o INR actual.
+
+    \item Mostra a dose correspondente ao día actual, o seu estado e a hora
+    habitual configurada.
+
+    \item Representa graficamente a evolución do INR.
+
+    \item Representa graficamente a evolución da dose semanal.
+
+    \item Mostra a seguinte visita dispoñible.
+
+    \item Se durante a consulta se recibe unha actualización do paciente, a
+    información local é recargada.
+
+    \item Desde esta pantalla o supervisor pode iniciar o CU-04 para incorporar
+    unha nova folla de tratamento no nome do paciente.
 \end{enumerate}
-\item[Fluxos alternativos:] Sen pacientes, ofrécese vincular outro. Se non hai
-informe, a tarxeta solicita escanear un documento. Se faltan nome ou hora, ao
-premer ábrese unha pantalla que envía ambos ao paciente e non o detalle. Se a
-sincronización falla, consérvase a última información local. O supervisor non
-dispón dun calendario nin pode confirmar tomas por outra persoa.
-\item[Postcondicións:] A consulta non cambia a pauta. A lista pode actualizarse
-co último estado recibido; só o envío explícito dunha folla cambia o tratamento.
-\item[Requisitos relacionados:] RF-05, RF-17, RF-18 e RF-19.
+
+\item[Fluxos alternativos:] Se non existen datos suficientes para unha gráfica,
+indícase que non hai información suficiente. Os valores non dispoñibles
+móstranse sen dato asociado. Se non existe conexión, pódese consultar o último
+estado almacenado no dispositivo. Se faltan o nome ou a hora habitual do
+paciente, desde a lista accédese ao CU-12 antes de entrar nesta vista.
+
+\item[Postcondicións:] Non se modifica o tratamento do paciente. Unicamente se
+actualiza a información mostrada se se reciben novos datos sincronizados.
+
+\item[Requisitos relacionados:] RF-21.
+
 \end{description}
+
 
 % ============================================================
 % CU-12
 % ============================================================
 
-\section{CU-12: Sincronizar cambios e recibir avisos}
-\label{cu:sincronizar-cambios}
+\section{CU-12: Configurar datos dun paciente supervisado}
+\label{cu:configurar-paciente-supervisado}
 
 \begin{description}
-\item[Obxectivo:] Transferir entre dispositivos vinculados o último estado e as
-operacións permitidas sen un historial clínico central.
-\item[Actores principais:] Paciente e supervisor.
-\item[Actores secundarios:] API de SintromApp e Firebase Cloud Messaging.
-\item[Disparador:] O paciente cambia preferencias, confirma unha toma, incorpora
-unha folla ou detecta unha toma vencida; o supervisor solicita actualización; ou
-envíase unha folla, configuración ou desvinculación.
-\item[Precondicións:] Existe unha vinculación con identificador, token e clave
-permanente. O envío necesita conexión e tokens vixentes.
-\item[Fluxo principal de actualización:] \hfill
+
+\item[Obxectivo:] Permitir ao supervisor establecer o nome e a hora habitual da
+toma dun paciente vinculado cando estes datos sexan necesarios para o
+seguimento.
+
+\item[Actor principal:] Supervisor.
+
+\item[Actor secundario:] Firebase Cloud Messaging.
+
+\item[Disparador:] O supervisor selecciona desde a lista un paciente ao que lle
+falta o nome ou a hora habitual da toma.
+
+\item[Precondicións:] Existe unha vinculación válida co paciente e a relación
+dispón da información necesaria para realizar unha comunicación segura.
+
+\item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item O paciente crea un resumo con identificador e token, nome, hora,
-    existencia de informe, dose e estado de hoxe, futuras datas tomables,
-    próxima visita, centro, INR, dose semanal, historial e cumprimento.
-    \item Cifra e autentica o resumo para cada supervisor con AES-GCM.
-    \item Envía á API o token de destino, o tipo de aviso e o sobre cifrado.
-    \item A API remite a mensaxe mediante Firebase.
-    \item O supervisor verifica a vinculación, autentica e descifra o contido.
-    \item Actualiza o seu rexistro local, reprograma avisos e refresca as
-    pantallas abertas.
+    \item A aplicación mostra unha pantalla coa configuración do paciente.
+
+    \item O supervisor pode modificar o nome mostrado.
+
+    \item O supervisor selecciona a hora habitual da toma. Inicialmente existe
+    unha hora predefinida que pode ser modificada.
+
+    \item O supervisor preme a opción de gardar e enviar.
+
+    \item A aplicación cifra os datos empregando a información asociada á
+    vinculación.
+
+    \item A configuración envíase ao dispositivo do paciente.
+
+    \item O paciente recibe e valida a mensaxe.
+
+    \item O dispositivo do paciente actualiza o nome e a hora recibidos.
+
+    \item Os recordatorios locais do paciente son programados novamente segundo
+    a nova hora.
+
+    \item O paciente envía aos seus supervisores un novo estado actualizado.
+
+    \item O supervisor actualiza a información almacenada do paciente.
 \end{enumerate}
-\item[Fluxo principal solicitado polo supervisor:] \hfill
-\begin{enumerate}
-    \item O supervisor envía a cada paciente unha solicitude cifrada co seu
-    token de resposta.
-    \item O paciente autentícaa, actualiza o token remoto e responde co estado
-    completo.
-    \item O supervisor espera brevemente, relé a base local e tamén reacciona ás
-    respostas que cheguen despois.
-\end{enumerate}
-\item[Fluxos alternativos:] Descártanse versións incorrectas, vinculacións
-descoñecidas, contidos incompletos ou mensaxes que non se autentiquen. Sen rede,
-token ou aceptación de Firebase mantense a información local anterior. Non hai
-unha cola persistente de reintentos: a recuperación depende dunha acción futura
-ou dunha nova solicitude. Os informes só se aplican ao reunir todos os seus
-fragmentos.
-\item[Postcondicións:] O destinatario conserva o último estado recibido ou aplica
-a operación. A API e Firebase transportan as mensaxes, pero non gardan a pauta
-como repositorio clínico central.
-\item[Requisitos relacionados:] RF-17, RF-18 e RF-19.
+
+\item[Fluxos alternativos:] Se a vinculación non dispón dunha relación segura ou
+non se pode entregar a configuración, móstrase unha mensaxe de erro e o
+supervisor permanece na pantalla para poder intentalo novamente.
+
+\item[Postcondicións:] O dispositivo do paciente conserva os novos datos e os
+supervisores reciben posteriormente o estado actualizado.
+
+\item[Requisitos relacionados:] RF-07, RF-18, RF-19 e RF-24.
+
 \end{description}
+
 
 % ============================================================
 % CU-13
@@ -521,79 +784,110 @@ como repositorio clínico central.
 \label{cu:consultar-centro}
 
 \begin{description}
-\item[Obxectivo:] Obter o teléfono do centro da folla e abrir o marcador para
-que o paciente poida chamar.
+
+\item[Obxectivo:] Facilitar ao paciente o acceso aos datos de contacto do centro
+sanitario indicado na folla de tratamento e permitir iniciar unha chamada.
+
 \item[Actor principal:] Paciente.
-\item[Actores secundarios:] API de SintromApp, catálogo KML de centros
-sanitarios e aplicación de teléfono.
-\item[Disparador:] O paciente preme \emph{Chamar ao centro} na pantalla principal
-ou na información do seguinte control.
-\item[Precondicións:] A folla contén un nome de centro. Hai conexión e o
-dispositivo pode abrir enderezos \texttt{tel:}.
+
+\item[Disparador:] O paciente selecciona a opción para chamar ao centro sanitario
+mostrado xunto á información do próximo control.
+
+\item[Precondicións:] A folla de tratamento identifica un centro sanitario. É
+necesaria conexión á rede para consultar os seus datos de contacto.
+
 \item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item A aplicación envía á API o nome do centro.
-    \item A API normaliza a consulta e compáraa co catálogo da Xunta de Galicia.
-    \item Se a mellor coincidencia supera o limiar, devolve os datos e o teléfono.
-    \item O cliente extrae o número e crea un enderezo \texttt{tel:}.
-    \item O sistema abre o marcador co número preparado; o paciente decide se
-    inicia a chamada.
+    \item A aplicación obtén o nome do centro sanitario almacenado coa folla de
+    tratamento.
+
+    \item O paciente selecciona a opción de chamar ao centro.
+
+    \item A aplicación solicita ao servidor a información correspondente ao
+    centro indicado.
+
+    \item O servidor busca o centro e devolve os datos dispoñibles.
+
+    \item A aplicación obtén o número de teléfono.
+
+    \item Se o número está dispoñible, abre o marcador telefónico do dispositivo
+    con ese número preparado para realizar a chamada.
 \end{enumerate}
-\item[Fluxos alternativos:] Sen centro, o botón non aparece. Sen coincidencia,
-catálogo, teléfono, conexión ou marcador dispoñible, móstrase unha mensaxe. A
-interface non presenta o enderezo e concello que tamén devolve a API. Esta
-función non está dispoñible na pantalla do supervisor.
-\item[Postcondicións:] O marcador queda aberto sen cambiar a pauta nin rexistrar
-a chamada en SintromApp.
-\item[Requisitos relacionados:] RF-20.
+
+\item[Fluxos alternativos:] Se non existe un centro identificado, non se mostra
+a opción de chamada. Se o centro non pode ser atopado, non dispón dun teléfono,
+se produce un erro de conexión ou non se pode abrir o marcador, móstrase unha
+mensaxe de erro.
+
+\item[Postcondicións:] A información do tratamento non sofre modificacións. Se
+a operación se completa, o marcador telefónico queda aberto co número do centro.
+
+\item[Requisitos relacionados:] RF-22.
+
 \end{description}
+
 
 % ============================================================
 % CU-14
 % ============================================================
 
-\section{CU-14: Xestionar as vinculacións}
-\label{cu:xestionar-vinculacions}
+\section{CU-14: Revogar unha vinculación}
+\label{cu:revogar-vinculacion}
 
 \begin{description}
-\item[Obxectivo:] Consultar as relacións gardadas, iniciar novas vinculacións e
-retirar un paciente ou supervisor do seguimento.
+
+\item[Obxectivo:] Permitir que calquera das dúas partes finalice unha relación
+de supervisión existente.
+
 \item[Actor principal:] Paciente ou supervisor.
-\item[Actores secundarios:] API de SintromApp e Firebase Cloud Messaging.
-\item[Disparador:] O paciente abre axustes ou o supervisor abre a lista ou os
-axustes e escolle engadir ou quitar unha persoa.
-\item[Precondicións:] A aplicación está configurada. Para engadir aplícanse as
-condicións do CU-02. Para eliminar debe existir unha vinculación segura e
-conexión para que Firebase acepte o aviso.
-\item[Fluxo principal de consulta e alta:] \hfill
+
+\item[Actor secundario:] Firebase Cloud Messaging.
+
+\item[Disparador:] O paciente decide quitar unha persoa supervisora desde os seus
+axustes ou o supervisor decide deixar de supervisar un paciente.
+
+\item[Precondicións:] Existe unha vinculación entre os dous dispositivos. Para
+comunicar correctamente a revogación á outra parte é necesaria conexión á rede.
+
+\item[Fluxo principal:] \hfill
 \begin{enumerate}
-    \item O paciente consulta os supervisores dos seus axustes ou o supervisor
-    consulta os pacientes da súa base local.
-    \item Para engadir supervisor, o paciente xera e mostra outro QR. Para
-    engadir paciente, o supervisor preme \emph{Vincular outro paciente}.
-    \item Ambos completan o CU-02. Un novo QR do paciente substitúe a clave
-    provisional pendente do código anterior.
+    \item A aplicación mostra as vinculacións existentes do actor.
+
+    \item A persoa usuaria selecciona a relación que quere eliminar.
+
+    \item A aplicación mostra un diálogo explicando as consecuencias da
+    desvinculación e solicita confirmación.
+
+    \item A persoa usuaria confirma a operación.
+
+    \item Se a revogación a inicia o paciente, a aplicación envía ao supervisor
+    unha mensaxe segura indicando que a relación debe ser eliminada.
+
+    \item Unha vez enviado o aviso, o dispositivo do paciente elimina localmente
+    a información correspondente a ese supervisor.
+
+    \item O supervisor que recibe a mensaxe elimina o paciente dos seus
+    rexistros locais e cancela os recordatorios asociados a el.
+
+    \item Se a revogación a inicia o supervisor, envíase de forma equivalente
+    unha mensaxe segura ao paciente.
+
+    \item Unha vez enviado o aviso, o supervisor elimina da súa lista o paciente
+    e cancela os recordatorios asociados.
+
+    \item O paciente que recibe a mensaxe elimina a información correspondente
+    ao supervisor que iniciou a desvinculación.
 \end{enumerate}
-\item[Fluxo principal de baixa:] \hfill
-\begin{enumerate}
-    \item O actor preme quitar xunto á persoa e confirma o diálogo.
-    \item A aplicación cifra e envía ao outro dispositivo unha orde de
-    desvinculación.
-    \item Só se Firebase acepta o envío, o iniciador elimina a clave e relación
-    locais.
-    \item Se o iniciador é supervisor, tamén elimina o resumo do paciente e
-    cancela os seus recordatorios.
-    \item O receptor autentica a mensaxe e, se coinciden vinculación e rol,
-    elimina a relación; no supervisor tamén retira o paciente e os avisos.
-    \item Actualízanse as listas afectadas.
-\end{enumerate}
-\item[Fluxos alternativos:] Cancelar mantén a relación. Sen clave segura,
-pídese repetir o emparellamento. Se Firebase non acepta o aviso, móstrase un erro
-e o iniciador conserva a vinculación; non se presenta como revogada. O receptor
-descarta ordes que non poida autenticar ou que non correspondan co rol e o
-identificador gardados.
-\item[Postcondicións:] Tras procesarse a baixa nos dous dispositivos, ambos
-eliminan a clave e deixan de intercambiar información por esa relación. As demais
-vinculacións non se ven afectadas.
-\item[Requisitos relacionados:] RF-04, RF-05 e RF-17.
+
+\item[Fluxos alternativos:] Se a persoa usuaria cancela o diálogo, a relación
+permanece intacta. Se non existe información criptográfica válida para a
+vinculación ou non se pode comunicar a revogación á outra parte, móstrase un
+erro e a aplicación non completa a eliminación local iniciada polo usuario.
+
+\item[Postcondicións:] A relación deixa de estar dispoñible nos dispositivos e
+non pode empregarse para continuar intercambiando información. As restantes
+vinculacións do paciente ou do supervisor non se ven afectadas.
+
+\item[Requisitos relacionados:] RF-19, RF-24 e RF-25.
+
 \end{description}

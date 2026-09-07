@@ -1,6 +1,8 @@
 \chapter{Detalles da implementación}
 \label{app:detalles-implementacion}
-
+\lstset{
+    captionpos=t
+}
 \section{Implementación da API}
 A \gls{api} está organizada en rutas independentes, a Figura~\ref{fig:swagger-api} mostra os endpoints publicados pola \gls{api} e a súa agrupación na interface de Swagger.
 
@@ -777,7 +779,7 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
         \label{fig:interface-permiso-notificacions}
     \end{subfigure}
     \hfill
-    \begin{subfigure}[t]{0.30\textwidth}
+    \begin{subfigure}[t]{0.3\textwidth}
         \centering
         \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/CONFIG_ADICIONAIS.jpg}
         \caption{Configuración adicional do paciente.}
@@ -787,8 +789,6 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
     \caption{Interfaces correspondentes á configuración inicial da aplicación.}
     \label{fig:interface-configuracion-inicial}
 \end{figure}
-
-
 % ============================================================
 % VINCULACIÓN
 % ============================================================
@@ -812,7 +812,11 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
     \hfill
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/PANTALLA_CORRECTA_VINCULACIÓN.jpg}
+        \includegraphics[
+        width=\linewidth,
+        trim={0 0 0 3cm},
+        clip
+        ]{imaxes/08-Implementacion/anexo/PANTALLA_CORRECTA_VINCULACIÓN.jpg}
         \caption{Confirmación da vinculación.}
         \label{fig:interface-vinculacion-correcta}
     \end{subfigure}
@@ -831,7 +835,9 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
 
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_PACIENTE_SEN_FOLLA.jpg}
+        \includegraphics[
+        width=\linewidth,
+        ]{imaxes/08-Implementacion/anexo/INICIO_SUPERVISOR_SEN_FOLLA.jpg}
         \caption{Inicio do paciente sen folla gardada.}
         \label{fig:interface-paciente-sen-folla}
     \end{subfigure}
@@ -846,7 +852,7 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
         \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/SUBIR_FOLLA2.jpg}
-        \caption{Selección do documento que se vai procesar.}
+        \caption{Selección da incorporación dunha folla 2.}
         \label{fig:interface-subir-folla-2}
     \end{subfigure}
 
@@ -878,7 +884,7 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
     \hfill
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/CORRECCIÓN_PAUTA3.jpg}
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/EDICIÓN_PAUTA2.jpg}
         \caption{Revisión da pauta obtida.}
         \label{fig:interface-correccion-pauta-3}
     \end{subfigure}
@@ -904,8 +910,8 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
     \hfill
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/EDICIÓN_PAUTA2.jpg}
-        \caption{Modificación dos datos da pauta.}
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/CORRECCIÓN_PAUTA3.jpg}
+        \caption{Edición dunha entrada da pauta 2.}
         \label{fig:interface-edicion-pauta-2}
     \end{subfigure}
     \hfill
@@ -944,7 +950,11 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
     \hfill
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/TOMA_FORA_DE_HORA_CONFIRMADA.jpg}
+        \includegraphics[
+         width=\linewidth,
+         trim={0 6cm 0 3cm},
+         clip
+        ]{imaxes/08-Implementacion/anexo/TOMA_FORA_DE_HORA_CONFIRMADA.jpg}
         \caption{Confirmación dunha toma fóra da hora habitual.}
         \label{fig:interface-toma-fora-hora}
     \end{subfigure}
@@ -1029,7 +1039,7 @@ A continuación recóllense as principais interfaces da aplicación resultante, 
 
     \begin{subfigure}[t]{0.30\textwidth}
         \centering
-        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_SUPERVISOR_SEN_FOLLA.jpg}
+        \includegraphics[width=\linewidth]{imaxes/08-Implementacion/anexo/INICIO_PACIENTE_SEN_FOLLA.jpg}
         \caption{Paciente sen folla de tratamento.}
         \label{fig:interface-supervisor-sen-folla}
     \end{subfigure}

@@ -221,7 +221,7 @@ A partir do resultado obtido, a \gls{api} interpreta os campos recoñecidos, nor
     \label{fig:fluxo-procesamento}
 \end{figure}
 
-O fluxo presenta unha variación cando a folla é incorporada desde o dispositivo dun supervisor (Figura~\ref{fig:procesamento-folla-supervisor}). As etapas de captura, extracción e revisión mantéñense, pero, tras a confirmación, a nova pauta non se almacena como tratamento activo no dispositivo do supervisor. A información confírmada cífrase e transmítese ao dispositivo do paciente vinculado, onde se descifra e se incorpora como nova pauta activa.
+O fluxo presenta unha variación cando a folla é incorporada desde o dispositivo dun supervisor (Figura~\ref{fig:procesamento-folla-supervisor}). As etapas de captura, extracción e revisión mantéñense, pero, tras a confirmación, a nova pauta non se almacena como tratamento activo no dispositivo do supervisor. A información confirmada cífrase e transmítese ao dispositivo do paciente vinculado, onde se descifra e se incorpora como nova pauta activa.
 
 \begin{figure}[h]
     \centering
@@ -236,7 +236,7 @@ A sincronización permite compartir información entre o dispositivo do paciente
 
 A mensaxe cifrada envíase a \gls{api}, que actúa como intermediaria e reenvíaa empregando o servizo de mensaxería. Este encárgase de entregala ao dispositivo de destino, onde o contido é descifrado e empregado para actualizar a información almacenada.
 
-Deste xeito,a \gls{api} participa no transporte das mensaxes sen necesitar almacenar a información clínica intercambiada entre os dispositivos. A Figura~\ref{fig:fluxo-sincronizacion} mostra as principais etapas deste fluxo.
+Deste xeito, a \gls{api} participa no transporte das mensaxes sen necesitar almacenar a información clínica intercambiada entre os dispositivos. A Figura~\ref{fig:fluxo-sincronizacion} mostra as principais etapas deste fluxo.
 
 \begin{figure}[htbp]
     \centering

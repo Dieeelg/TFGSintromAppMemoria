@@ -28,6 +28,13 @@ A estas capas engádese un conxunto de \textbf{servizos} encargados de encapsula
 
 A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes principais, cuxa organización se mostra na Figura~\ref{fig:paquetes-cliente}:
 
+\begin{figure}[h]
+    \centering
+        \includegraphics[width=0.40\textwidth]{imaxes/07-Deseño/anexo/01_estrutura_paquetes_cliente (2).drawio.png}
+        \caption{Estrutura de paquetes do cliente móbil.}
+        \label{fig:paquetes-cliente}
+\end{figure}
+
 \begin{itemize}
     \item \textbf{\textit{views}} e \textbf{\textit{modelos\_vista}} conteñen, respectivamente, as pantallas e os modelos de vista asociados ás distintas funcionalidades, cuxa estrutura se representa nas Figuras~\ref{fig:clases-presentacion-paciente} e~\ref{fig:clases-presentacion-supervisor}.
 
@@ -59,13 +66,6 @@ A nivel estrutural, estas responsabilidades distribúense nos seguintes paquetes
     \includegraphics[width=\textwidth]{imaxes/07-Deseño/diagrama_clases_servizos.drawio.png}
     \caption{Modelo de clases dos servizos do cliente móbil.}
     \label{fig:clases-servizos-cliente}
-\end{figure}
-
-\begin{figure}[h]
-    \centering
-        \includegraphics[width=0.40\textwidth]{imaxes/07-Deseño/anexo/01_estrutura_paquetes_cliente (2).drawio.png}
-        \caption{Estrutura de paquetes do cliente móbil.}
-        \label{fig:paquetes-cliente}
 \end{figure}
 
 \subsection{Arquitectura da API}
@@ -249,6 +249,13 @@ Deste xeito, a \gls{api} participa no transporte das mensaxes sen necesitar alma
 
 Cada dose da pauta activa permanece inicialmente en estado pendente e pode ser confirmada como realizada durante todo o día correspondente. Cando chega a hora configurada para realizar a toma, a aplicación envía unha notificación a modo de recordatorio. Se a persoa usuaria confirma a inxesta, o seu estado actualízase en función do momento no que se realizou. Se ao finalizar o día non se produciu ningunha confirmación, a toma pasa a considerarse non realizada. Deste xeito, o sistema distingue entre unha toma pendente, unha toma realizada, unha toma realizada fóra da hora prevista e unha toma non realizada, tal e como se representa na Figura~\ref{fig:anexo-estados-toma}.
 
+\begin{figure}[htbp]
+    \centering
+    \includegraphics[width=0.5\textwidth]{imaxes/07-Deseño/anexo/estados_dunha_toma.png}
+    \caption{Diagrama dos estados posibles dunha toma durante o seguimento.}
+    \label{fig:anexo-estados-toma}
+\end{figure}
+
 Cando existe unha vinculación activa, os cambios relevantes no estado dunha toma poden comunicarse ao dispositivo asociado. Desta forma, o seguimento local e a supervisión remota manteñen unha visión coherente da situación máis recente dispoñible.
 
 A Figura~\ref{fig:anexo-fluxo-toma} mostra as interaccións principais deste proceso.
@@ -259,12 +266,6 @@ A Figura~\ref{fig:anexo-fluxo-toma} mostra as interaccións principais deste pro
     \label{fig:anexo-fluxo-toma}
 \end{figure}
 
-\begin{figure}[htbp]
-    \centering
-    \includegraphics[width=0.5\textwidth]{imaxes/07-Deseño/anexo/estados_dunha_toma.png}
-    \caption{Diagrama dos estados posibles dunha toma durante o seguimento.}
-    \label{fig:anexo-estados-toma}
-\end{figure}
 
 \section{Deseño da navegación e da interface}
 
@@ -276,6 +277,8 @@ O primeiro acceso á aplicación comeza coa selección do rol, decisión que det
     configuración adicional para establecer datos como o nome da persoa usuaria e a hora habitual da toma. Finalizada esta configuración, móstrase a pantalla principal do paciente.
 
     Desde esta pantalla central accédese ás funcionalidades da aplicación, entre elas a consulta e seguimento da pauta, o calendario e o histórico, a incorporación dunha nova folla de tratamento e os axustes.
+
+    O paciente pode activar o modo sinxelo desde os axustes para mostrar unha interface máis reducida. Neste modo, a pantalla principal mostra unicamente a información da toma ou do control correspondente e o acceso aos axustes. Ocúltanse a pauta semanal e a barra inferior de navegación, polo que non se mostran os accesos ao progreso, ao calendario nin á incorporación dunha nova folla. Se non existe ningunha pauta gardada, mantense a opción para engadir unha folla. O modo pode desactivarse desde os axustes para volver á interface completa.
 
     \item No caso do \textbf{supervisor}, despois de seleccionar o rol accédese á pantalla de vinculación, desde a cal se escanea o código \gls{qr} xerado polo paciente. Tras formalizar a vinculación, móstrase a pantalla principal do supervisor, na que aparece a listaxe de pacientes vinculados.
 

@@ -1,15 +1,15 @@
 \chapter{Introdución}
 \label{chap:introducion}
 
-Este proxecto céntrase no desenvolvemento de \textbf{SintromApp}, unha aplicación móbil destinada a mellorar o seguimento do tratamento anticoagulante, ofrecendo unha alternativa dixital aos métodos físicos tradicionais.
+Este proxecto céntrase no desenvolvemento de SintromApp, unha aplicación móbil destinada a mellorar o seguimento do tratamento anticoagulante, ofrecendo unha alternativa dixital aos métodos físicos tradicionais.
 
 \section{Contexto}
 
-En España, preto de 800.000 persoas reciben tratamento con anticoagulantes. Concretamente, en Galicia estímase que uns 50.000~\cite{PacientesAnticoaguladosAnis} pacientes están baixo este tipo de medicación. Pese a importancia vital deste tratamento, a súa xestión diaria é moi arcaica. O paciente ten que depender \textbf{exclusivamente} dun informe en papel onde se detallan as doses diarias (Figura~\ref{fig:follasintrom}).
+En España, preto de 800.000 persoas reciben tratamento con anticoagulantes. Concretamente, en Galicia estímase que uns 50.000~\cite{PacientesAnticoaguladosAnis} pacientes están baixo este tipo de medicación. Pese a importancia vital deste tratamento, a súa xestión diaria é moi arcaica. O paciente ten que depender exclusivamente dun informe en papel onde se detallan as doses diarias (Figura~\ref{fig:follasintrom}).
 
-Este formato físico é \textbf{moi fráxil}, xa que o papel pode perderse ou estragarse, o que deixa ao paciente sen o medio imprescindible para poder realizar correctamente as tomas pautadas, provocando que teña que desprazarse ao centro de saúde. Ademais, a xestión manual do tratamento pode aumentar o risco de esquecementos nas tomas.
+Este formato físico é moi fráxil, xa que o papel pode perderse ou estragarse, o que deixa ao paciente sen o medio imprescindible para poder realizar correctamente as tomas pautadas, provocando que teña que desprazarse ao centro de saúde. Ademais, a xestión manual do tratamento pode aumentar o risco de esquecementos nas tomas.
 
-Aínda que o informe do tratamento tamén se atopa en formato dixital a través da plataforma eSaude, o acceso a esta pode resultar bastante complexo para algúns pacientes, especialmente no caso das persoas maiores, xa que \textbf{é imprescindible dispoñer dun certificado dixital, chave365 ou DNI electrónico.}
+Aínda que o informe do tratamento tamén se atopa en formato dixital a través da plataforma eSaude, o acceso a esta pode resultar bastante complexo para algúns pacientes, especialmente no caso das persoas maiores, xa que é imprescindible dispoñer dun certificado dixital, chave365 ou DNI electrónico.
 
 Unha das principais complexidades deste tratamento é que a dose non é fixa. Como se pode observar no informe da Figura~\ref{fig:follasintrom}, a pauta vai variando dependendo do día da semana, o que obriga ao paciente a realizar un esforzo para asegurarse que a dose que vai a tomar é a correcta e se corresponde co día concreto.
 
@@ -28,7 +28,7 @@ Ademais, o seguimento manual carece de mecanismos de notificación ou confirmaci
 
 Este proxecto nace coa premisa de achegar seguridade ao tratamento e maior tranquilidade tanto aos pacientes como aos seus familiares e coidadores. Como se expuxo na sección anterior, no sistema actual, moitos pacientes viven coa constante preocupación de perder ou estragar a folla de tratamento. Ademais deben interpretar a pauta diaria a partir dunha táboa que pode resultar complexa e difícil de ler debido ao reducido tamaño de letra. Ao mesmo tempo, o proxecto busca aliviar os familiares ou coidadores, que adoitan vivir coa incerteza de non saber se a toma foi realizada correctamente.
 
-A motivación principal deste proxecto é aproveitar as posibilidades que nos ofrecen os dispositivos móbiles para simplificar e reducir estes riscos ao mínimo. Para iso, proponse unha ferramenta \textbf{sinxela e intuitiva}, accesible para calquera persoa usuaria. A aplicación pretende dixitalizar a información do tratamento a partir dunha simple fotografía da folla de prescrición, permitindo extraer automaticamente toda a información necesaria e xerar recordatorios diarios para o paciente.
+A motivación principal deste proxecto é aproveitar as posibilidades que nos ofrecen os dispositivos móbiles para simplificar e reducir estes riscos ao mínimo. Para iso, proponse unha ferramenta sinxela e intuitiva, accesible para calquera persoa usuaria. A aplicación pretende dixitalizar a información do tratamento a partir dunha simple fotografía da folla de prescrición, permitindo extraer automaticamente toda a información necesaria e xerar recordatorios diarios para o paciente.
 
 Ademais, incorpórase un sistema de confirmación das tomas. O paciente pode marcar na aplicación cando realiza a toma da dose que lle corresponde e, no caso de que esta non sexa rexistrada nun intervalo de tempo, o sistema envía unha notificación a un familiar ou coidador para que poida comprobar a situación e actuar no caso de que sexa necesario.
 
@@ -87,16 +87,16 @@ Existen algunhas solucións deseñadas especificamente para este tratamento como
 
 Como se pode observar na Táboa~\ref{tab:comparativa}, as solucións existentes presentan limitacións importantes no contexto específico do tratamento con Sintrom. Ningunha das aplicacións analizadas permite extraer automaticamente a información a partir dunha folla de prescrición médica, delegando a responsabilidade da carga de datos no paciente.
 
-Para dar resposta a estas limitacións, a nosa proposta introduce unha solución centrada na automatización e na adaptación ás necesidades reais dos pacientes anticoagulados. Concretamente, a ferramenta \textbf{desmarcarase} das alternativas actuais baseándose nos seguintes piares:
+Para dar resposta a estas limitacións, a nosa proposta introduce unha solución centrada na automatización e na adaptación ás necesidades reais dos pacientes anticoagulados. Concretamente, a ferramenta desmarcarase das alternativas actuais baseándose nos seguintes piares:
 
 \begin{itemize}
-    \item \textbf{Automatización mediante procesado de imaxe:} A aplicación \textbf{é capaz} de ler e interpretar a folla do SERGAS mediante a cámara do dispositivo, eliminando por completo a necesidade de que o paciente teña que teclear as súas doses.
-    \item \textbf{Adaptación nativa a pautas variables:} A lóxica do sistema \textbf{está deseñada} especificamente para o Sintrom, xestionando de forma autónoma as doses cambiantes de cada día sen requirir múltiples configuracións manuais.
-    \item \textbf{Rede de seguridade familiar:} \textbf{Intégrase} un sistema de notificacións que avisa automaticamente aos coidadores ou familiares en caso de que o paciente se esqueza da súa toma diaria.
-    \item \textbf{Foco na fenda dixital:} Para romper as barreiras de adopción tecnolóxica, a interface \textbf{conta} cun ``modo sinxelo'' pensado especificamente para persoas de avanzada idade.
+    \item \textbf{Automatización mediante procesado de imaxe:} A aplicación é capaz de ler e interpretar a folla do SERGAS mediante a cámara do dispositivo, eliminando por completo a necesidade de que o paciente teña que teclear as súas doses.
+    \item \textbf{Adaptación nativa a pautas variables:} A lóxica do sistema está deseñada especificamente para o Sintrom, xestionando de forma autónoma as doses cambiantes de cada día sen requirir múltiples configuracións manuais.
+    \item \textbf{Rede de seguridade familiar:} Intégrase un sistema de notificacións que avisa automaticamente aos coidadores ou familiares en caso de que o paciente se esqueza da súa toma diaria.
+    \item \textbf{Foco na fenda dixital:} Para romper as barreiras de adopción tecnolóxica, a interface conta cun ``modo sinxelo'' pensado especificamente para persoas de avanzada idade.
 \end{itemize}
 
-Con este conxunto de funcionalidades, o proxecto \textbf{busca} cubrir un oco baleiro no mercado, ofrecendo unha ferramenta que non só rexistre datos, senón que reduza a carga cognitiva do usuario e achegue unha tranquilidade real tanto ao paciente como á súa contorna.
+Con este conxunto de funcionalidades, o proxecto busca cubrir un oco baleiro no mercado, ofrecendo unha ferramenta que non só rexistre datos, senón que reduza a carga cognitiva do usuario e achegue unha tranquilidade real tanto ao paciente como á súa contorna.
 
 \section{Estrutura do documento}
 
